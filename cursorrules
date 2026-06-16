@@ -1,0 +1,224 @@
+# KickPro – Cursor Rules
+# Always read architecture.md and app_description.md before starting any task.
+
+---
+
+## 🧠 Project Identity
+You are building KickPro — a football talent discovery and development platform.
+Stack: Spring Boot 3 + Java 21 (backend) + Flutter 3 (mobile) + Python 3.11 FastAPI (AI) + PostgreSQL 15 + Kafka + Redis + Cloudinary + Docker + GitHub Actions + AWS.
+There is NO web frontend. Flutter is the only client.
+The AI service uses Google Gemini API (free) — NEVER OpenAI.
+
+---
+
+## 📋 Phase Rules (CRITICAL)
+
+KickPro is built in 6 phases:
+- Phase 0: DevOps Foundation
+- Phase 1: Authentication + Profiles
+- Phase 2: Video + Drill System
+- Phase 3: Match Booking + Chat
+- Phase 4: Certifications + Search + Credibility Score
+- Phase 5: AI Features + Deployment
+
+### Before starting ANY phase:
+1. State clearly which phase and step you are working on
+2. List exactly which files will be created or modified
+3. Ask for any required API keys or tokens BEFORE writing code that needs them
+
+### Before moving to the NEXT phase:
+1. Run a checklist of everything built in the current phase
+2. Ask the developer to confirm: "Does the app run and work end to end for this phase?"
+3. Only proceed when the developer explicitly says it works
+
+### Never skip a phase or mix phase work together.
+
+---
+
+## 🔑 Keys and Tokens Rule (CRITICAL)
+Before writing ANY code that requires a key, token, or credential:
+STOP and ask the developer:
+"I need [KEY_NAME] before continuing. Do you have it? If not, here's how to get it: [instructions]"
+Never use placeholder values silently. Always ask first.
+
+Required keys by phase:
+- Phase 0–1: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, JWT_SECRET
+- Phase 5: GEMINI_API_KEY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, EC2_HOST, EC2_SSH_PRIVATE_KEY
+
+---
+
+## 📦 Git Commands Rule (CRITICAL)
+After EVERY completed step, provide the exact git commands:
+
+### First time setup (only once at project start):
+```bash
+git init
+git remote add origin https://github.com/Hamza-spc/KickPro.git
+git branch -M main
+git add .
+git commit -m "init: project setup"
+git push -u origin main
+```
+
+### After every step:
+```bash
+git add .
+git commit -m "[type]: [short description of what was built]"
+git push
+```
+
+Commit types: feat, fix, config, refactor, test, docs
+Examples:
+- "feat: user entity and auth endpoints"
+- "feat: drill tree system with badge rewards"
+- "fix: JWT filter not validating correctly"
+- "config: docker compose with all services"
+
+---
+
+## 🌐 Spring Boot Rules
+
+### Structure
+- Controllers → controller/
+- Services (interface + impl) → service/
+- Repositories → repository/
+- Entities → entity/
+- DTOs → dto/
+- Kafka events + listeners → event/
+- Config classes → config/
+- Utilities → util/
+
+### Mandatory Patterns
+- ALWAYS use DTOs — never return JPA entities from controllers
+- ALWAYS @Transactional on service methods that write to DB
+- ALWAYS ResponseEntity<ApiResponse<T>> on all endpoints
+- ALWAYS @Valid on all @RequestBody parameters
+- ALWAYS use GlobalExceptionHandler with @RestControllerAdvice
+- ALWAYS @PreAuthorize for role-based access
+- NEVER put business logic in controllers
+- NEVER expose password or sensitive fields in DTOs
+- NEVER hardcode secrets — always use ${ENV_VAR} from application.properties
+
+### ApiResponse wrapper (always use this):
+```java
+public class ApiResponse<T> {
+    private boolean success;
+    private T data;
+    private String message;
+    private LocalDateTime timestamp;
+}
+```
+
+### Auth
+- JwtAuthFilter extends OncePerRequestFilter
+- JwtUtil: generateToken, validateToken, extractUsername
+- SecurityConfig with SecurityFilterChain bean
+- BCryptPasswordEncoder for passwords
+- Client sends: Authorization: Bearer <token>
+
+### Kafka
+- Topics as constants in a KafkaTopics class
+- Producers: KafkaTemplate<String, Object>
+- Consumers: @KafkaListener in event/ package
+- Serialize/deserialize as JSON with Jackson
+
+### Cloudinary
+- All operations via util/CloudinaryService.java
+- Credentials from environment variables only
+- Store only the URL string in the database
+- Never store binary files in PostgreSQL
+
+---
+
+## 📱 Flutter Rules
+
+### Structure (feature-first)
+```
+lib/features/<feature>/
+├── screens/
+├── widgets/
+├── models/
+└── providers/
+```
+
+### Mandatory Patterns
+- Dio for ALL HTTP — NEVER the http package
+- All models: fromJson(Map<String, dynamic>) + toJson()
+- Riverpod for ALL state management
+- setState only for purely local UI (e.g. show/hide password)
+- JWT in flutter_secure_storage — NEVER SharedPreferences
+- go_router for ALL navigation — NEVER Navigator.push
+- Always handle 3 states: loading / error / data
+- Never hardcode colors, fonts, or sizes — always use theme
+- All API base URLs from core/api/api_client.dart
+- All endpoints as constants in core/api/endpoints.dart
+
+### UI Rules (CRITICAL)
+The UI must be:
+- Clean, modern, and visually polished
+- Interactive with smooth animations and transitions
+- Dynamic — real data, real states, nothing static
+- NOT generic AI-looking (no plain white lists, no boring forms)
+- Consistent design system: one color palette, one font family
+- Use cards, gradients, icons, and visual hierarchy
+- Every screen must feel like a real product, not a prototype
+
+### Design System
+Define once in core/theme/:
+- Primary color: deep blue (#1E3A5F)
+- Accent color: electric blue (#2E86C1)
+- Background: dark or light (decide at start, stick with it)
+- Font: Inter or Poppins (Google Fonts)
+- Border radius: 12px standard, 20px for cards
+- Consistent spacing scale: 8, 16, 24, 32px
+
+---
+
+## 🐍 Python AI Service Rules
+- FastAPI with Pydantic BaseModel for all I/O
+- Use Google Gemini API — NEVER OpenAI
+- All LLM calls in try/except
+- Response format: { "success": bool, "data": ..., "message": str }
+- One router file per AI feature in routers/
+- LLM logic in services/llm.py
+- Ask for GEMINI_API_KEY before writing any LLM code
+
+---
+
+## 🐳 Docker Rules
+- Multi-stage Dockerfiles for smaller images
+- Never hardcode credentials in Dockerfiles
+- docker-compose.yml for local dev only
+- Use .env file for all local secrets
+- Add .env to .gitignore immediately
+
+---
+
+## 🚫 Claude Must NEVER
+- Return JPA entities from controllers
+- Put business logic in controllers
+- Forget @Transactional on write operations
+- Hardcode any secret, key, URL, or credential
+- Use http package in Flutter
+- Store JWT in SharedPreferences
+- Use setState for shared/global state
+- Use Navigator.push directly
+- Use OpenAI — always Gemini
+- Move to next phase without developer confirmation
+- Use placeholder keys silently without asking
+- Generate generic, boring, static UI
+- Change anything not explicitly requested
+- Add unrequested features or improvements
+
+---
+
+## ✅ Claude Must ALWAYS
+- State phase + step number at the start of every response
+- List files being created or modified before writing code
+- Ask for required keys before writing code that needs them
+- Provide git commands after every completed step
+- Check phase completion before suggesting next phase
+- Write clean, production-quality code
+- Follow the folder structure in architecture.md exactly
+- Match Flutter models to Spring Boot DTOs exactly
+- Keep UI polished, interactive, and on-brand
