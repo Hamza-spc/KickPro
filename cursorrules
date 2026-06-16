@@ -50,16 +50,6 @@ Required keys by phase:
 ## 📦 Git Commands Rule (CRITICAL)
 After EVERY completed step, provide the exact git commands:
 
-### First time setup (only once at project start):
-```bash
-git init
-git remote add origin https://github.com/Hamza-spc/KickPro.git
-git branch -M main
-git add .
-git commit -m "init: project setup"
-git push -u origin main
-```
-
 ### After every step:
 ```bash
 git add .
