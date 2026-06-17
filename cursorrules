@@ -39,6 +39,7 @@ KickPro is built in 6 phases:
 Before writing ANY code that requires a key, token, or credential:
 STOP and ask the developer:
 "I need [KEY_NAME] before continuing. Do you have it? If not, here's how to get it: [instructions]"
+Always guide the developer exactly where to go: which platform, which section, which button to click.
 Never use placeholder values silently. Always ask first.
 
 Required keys by phase:
@@ -48,9 +49,8 @@ Required keys by phase:
 ---
 
 ## 📦 Git Commands Rule (CRITICAL)
-After EVERY completed step, provide the exact git commands:
+After EVERY completed step, provide the exact git commands for the developer to run manually:
 
-### After every step:
 ```bash
 git add .
 git commit -m "[type]: [short description of what was built]"
@@ -63,6 +63,17 @@ Examples:
 - "feat: drill tree system with badge rewards"
 - "fix: JWT filter not validating correctly"
 - "config: docker compose with all services"
+
+The developer runs these manually — never run git commands automatically.
+
+---
+
+## 📝 Summary Rule (CRITICAL)
+After every completed step AND after every completed phase, write a clear summary:
+- What was built
+- Which files were created or modified
+- What the developer should test before moving on
+- Any important notes or warnings
 
 ---
 
@@ -88,6 +99,7 @@ Examples:
 - NEVER put business logic in controllers
 - NEVER expose password or sensitive fields in DTOs
 - NEVER hardcode secrets — always use ${ENV_VAR} from application.properties
+- One service interface + one implementation per module
 
 ### ApiResponse wrapper (always use this):
 ```java
@@ -143,24 +155,151 @@ lib/features/<feature>/
 - All API base URLs from core/api/api_client.dart
 - All endpoints as constants in core/api/endpoints.dart
 
-### UI Rules (CRITICAL)
-The UI must be:
-- Clean, modern, and visually polished
-- Interactive with smooth animations and transitions
-- Dynamic — real data, real states, nothing static
-- NOT generic AI-looking (no plain white lists, no boring forms)
-- Consistent design system: one color palette, one font family
-- Use cards, gradients, icons, and visual hierarchy
-- Every screen must feel like a real product, not a prototype
+---
 
-### Design System
-Define once in core/theme/:
-- Primary color: deep blue (#1E3A5F)
-- Accent color: electric blue (#2E86C1)
-- Background: dark or light (decide at start, stick with it)
-- Font: Inter or Poppins (Google Fonts)
-- Border radius: 12px standard, 20px for cards
-- Consistent spacing scale: 8, 16, 24, 32px
+## 🎨 Flutter UI Design System (CRITICAL — read before writing any Flutter code)
+
+### Theme
+- Mode: DARK
+- Background: #0D1117 (page background)
+- Surface: #111827 (cards, bottom sheets, dialogs)
+- Border: #1F2937 (all dividers and borders)
+- Primary: #2563EB (buttons, active states, links)
+- Accent: #60A5FA (highlights, icons, active nav)
+- Gold: #FBBF24 (badges, achievements, rewards)
+- Success: #4ADE80 (approved, completed states)
+- Error: #EF4444 (rejected, error states)
+- Text Primary: #F1F5F9
+- Text Secondary: #9CA3AF
+- Text Hint: #6B7280
+
+### Typography
+- Font family: Poppins (Google Fonts)
+- Heading large: 22px, weight 700, color #F1F5F9
+- Heading medium: 18px, weight 600, color #F1F5F9
+- Heading small: 16px, weight 600, color #F1F5F9
+- Body: 14px, weight 400, color #9CA3AF
+- Caption: 12px, weight 400, color #6B7280
+- Badge/label: 11px, weight 600
+
+### Spacing Scale
+- xs: 4px | sm: 8px | md: 16px | lg: 24px | xl: 32px
+
+### Border Radius
+- Chips/badges: 20px
+- Buttons/inputs: 8px
+- Cards: 16px
+- Bottom sheets: 24px (top corners only)
+
+### Components
+
+#### Cards
+- Background: #111827
+- Border: 0.5px solid #1F2937
+- Border radius: 16px
+- Padding: 16px
+- Never use plain white cards
+
+#### Buttons
+- Primary: background #2563EB, text white, radius 8px, height 48px
+- Ghost: transparent, border #2563EB, text #60A5FA
+- Secondary: background #1F2937, text #9CA3AF
+- Always 48px height minimum for touch targets
+
+#### Inputs
+- Background: #111827
+- Border: 0.5px solid #374151
+- Focus border: #2563EB
+- Border radius: 8px
+- Height: 48px
+- Text: #F1F5F9, Hint: #6B7280
+
+#### Bottom Navigation
+- Background: #0D1117
+- Border top: 0.5px solid #1F2937
+- Player tabs: Feed / Drills / Matches / Profile
+- Scout tabs: Search / Players / Bookmarks / Profile
+- Active: #2563EB | Inactive: #6B7280
+
+#### Avatars
+- Round, gradient #2563EB → #1D4ED8
+- Initials in white, font weight 700
+- Sizes: 32px (lists) | 40px (cards) | 56px (profile)
+
+#### Badges
+- Blue: background #1E3A5F, text #60A5FA (position, role)
+- Gold: background #2D1F00, text #FBBF24 (achievements)
+- Green: background #052E16, text #4ADE80 (verified, approved)
+- Red: background #2D0707, text #EF4444 (rejected, error)
+
+#### Skill Bars
+- Track: #1F2937
+- Fill: gradient #2563EB → #60A5FA
+- Height: 6px, radius 3px
+- Always show percentage label
+
+#### Drill Tree Nodes
+- Completed: background #1E3A5F, border #2563EB
+- Active: background #2563EB, border #60A5FA, glow shadow
+- Locked: background #111827, border #374151, opacity 0.4
+- Node size: 56px diameter
+- Connector: 2px line, #1F2937 (locked) or #2563EB (completed)
+
+### Screen UI Notes
+
+#### Login / Register
+- Full dark background, KickPro logo centered at top
+- Card-style form, smooth transition between login and register
+- Social proof at bottom
+
+#### Player Profile
+- Hero: large avatar, name, position badges, city
+- Credibility score: circular progress ring in #2563EB
+- Skill bars per attribute
+- Tab bar: Videos / Drills / Badges / Certifications
+
+#### Drill Tree
+- Full screen vertical scroll tree
+- Level selector (Beginner / Intermediate / Advanced) as pill tabs
+- Active node glows blue, completed nodes solid blue
+
+#### Video Feed
+- Full cards with video thumbnail + play overlay
+- Player info row at top, stats at bottom
+
+#### Match Booking
+- Stadium cards with photo, name, price, location
+- Match cards show joined players as avatar stack
+
+#### Scout Search
+- Filter chips scrollable horizontally
+- Player cards list with credibility badge
+- AI search bar at top
+
+### Animations
+- Page transitions: fade + slide (300ms)
+- Card press: scale 0.97
+- Button press: scale 0.95
+- Drill unlock: bounce + glow pulse
+- Badge earned: confetti + scale up
+- Loading: shimmer effect (never spinner)
+
+### UI Never Do
+- No plain white backgrounds
+- No generic Material blue (#1976D2)
+- No flat boring list tiles
+- No default AppBar — always custom
+- No Lorem Ipsum — use realistic football data
+- No static screens — always real dynamic data
+- No default CircularProgressIndicator — use shimmer
+- No generic snackbars — use custom styled toasts
+
+### Stitch MCP
+A Google Stitch MCP server is connected. Before building any Flutter screen:
+1. Check Stitch for the existing design reference of that screen
+2. Use it as visual inspiration — do not copy paste HTML/CSS
+3. Translate the design intent into Flutter widgets using this design system
+4. The final output must be Flutter Dart code, never HTML
 
 ---
 
@@ -184,31 +323,69 @@ Define once in core/theme/:
 
 ---
 
-## 🚫 Claude Must NEVER
-- Return JPA entities from controllers
-- Put business logic in controllers
-- Forget @Transactional on write operations
-- Hardcode any secret, key, URL, or credential
-- Use http package in Flutter
-- Store JWT in SharedPreferences
-- Use setState for shared/global state
-- Use Navigator.push directly
-- Use OpenAI — always Gemini
-- Move to next phase without developer confirmation
-- Use placeholder keys silently without asking
-- Generate generic, boring, static UI
-- Change anything not explicitly requested
-- Add unrequested features or improvements
+## 💡 Coding Pattern Preferences
+- Always prefer simple solutions over complex ones
+- Avoid duplication — always check if similar code already exists
+- Write code that accounts for dev, test, and prod environments
+- Only make changes explicitly requested or clearly related to the task
+- When fixing a bug, exhaust existing implementation options before introducing new patterns
+- If a new pattern is introduced, remove the old one immediately — no duplicate logic
+- Keep the codebase clean and organized at all times
+- Avoid writing one-off scripts inside source files
+- Files over 200–300 lines must be refactored and split
+- Mocking data is only for tests — never in dev or prod
+- Never add stubbing or fake data to dev or prod code
+- Never overwrite the .env file without asking the developer first
 
 ---
 
-## ✅ Claude Must ALWAYS
+## 🔄 Coding Workflow Preferences
+- Focus only on the area of code relevant to the current task
+- Never touch code unrelated to the current task
+- Write thorough tests for all major functionality
+- Never change architecture or patterns of a working feature unless explicitly instructed
+- Before any change, think about which other methods or areas might be affected
+
+---
+
+## 🔌 MCP Servers Available
+- PostgreSQL MCP: query the database directly to debug schema and data issues
+- GitHub MCP: read repo commits, issues, and history directly
+- Filesystem MCP: navigate the project folder structure directly
+- Stitch MCP: fetch UI design references before building any Flutter screen
+- Always use MCP servers to verify and debug before asking the developer for information
+
+---
+
+## 🚫 Cursor Must NEVER
+- Return JPA entities from controllers — always DTOs
+- Put business logic in controllers
+- Forget @Transactional on write operations
+- Hardcode any secret, key, URL, or credential
+- Use http package in Flutter — always Dio
+- Store JWT in SharedPreferences — always flutter_secure_storage
+- Use setState for shared/global state — always Riverpod
+- Use Navigator.push — always go_router
+- Use OpenAI — always Gemini
+- Move to next phase without developer confirmation
+- Use placeholder keys silently without asking
+- Generate generic, boring, or static UI
+- Change anything not explicitly requested
+- Add unrequested features or improvements
+- Run git commands automatically — always provide them for the developer to run
+
+---
+
+## ✅ Cursor Must ALWAYS
 - State phase + step number at the start of every response
 - List files being created or modified before writing code
 - Ask for required keys before writing code that needs them
-- Provide git commands after every completed step
+- Guide the developer exactly where to get any key or token
+- Provide git commands after every completed step (for developer to run manually)
+- Write a summary after every completed step and phase
 - Check phase completion before suggesting next phase
 - Write clean, production-quality code
 - Follow the folder structure in architecture.md exactly
 - Match Flutter models to Spring Boot DTOs exactly
-- Keep UI polished, interactive, and on-brand
+- Check Stitch MCP for design reference before building any Flutter screen
+- Keep UI polished, interactive, and on-brand at all times
