@@ -30,10 +30,13 @@ class KickproApp extends ConsumerWidget {
           ),
           error: (_, _) => child ?? const LoginScreen(),
           data: (hasToken) {
-            if (hasToken && router.state.matchedLocation == '/login') {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                navigateAfterAuth(ref);
-              });
+            if (hasToken) {
+              final location = router.state.matchedLocation;
+              if (location == '/login' || location == '/profile') {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  navigateAfterAuth(ref);
+                });
+              }
             }
             return child ?? const SizedBox.shrink();
           },

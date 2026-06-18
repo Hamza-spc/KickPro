@@ -21,4 +21,12 @@ abstract final class ApiEndpoints {
   static const playerProfilePhoto = '/api/v1/players/profile/photo';
   static const playerSkills = '/api/v1/players/skills';
   static const playerSkillsMe = '/api/v1/players/skills/me';
+
+  static const videos = '/api/v1/videos';
+  static const videoFeed = '/api/v1/videos/feed';
+  static const videoMe = '/api/v1/videos/me';
+
+  static const drillProgression = '/api/v1/drills/progression';
+  static String drillSubmit(int drillId) => '/api/v1/drills/$drillId/submit';
+  static const drillBadgesMe = '/api/v1/drills/badges/me';
 }

@@ -42,7 +42,7 @@ class _SkillsSetupScreenState extends ConsumerState<SkillsSetupScreen> {
 
       await ref.read(profileRepositoryProvider).saveSkills(skills);
       if (!mounted) return;
-      context.go('/profile');
+      context.go('/home');
     } catch (e) {
       if (mounted) showKickproToast(context, e.toString(), isError: true);
     } finally {

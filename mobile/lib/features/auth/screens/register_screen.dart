@@ -42,8 +42,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (_role == UserRole.player) {
         await navigateAfterAuth(ref);
       } else {
-        showKickproToast(context, 'Account created. Scout features coming soon.');
-        context.go('/login');
+        showKickproToast(context, 'Scout account created');
+        await navigateAfterAuth(ref);
       }
     } catch (e) {
       if (mounted) {
