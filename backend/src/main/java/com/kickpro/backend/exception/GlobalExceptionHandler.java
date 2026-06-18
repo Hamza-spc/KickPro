@@ -3,6 +3,7 @@ package com.kickpro.backend.exception;
 import com.kickpro.backend.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -46,6 +47,16 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(message));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(
+                        "Invalid request body. Submit answers as "
+                                + "[{\"questionId\":1,\"selectedOptionIndex\":0}] "
+                                + "or {\"1\":\"option text\",\"2\":\"option text\"}"
+                ));
     }
 
     @ExceptionHandler(Exception.class)

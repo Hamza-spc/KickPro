@@ -155,6 +155,10 @@ public class CourseServiceImpl implements CourseService {
             questionsById.put(question.getId(), question);
         }
 
+        if (request.getAnswers() == null || request.getAnswers().isEmpty()) {
+            throw new BadRequestException("At least one answer is required");
+        }
+
         if (request.getAnswers().size() != questionsById.size()) {
             throw new BadRequestException("All quiz questions must be answered");
         }
@@ -171,12 +175,13 @@ public class CourseServiceImpl implements CourseService {
                 throw new BadRequestException("Invalid question id: " + answer.getQuestionId());
             }
 
-            if (answer.getSelectedOptionIndex() < 0
-                    || answer.getSelectedOptionIndex() >= question.getOptions().size()) {
+            int selectedIndex = resolveSelectedOptionIndex(answer, question);
+
+            if (selectedIndex < 0 || selectedIndex >= question.getOptions().size()) {
                 throw new BadRequestException("Invalid option index for question " + question.getId());
             }
 
-            if (answer.getSelectedOptionIndex().equals(question.getCorrectAnswerIndex())) {
+            if (selectedIndex == question.getCorrectAnswerIndex()) {
                 correctCount++;
             }
         }
@@ -230,6 +235,29 @@ public class CourseServiceImpl implements CourseService {
         return certificationRepository.findByPlayerIdOrderByEarnedAtDesc(profileId).stream()
                 .map(this::toCertificationResponse)
                 .toList();
+    }
+
+    private int resolveSelectedOptionIndex(QuizSubmitRequest.AnswerSubmission answer, QuizQuestion question) {
+        if (answer.getSelectedOptionIndex() != null) {
+            return answer.getSelectedOptionIndex();
+        }
+
+        String selectedText = answer.getSelectedAnswerText();
+        if (selectedText == null || selectedText.isBlank()) {
+            throw new BadRequestException(
+                    "Question " + question.getId() + " requires selectedOptionIndex or answer text"
+            );
+        }
+
+        for (int i = 0; i < question.getOptions().size(); i++) {
+            if (question.getOptions().get(i).equalsIgnoreCase(selectedText.trim())) {
+                return i;
+            }
+        }
+
+        throw new BadRequestException(
+                "Answer \"" + selectedText + "\" is not a valid option for question " + question.getId()
+        );
     }
 
     private Lesson loadLesson(Long courseId, Long lessonId) {
