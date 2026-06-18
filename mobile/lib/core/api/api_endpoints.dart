@@ -8,8 +8,10 @@ abstract final class ApiEndpoints {
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
     if (kIsWeb) return 'http://localhost:8080';
+    // 10.0.2.2 is the Android emulator alias for the host machine only.
     if (Platform.isAndroid) return 'http://10.0.2.2:8080';
-    return 'http://localhost:8080';
+    // Use 127.0.0.1 on Apple/desktop to avoid IPv6 localhost resolution issues.
+    return 'http://127.0.0.1:8080';
   }
 
   static const register = '/api/v1/auth/register';

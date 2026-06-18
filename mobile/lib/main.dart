@@ -28,7 +28,7 @@ class KickproApp extends ConsumerWidget {
           loading: () => const Scaffold(
             body: Center(child: ShimmerBox(height: 48, width: 160)),
           ),
-          error: (_, __) => child ?? const LoginScreen(),
+          error: (_, _) => child ?? const LoginScreen(),
           data: (hasToken) {
             if (hasToken && router.state.matchedLocation == '/login') {
               WidgetsBinding.instance.addPostFrameCallback((_) {

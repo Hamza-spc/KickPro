@@ -13,11 +13,11 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login',
     routes: [
-      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
-      GoRoute(path: '/profile-setup', builder: (_, __) => const ProfileSetupScreen()),
-      GoRoute(path: '/skills-setup', builder: (_, __) => const SkillsSetupScreen()),
-      GoRoute(path: '/profile', builder: (_, __) => const PlayerProfileScreen()),
+      GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+      GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
+      GoRoute(path: '/profile-setup', builder: (_, _) => const ProfileSetupScreen()),
+      GoRoute(path: '/skills-setup', builder: (_, _) => const SkillsSetupScreen()),
+      GoRoute(path: '/profile', builder: (_, _) => const PlayerProfileScreen()),
     ],
   );
 });

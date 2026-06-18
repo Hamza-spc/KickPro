@@ -58,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Image.asset(
                 '../assets/fullwordmark_logo.png',
                 height: 48,
-                errorBuilder: (_, __, ___) => const Text(
+                errorBuilder: (_, _, _) => const Text(
                   'KickPro',
                   style: TextStyle(
                     color: AppColors.textPrimary,
