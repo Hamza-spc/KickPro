@@ -26,6 +26,7 @@ import com.kickpro.backend.repository.PlayerProfileRepository;
 import com.kickpro.backend.repository.PlayerRatingRepository;
 import com.kickpro.backend.repository.StadiumRepository;
 import com.kickpro.backend.repository.UserRepository;
+import com.kickpro.backend.service.CredibilityService;
 import com.kickpro.backend.service.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class MatchServiceImpl implements MatchService {
     private final ChatRoomRepository chatRoomRepository;
     private final PlayerRatingRepository playerRatingRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
+    private final CredibilityService credibilityService;
 
     @Override
     @Transactional
@@ -296,7 +298,9 @@ public class MatchServiceImpl implements MatchService {
                 .behaviorScore(request.getBehaviorScore())
                 .build();
 
-        return toRatingResponse(playerRatingRepository.save(rating));
+        PlayerRating saved = playerRatingRepository.save(rating);
+        credibilityService.recalculateForPlayer(ratedPlayer.getId());
+        return toRatingResponse(saved);
     }
 
     @Override

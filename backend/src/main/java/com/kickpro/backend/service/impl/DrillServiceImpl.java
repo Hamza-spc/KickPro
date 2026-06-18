@@ -21,6 +21,7 @@ import com.kickpro.backend.repository.DrillRepository;
 import com.kickpro.backend.repository.DrillSubmissionRepository;
 import com.kickpro.backend.repository.PlayerProfileRepository;
 import com.kickpro.backend.service.DrillService;
+import com.kickpro.backend.service.CredibilityService;
 import com.kickpro.backend.util.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class DrillServiceImpl implements DrillService {
     private final PlayerProfileRepository playerProfileRepository;
     private final CloudinaryService cloudinaryService;
     private final KafkaEventPublisher kafkaEventPublisher;
+    private final CredibilityService credibilityService;
 
     @Override
     @Transactional(readOnly = true)
@@ -190,7 +192,11 @@ public class DrillServiceImpl implements DrillService {
             submission.setScore(null);
         }
 
-        return toSubmissionResponse(drillSubmissionRepository.save(submission));
+        DrillSubmission saved = drillSubmissionRepository.save(submission);
+        if (saved.getStatus() == SubmissionStatus.APPROVED) {
+            credibilityService.recalculateForPlayer(saved.getPlayer().getId());
+        }
+        return toSubmissionResponse(saved);
     }
 
     private void awardBadgeIfMissing(DrillSubmission submission) {

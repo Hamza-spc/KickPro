@@ -1,11 +1,16 @@
 package com.kickpro.backend.config;
 
+import com.kickpro.backend.entity.Course;
 import com.kickpro.backend.entity.Drill;
 import com.kickpro.backend.entity.DrillLevel;
+import com.kickpro.backend.entity.Lesson;
+import com.kickpro.backend.entity.Quiz;
+import com.kickpro.backend.entity.QuizQuestion;
 import com.kickpro.backend.entity.Role;
 import com.kickpro.backend.entity.Stadium;
 import com.kickpro.backend.entity.TargetSkill;
 import com.kickpro.backend.entity.User;
+import com.kickpro.backend.repository.CourseRepository;
 import com.kickpro.backend.repository.DrillRepository;
 import com.kickpro.backend.repository.StadiumRepository;
 import com.kickpro.backend.repository.UserRepository;
@@ -25,6 +30,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private final DrillRepository drillRepository;
     private final StadiumRepository stadiumRepository;
+    private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -33,6 +39,7 @@ public class DataSeeder implements CommandLineRunner {
         seedAdminUser();
         seedDrills();
         seedStadiums();
+        seedCourses();
     }
 
     private void seedAdminUser() {
@@ -162,5 +169,85 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         log.info("Seeded default stadiums");
+    }
+
+    private void seedCourses() {
+        if (courseRepository.count() > 0) {
+            return;
+        }
+
+        Course tactics = Course.builder()
+                .title("Basic Football Tactics")
+                .description("Understand formations, pressing triggers, and off-the-ball movement.")
+                .level(DrillLevel.BEGINNER)
+                .build();
+
+        Lesson tacticsLesson1 = Lesson.builder()
+                .course(tactics)
+                .title("Formations and shape")
+                .content("Learn how 4-3-3 and 4-4-2 structures affect width, depth, and defensive balance.")
+                .orderIndex(1)
+                .build();
+        tactics.getLessons().add(tacticsLesson1);
+
+        Lesson tacticsLesson2 = Lesson.builder()
+                .course(tactics)
+                .title("Pressing fundamentals")
+                .content("Recognize when to press as a unit and how to cut passing lanes without leaving gaps.")
+                .orderIndex(2)
+                .build();
+        tactics.getLessons().add(tacticsLesson2);
+
+        Quiz tacticsQuiz = Quiz.builder().lesson(tacticsLesson2).build();
+        tacticsLesson2.setQuiz(tacticsQuiz);
+        tacticsQuiz.getQuestions().add(QuizQuestion.builder()
+                .quiz(tacticsQuiz)
+                .question("What is the main goal of a coordinated press?")
+                .options(List.of(
+                        "Win the ball high up the pitch",
+                        "Keep all players behind the ball",
+                        "Man-mark every opponent",
+                        "Slow the game down completely"
+                ))
+                .correctAnswerIndex(0)
+                .build());
+        tacticsQuiz.getQuestions().add(QuizQuestion.builder()
+                .quiz(tacticsQuiz)
+                .question("Which formation typically provides two wide forwards?")
+                .options(List.of("4-3-3", "5-4-1", "3-5-2", "4-1-4-1"))
+                .correctAnswerIndex(0)
+                .build());
+
+        Course discipline = Course.builder()
+                .title("Discipline On and Off the Pitch")
+                .description("Build professionalism, respect, and mental strength.")
+                .level(DrillLevel.BEGINNER)
+                .build();
+
+        Lesson disciplineLesson = Lesson.builder()
+                .course(discipline)
+                .title("Professional habits")
+                .content("Punctuality, body language, and respect for teammates and officials define credibility.")
+                .orderIndex(1)
+                .build();
+        discipline.getLessons().add(disciplineLesson);
+
+        Quiz disciplineQuiz = Quiz.builder().lesson(disciplineLesson).build();
+        disciplineLesson.setQuiz(disciplineQuiz);
+        disciplineQuiz.getQuestions().add(QuizQuestion.builder()
+                .quiz(disciplineQuiz)
+                .question("Why does punctuality matter for match day credibility?")
+                .options(List.of(
+                        "It shows reliability to teammates and scouts",
+                        "It increases sprint speed",
+                        "It replaces warm-up routines",
+                        "It guarantees starting position"
+                ))
+                .correctAnswerIndex(0)
+                .build());
+
+        courseRepository.save(tactics);
+        courseRepository.save(discipline);
+        log.info("Seeded default certification courses");
     }
 }

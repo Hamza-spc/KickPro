@@ -16,4 +16,6 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
     boolean existsByMatchIdAndPlayerId(Long matchId, Long playerId);
 
     Optional<MatchParticipant> findByMatchIdAndPlayerId(Long matchId, Long playerId);
+
+    long countByPlayerIdAndStatus(Long playerId, ParticipantStatus status);
 }
