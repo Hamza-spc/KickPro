@@ -3,9 +3,11 @@ package com.kickpro.backend.config;
 import com.kickpro.backend.entity.Drill;
 import com.kickpro.backend.entity.DrillLevel;
 import com.kickpro.backend.entity.Role;
+import com.kickpro.backend.entity.Stadium;
 import com.kickpro.backend.entity.TargetSkill;
 import com.kickpro.backend.entity.User;
 import com.kickpro.backend.repository.DrillRepository;
+import com.kickpro.backend.repository.StadiumRepository;
 import com.kickpro.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +15,16 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
     private final DrillRepository drillRepository;
+    private final StadiumRepository stadiumRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -26,6 +32,7 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         seedAdminUser();
         seedDrills();
+        seedStadiums();
     }
 
     private void seedAdminUser() {
@@ -116,5 +123,44 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         log.info("Seeded default drill progression tree");
+    }
+
+    private void seedStadiums() {
+        if (stadiumRepository.count() > 0) {
+            return;
+        }
+
+        stadiumRepository.save(Stadium.builder()
+                .name("Stade Mohammed V")
+                .location("Casablanca, Maarif")
+                .description("Full-size grass pitch with floodlights. Ideal for 11v11 and training sessions.")
+                .pricePerHour(new BigDecimal("450.00"))
+                .photos(List.of(
+                        "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+                        "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+                ))
+                .build());
+
+        stadiumRepository.save(Stadium.builder()
+                .name("Complexe Sportif Agdal")
+                .location("Rabat, Agdal")
+                .description("Modern futsal courts and 7v7 pitches. Changing rooms and parking available.")
+                .pricePerHour(new BigDecimal("320.00"))
+                .photos(List.of(
+                        "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+                ))
+                .build());
+
+        stadiumRepository.save(Stadium.builder()
+                .name("Terrain Atlas Marrakech")
+                .location("Marrakech, Gueliz")
+                .description("Outdoor 5v5 pitch near the city center. Great for evening kickabouts.")
+                .pricePerHour(new BigDecimal("280.00"))
+                .photos(List.of(
+                        "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+                ))
+                .build());
+
+        log.info("Seeded default stadiums");
     }
 }

@@ -19,4 +19,14 @@ public class KafkaConfig {
     public NewTopic videoUploadedTopic() {
         return TopicBuilder.name("video.uploaded").partitions(1).replicas(1).build();
     }
+
+    @Bean
+    public NewTopic matchBookedTopic() {
+        return TopicBuilder.name("match.booked").partitions(1).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic matchCompletedTopic() {
+        return TopicBuilder.name("match.completed").partitions(1).replicas(1).build();
+    }
 }

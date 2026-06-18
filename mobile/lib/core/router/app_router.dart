@@ -6,6 +6,9 @@ import 'package:kickpro/features/auth/data/auth_repository.dart';
 import 'package:kickpro/features/auth/screens/login_screen.dart';
 import 'package:kickpro/features/auth/screens/register_screen.dart';
 import 'package:kickpro/features/drills/screens/drill_submission_screen.dart';
+import 'package:kickpro/features/matches/screens/match_chat_screen.dart';
+import 'package:kickpro/features/matches/screens/match_detail_screen.dart';
+import 'package:kickpro/features/matches/screens/match_rating_screen.dart';
 import 'package:kickpro/features/home/screens/admin_home_screen.dart';
 import 'package:kickpro/features/home/screens/player_home_screen.dart';
 import 'package:kickpro/features/home/screens/scout_home_screen.dart';
@@ -52,6 +55,42 @@ final routerProvider = Provider<GoRouter>((ref) {
             );
           }
           return DrillSubmissionScreen(drill: drill);
+        },
+      ),
+      GoRoute(
+        path: '/matches/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) {
+            return const Scaffold(
+              body: Center(child: Text('Match not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return MatchDetailScreen(matchId: id);
+        },
+      ),
+      GoRoute(
+        path: '/matches/:id/chat',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) {
+            return const Scaffold(
+              body: Center(child: Text('Match not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return MatchChatScreen(matchId: id);
+        },
+      ),
+      GoRoute(
+        path: '/matches/:id/rate',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) {
+            return const Scaffold(
+              body: Center(child: Text('Match not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return MatchRatingScreen(matchId: id);
         },
       ),
     ],

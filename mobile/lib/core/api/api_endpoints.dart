@@ -29,4 +29,19 @@ abstract final class ApiEndpoints {
   static const drillProgression = '/api/v1/drills/progression';
   static String drillSubmit(int drillId) => '/api/v1/drills/$drillId/submit';
   static const drillBadgesMe = '/api/v1/drills/badges/me';
+
+  static const stadiums = '/api/v1/stadiums';
+  static String stadium(int id) => '/api/v1/stadiums/$id';
+
+  static const matches = '/api/v1/matches';
+  static const matchesOpen = '/api/v1/matches/open';
+  static const matchesMine = '/api/v1/matches/mine';
+  static String match(int id) => '/api/v1/matches/$id';
+  static String matchJoin(int id) => '/api/v1/matches/$id/join';
+  static String matchParticipantReview(int matchId, int participantId) =>
+      '/api/v1/matches/$matchId/participants/$participantId/review';
+  static String matchComplete(int id) => '/api/v1/matches/$id/complete';
+  static String matchCancel(int id) => '/api/v1/matches/$id/cancel';
+  static String matchRatings(int id) => '/api/v1/matches/$id/ratings';
+  static String matchChatMessages(int id) => '/api/v1/matches/$id/chat/messages';
 }

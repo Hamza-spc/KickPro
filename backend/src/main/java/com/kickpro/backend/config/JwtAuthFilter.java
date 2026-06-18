@@ -35,18 +35,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authHeader.substring(7);
+        String token = authHeader.substring(7).trim();
 
-        if (jwtUtil.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String email = jwtUtil.extractUsername(token);
-            Long userId = jwtUtil.extractUserId(token);
-            Role role = jwtUtil.extractRole(token);
+        try {
+            if (jwtUtil.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String email = jwtUtil.extractUsername(token);
+                Long userId = jwtUtil.extractUserId(token);
+                Role role = jwtUtil.extractRole(token);
 
-            UserPrincipal principal = new UserPrincipal(userId, email, role);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UserPrincipal principal = new UserPrincipal(userId, email, role);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (Exception ex) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
