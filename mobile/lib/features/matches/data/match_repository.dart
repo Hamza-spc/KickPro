@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/api/api_client.dart';
 import 'package:kickpro/core/api/api_endpoints.dart';
 import 'package:kickpro/shared/models/api_response.dart';
@@ -43,7 +44,7 @@ class MatchRepository {
       ApiEndpoints.matches,
       data: {
         'stadiumId': stadiumId,
-        'dateTime': dateTime.toIso8601String().split('.').first,
+        'dateTime': formatMatchDateTime(dateTime),
         'maxPlayers': maxPlayers,
       },
     );

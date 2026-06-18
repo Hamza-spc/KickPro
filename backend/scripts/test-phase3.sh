@@ -62,30 +62,22 @@ CREATE_MATCH=$(curl -s -w "\n%{http_code}" -X POST "$BASE/api/v1/matches" \
 CREATE_BODY=$(echo "$CREATE_MATCH" | sed '$d')
 CREATE_CODE=$(echo "$CREATE_MATCH" | tail -1)
 MATCH_ID=$(echo "$CREATE_BODY" | json_field "d['data']['id']" || true)
+CHAT_ON_CREATE=$(echo "$CREATE_BODY" | json_field "d['data'].get('chatRoomId') or 'null'")
 if [ -z "$MATCH_ID" ] || [ "$MATCH_ID" = "None" ]; then
   echo "  create match FAILED: HTTP $CREATE_CODE"
   echo "$CREATE_BODY"
   exit 1
 fi
-echo "  create match: $CREATE_CODE (expect 201), matchId=$MATCH_ID"
+echo "  create match: $CREATE_CODE (expect 201), matchId=$MATCH_ID, chatRoomId=$CHAT_ON_CREATE"
 
 echo ""
-echo "5. Join + approve"
+echo "5. Join (pending approval)"
 JOIN_RES=$(curl -s -w "\n%{http_code}" -X POST "$BASE/api/v1/matches/$MATCH_ID/join" \
   -H "Authorization: Bearer $JOIN_TOKEN")
 JOIN_BODY=$(echo "$JOIN_RES" | sed '$d')
 JOIN_CODE=$(echo "$JOIN_RES" | tail -1)
 PARTICIPANT_ID=$(echo "$JOIN_BODY" | json_field "[p['id'] for p in d['data']['participants'] if p['status']=='PENDING'][0]")
 echo "  join request: $JOIN_CODE (expect 200), participantId=$PARTICIPANT_ID"
-
-APPROVE_RES=$(curl -s -w "\n%{http_code}" -X PUT "$BASE/api/v1/matches/$MATCH_ID/participants/$PARTICIPANT_ID/review" \
-  -H "Authorization: Bearer $ORG_TOKEN" -H "Content-Type: application/json" \
-  -d '{"status":"APPROVED"}')
-APPROVE_BODY=$(echo "$APPROVE_RES" | sed '$d')
-APPROVE_CODE=$(echo "$APPROVE_RES" | tail -1)
-MATCH_STATUS=$(echo "$APPROVE_BODY" | json_field "d['data']['status']")
-CHAT_ROOM_ID=$(echo "$APPROVE_BODY" | json_field "d['data'].get('chatRoomId') or 'null'")
-echo "  approve: $APPROVE_CODE, match status=$MATCH_STATUS, chatRoomId=$CHAT_ROOM_ID"
 
 echo ""
 echo "6. Double-booking prevention"
@@ -96,13 +88,28 @@ echo "  overlapping booking: $DOUBLE_CODE (expect 400)"
 
 echo ""
 echo "7. Chat"
-CHAT_FAIL=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/v1/matches/$MATCH_ID/chat/messages" \
+ORG_CHAT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/v1/matches/$MATCH_ID/chat/messages" \
   -H "Authorization: Bearer $ORG_TOKEN" -H "Content-Type: application/json" \
-  -d '{"content":"Before full test"}')
-echo "  chat when not full: $CHAT_FAIL (expect 400 if not FULL)"
+  -d '{"content":"Organizer hello"}')
+echo "  organizer chat after create: $ORG_CHAT (expect 201)"
 
-# Fill match to FULL if needed (maxPlayers=4, organizer already approved = 2 approved)
-# Need 2 more players or lower maxPlayers - recreate with maxPlayers=2 for simpler test
+PENDING_CHAT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/v1/matches/$MATCH_ID/chat/messages" \
+  -H "Authorization: Bearer $JOIN_TOKEN" -H "Content-Type: application/json" \
+  -d '{"content":"Pending player"}')
+echo "  pending joiner chat: $PENDING_CHAT (expect 400)"
+
+APPROVE_RES=$(curl -s -w "\n%{http_code}" -X PUT "$BASE/api/v1/matches/$MATCH_ID/participants/$PARTICIPANT_ID/review" \
+  -H "Authorization: Bearer $ORG_TOKEN" -H "Content-Type: application/json" \
+  -d '{"status":"APPROVED"}')
+APPROVE_BODY=$(echo "$APPROVE_RES" | sed '$d')
+APPROVE_CODE=$(echo "$APPROVE_RES" | tail -1)
+echo "  approve joiner: $APPROVE_CODE (expect 200)"
+
+JOINER_CHAT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/v1/matches/$MATCH_ID/chat/messages" \
+  -H "Authorization: Bearer $JOIN_TOKEN" -H "Content-Type: application/json" \
+  -d '{"content":"Approved joiner hello"}')
+echo "  approved joiner chat: $JOINER_CHAT (expect 201)"
+
 MATCH2_DATE=$(python3 -c "from datetime import datetime,timedelta; import random; print((datetime.now(datetime.UTC)+timedelta(days=31, hours=random.randint(1,12), minutes=random.randint(0,59))).strftime('%Y-%m-%dT%H:%M:%S'))" 2>/dev/null || python3 -c "from datetime import datetime,timedelta,timezone; import random; print((datetime.now(timezone.utc)+timedelta(days=31, hours=random.randint(1,12), minutes=random.randint(0,59))).strftime('%Y-%m-%dT%H:%M:%S'))")
 CREATE2=$(curl -s -X POST "$BASE/api/v1/matches" \
   -H "Authorization: Bearer $ORG_TOKEN" -H "Content-Type: application/json" \
@@ -122,7 +129,7 @@ MSG_RES=$(curl -s -w "\n%{http_code}" -X POST "$BASE/api/v1/matches/$MATCH2_ID/c
   -H "Authorization: Bearer $ORG_TOKEN" -H "Content-Type: application/json" \
   -d '{"content":"See you on the pitch!"}')
 MSG_CODE=$(echo "$MSG_RES" | tail -1)
-echo "  send chat message: $MSG_CODE (expect 201)"
+echo "  send chat message on full match: $MSG_CODE (expect 201)"
 
 HIST_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/api/v1/matches/$MATCH2_ID/chat/messages" \
   -H "Authorization: Bearer $JOIN_TOKEN")

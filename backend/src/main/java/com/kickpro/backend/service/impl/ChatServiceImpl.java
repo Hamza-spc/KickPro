@@ -64,8 +64,7 @@ public class ChatServiceImpl implements ChatService {
         }
 
         ChatRoom room = chatRoomRepository.findByMatchId(matchId)
-                .orElseThrow(() -> new BadRequestException(
-                        "Chat room is not available yet. Match must be full before chatting."));
+                .orElseThrow(() -> new BadRequestException("Chat room not found for this match"));
 
         PlayerProfile player = playerProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new BadRequestException("Player profile not found"));

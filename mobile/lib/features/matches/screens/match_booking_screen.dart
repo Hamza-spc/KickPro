@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
@@ -331,11 +332,12 @@ class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
 
   Future<void> _pickDateTime() async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final date = await showDatePicker(
       context: context,
-      initialDate: now.add(const Duration(days: 1)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
+      initialDate: today.add(const Duration(days: 1)),
+      firstDate: today,
+      lastDate: today.add(const Duration(days: 365)),
     );
     if (date == null || !mounted) return;
 
@@ -355,8 +357,8 @@ class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
       showKickproToast(context, 'Select a stadium and date/time', isError: true);
       return;
     }
-    if (_selectedDateTime!.isBefore(DateTime.now())) {
-      showKickproToast(context, 'Pick a future date and time', isError: true);
+    if (_selectedDateTime!.isBefore(DateTime.now().add(const Duration(minutes: 30)))) {
+      showKickproToast(context, 'Pick a time at least 30 minutes from now', isError: true);
       return;
     }
 
@@ -372,7 +374,7 @@ class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
         widget.onBooked();
       }
     } catch (e) {
-      if (mounted) showKickproToast(context, e.toString(), isError: true);
+      if (mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

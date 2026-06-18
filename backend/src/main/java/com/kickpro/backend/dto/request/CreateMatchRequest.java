@@ -1,6 +1,5 @@
 package com.kickpro.backend.dto.request;
 
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +16,6 @@ public class CreateMatchRequest {
     private Long stadiumId;
 
     @NotNull(message = "Match date and time is required")
-    @Future(message = "Match must be scheduled in the future")
     private LocalDateTime dateTime;
 
     @NotNull(message = "Max players is required")

@@ -63,6 +63,10 @@ public class MatchServiceImpl implements MatchService {
 
         assertNoBookingConflict(request.getStadiumId(), request.getDateTime(), null);
 
+        if (!request.getDateTime().isAfter(LocalDateTime.now().plusMinutes(15))) {
+            throw new BadRequestException("Match must be scheduled at least 15 minutes in the future");
+        }
+
         Match match = Match.builder()
                 .stadium(stadium)
                 .organizer(organizerUser)
@@ -78,6 +82,8 @@ public class MatchServiceImpl implements MatchService {
                 .player(organizer)
                 .status(ParticipantStatus.APPROVED)
                 .build());
+
+        createChatRoomIfMissing(saved);
 
         kafkaEventPublisher.publishMatchBooked(MatchBookedEvent.builder()
                 .matchId(saved.getId())
@@ -193,7 +199,6 @@ public class MatchServiceImpl implements MatchService {
             if (approvedCount >= match.getMaxPlayers()) {
                 match.setStatus(MatchStatus.FULL);
                 matchRepository.save(match);
-                createChatRoomIfMissing(match);
             }
         }
 
