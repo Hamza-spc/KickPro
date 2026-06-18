@@ -1,0 +1,37 @@
+name: AI Service CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai-service/**"
+      - ".github/workflows/ai-service-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "ai-service/**"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: ai-service
+        run: pip install -r requirements.txt
+
+      - name: Verify app imports
+        working-directory: ai-service
+        run: python -c "from app.main import app; assert app.title == 'KickPro AI Service'"
+
+      - name: Build Docker image
+        working-directory: ai-service
+        run: docker build -t kickpro-ai-service:ci .

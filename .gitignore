@@ -1,0 +1,19 @@
+.env
+.DS_Store
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+ai-service/.venv/
+
+# Flutter (future)
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins-dependencies

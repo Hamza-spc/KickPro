@@ -5,21 +5,29 @@
 
 ## 🧠 Project Identity
 You are building KickPro — a football talent discovery and development platform.
-Stack: Spring Boot 3 + Java 21 (backend) + Flutter 3 (mobile) + Python 3.11 FastAPI (AI) + PostgreSQL 15 + Kafka + Redis + Cloudinary + Docker + GitHub Actions + AWS.
+Stack: Spring Boot 3 + Java 21 (backend) + Flutter 3 (mobile) + Python 3.11 FastAPI (AI) + PostgreSQL 15 + Kafka + Redis + Cloudinary + Docker + GitHub Actions.
 There is NO web frontend. Flutter is the only client.
 The AI service uses Google Gemini API (free) — NEVER OpenAI.
+AWS deployment is DEFERRED — Docker and CI/CD files are written but never deployed yet.
+Drill UI uses Option C: progression list in Phase 2, full visual tree upgrade in Phase 6 (backend tree data unchanged).
 
 ---
 
 ## 📋 Phase Rules (CRITICAL)
 
-KickPro is built in 6 phases:
+KickPro is built in 7 phases:
 - Phase 0: DevOps Foundation
 - Phase 1: Authentication + Profiles
 - Phase 2: Video + Drill System
 - Phase 3: Match Booking + Chat
 - Phase 4: Certifications + Search + Credibility Score
-- Phase 5: AI Features + Deployment
+- Phase 5: AI Features
+- Phase 6: Additional Features (comparison, timeline, feedback, challenges, leaderboards, injury tracker, agents, drill tree UI upgrade)
+
+### Deployment note:
+AWS deployment is intentionally deferred. There are no real users yet.
+CI/CD pipelines build and test only — they do NOT deploy to AWS.
+When deployment is needed in the future, it will be a separate task.
 
 ### Before starting ANY phase:
 1. State clearly which phase and step you are working on
@@ -43,8 +51,9 @@ Always guide the developer exactly where to go: which platform, which section, w
 Never use placeholder values silently. Always ask first.
 
 Required keys by phase:
-- Phase 0–1: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, JWT_SECRET
-- Phase 5: GEMINI_API_KEY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, EC2_HOST, EC2_SSH_PRIVATE_KEY
+- Phase 1: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, JWT_SECRET
+- Phase 5: GEMINI_API_KEY (aistudio.google.com — free, no credit card)
+- AWS keys: NOT needed — deployment is deferred
 
 ---
 
@@ -64,7 +73,7 @@ Examples:
 - "fix: JWT filter not validating correctly"
 - "config: docker compose with all services"
 
-The developer runs these manually — never run git commands automatically.
+The developer runs these manually — NEVER run git commands automatically.
 
 ---
 
@@ -219,6 +228,7 @@ lib/features/<feature>/
 - Border top: 0.5px solid #1F2937
 - Player tabs: Feed / Drills / Matches / Profile
 - Scout tabs: Search / Players / Bookmarks / Profile
+- Agent tabs: Trials / Players / Messages / Profile
 - Active: #2563EB | Inactive: #6B7280
 
 #### Avatars
@@ -238,7 +248,16 @@ lib/features/<feature>/
 - Height: 6px, radius 3px
 - Always show percentage label
 
-#### Drill Tree Nodes
+#### Drill Progression List (Phase 2–5 — build this first)
+- Vertical styled list — one row per drill in progression order
+- Status icons: ✅ completed | 🔵 current (active) | 🔒 locked
+- Completed row: subtle green accent or check icon, title in text secondary
+- Current row: primary blue left border or highlight, tappable
+- Locked row: opacity 0.4, not tappable
+- Level selector pills at top: Beginner / Intermediate / Advanced
+- Same backend tree data — list is the view layer only
+
+#### Drill Tree Nodes (Phase 6 upgrade only — do NOT build before Phase 6)
 - Completed: background #1E3A5F, border #2563EB
 - Active: background #2563EB, border #60A5FA, glow shadow
 - Locked: background #111827, border #374151, opacity 0.4
@@ -256,12 +275,19 @@ lib/features/<feature>/
 - Hero: large avatar, name, position badges, city
 - Credibility score: circular progress ring in #2563EB
 - Skill bars per attribute
-- Tab bar: Videos / Drills / Badges / Certifications
+- Tab bar: Videos / Drills / Badges / Certifications / AI Coach
 
-#### Drill Tree
-- Full screen vertical scroll tree
+#### Drill Progression List (Phase 2–5)
+- Full screen scrollable list of drills in order
+- Level selector (Beginner / Intermediate / Advanced) as pill tabs
+- Each row shows drill title, target skill badge, and status icon (✅ / 🔵 / 🔒)
+- Tap current drill to open submission screen
+
+#### Drill Tree (Phase 6 upgrade — replaces list above)
+- Full screen vertical scroll tree with nodes and connectors
 - Level selector (Beginner / Intermediate / Advanced) as pill tabs
 - Active node glows blue, completed nodes solid blue
+- UI-only change — same API and progression logic as the list
 
 #### Video Feed
 - Full cards with video thumbnail + play overlay
@@ -276,6 +302,25 @@ lib/features/<feature>/
 - Player cards list with credibility badge
 - AI search bar at top
 
+#### Player Comparison
+- Two-column layout side by side
+- Visual stat bars for each skill
+- Credibility score rings for both players
+
+#### Match History Timeline
+- Vertical timeline, newest event first
+- Icon per event type (drill, match, certification, video)
+
+#### Weekly Challenges
+- Active challenge card at top with countdown timer
+- Submission cards below with vote counts
+- Winner highlighted with gold badge
+
+#### Leaderboard
+- Filter pills: position + city + age group
+- Ranked list with position number, avatar, name, score
+- Top 3 get gold/silver/bronze styling
+
 ### Animations
 - Page transitions: fade + slide (300ms)
 - Card press: scale 0.97
@@ -283,6 +328,7 @@ lib/features/<feature>/
 - Drill unlock: bounce + glow pulse
 - Badge earned: confetti + scale up
 - Loading: shimmer effect (never spinner)
+- Challenge countdown: animated timer
 
 ### UI Never Do
 - No plain white backgrounds
@@ -320,6 +366,7 @@ A Google Stitch MCP server is connected. Before building any Flutter screen:
 - docker-compose.yml for local dev only
 - Use .env file for all local secrets
 - Add .env to .gitignore immediately
+- CI/CD pipelines build and test only — NO deployment to AWS
 
 ---
 
@@ -373,6 +420,8 @@ A Google Stitch MCP server is connected. Before building any Flutter screen:
 - Change anything not explicitly requested
 - Add unrequested features or improvements
 - Run git commands automatically — always provide them for the developer to run
+- Deploy to AWS — deployment is deferred
+- Build Duolingo-style drill tree UI before Phase 6 — use progression list in Phase 2
 
 ---
 
@@ -389,3 +438,114 @@ A Google Stitch MCP server is connected. Before building any Flutter screen:
 - Match Flutter models to Spring Boot DTOs exactly
 - Check Stitch MCP for design reference before building any Flutter screen
 - Keep UI polished, interactive, and on-brand at all times
+
+---
+
+## 👨‍💻 Developer Experience Level (CRITICAL)
+The developer is familiar with Spring Boot and Flutter but this is their FIRST TIME working with Docker, CI/CD (GitHub Actions), Kafka, and Redis.
+
+So whenever these technologies are involved:
+1. Before writing any code, explain in simple plain English what you are about to do and why
+2. After writing the code, explain what each part does in simple terms
+3. If the developer needs to run any command they haven't seen before, explain what it does before they run it
+4. Never assume the developer knows how these tools work
+5. If something could go wrong, warn about it in advance
+6. Always prefer the simplest explanation over the most technical one
+
+---
+
+## ⭐ Skill Rating System
+Players rate their skills using a smooth star slider (1–10) during profile setup.
+- Slider goes from 1 to 10 with smooth animation
+- Each skill: dribbling, shooting, passing, speed, heading, stamina
+- Strengths → skills rated 7–10 (computed automatically)
+- Weaknesses → skills rated 1–4 (computed automatically)
+- Never use a text input for skill ratings — always the star slider widget
+- The slider must feel smooth and satisfying to use
+
+---
+
+## 🤖 AI Coach Feature
+Every player profile has a personal AI coach section with tabs:
+
+### 🥗 Meal Plan Tab
+- Calls POST /meal-plan on Python AI service
+- Input: age (from dateOfBirth), height, weight, position
+- Output: daily calories, protein, carbs, fats + match/training/rest day meals
+- Football players ONLY — NOT bodybuilders, NOT runners
+- Position-specific and age-specific calculations
+
+### 🎯 Drill Recommender Tab
+- Calls POST /recommend-drills on Python AI service
+- Input: all skill ratings (1–10)
+- Output: specific drills targeting weak skills with explanations
+- Each recommendation maps to a real drill in the DB
+
+### 🏥 Recovery Plan Tab (when injured)
+- Calls POST /recovery-plan on Python AI service
+- Input: injuryType, bodyPart, severity, playerProfile
+- Output: recovery nutrition + safe rehabilitation exercises
+- Only visible when player has an ACTIVE InjuryRecord
+
+---
+
+## 🏗️ Build Order (CRITICAL)
+For EVERY phase:
+1. Build ALL backend (Spring Boot) for the phase
+2. Tell developer to test endpoints with Postman
+3. Wait for developer confirmation backend works
+4. THEN build Flutter screens
+Never build Flutter before backend is tested and confirmed working.
+
+---
+
+## 🆕 Additional Features Rules (Phase 6)
+
+### Player Comparison Tool
+- Scout-only feature
+- GET /api/v1/scouts/compare?player1={id}&player2={id}
+- Single endpoint returns both players in one response
+- Flutter: two-column layout with visual stat bars
+- No new entities needed
+
+### Match History Timeline
+- Auto-generated from existing data
+- GET /api/v1/players/{id}/timeline
+- Events sorted newest first
+- No new entity needed
+- Flutter: vertical timeline with icons per event type
+
+### Scout Feedback
+- New entity: ScoutFeedback
+- Private — only visible to scout (notes) and player (feedback)
+- POST + GET /api/v1/feedback
+
+### Weekly Challenges
+- New entities: WeeklyChallenge + ChallengeSubmission
+- Admin posts weekly, players submit videos, community votes
+- Winner gets 7-day boosted badge
+- Kafka event: challenge.winner.announced
+
+### Position-Specific Leaderboards
+- No new entity — computed from credibility scores
+- GET /api/v1/leaderboard?position=&city=&ageGroup=
+- Filters: position + city + ageGroup (U18 | U21 | OPEN)
+
+### Injury Tracker
+- New entity: InjuryRecord
+- When ACTIVE: meal plan → recovery, drills → rehabilitation, profile shows badge
+- POST /ai-service/recovery-plan
+
+### Agent Account Type
+- New role: AGENT in Role enum
+- New entity: AgentProfile (agencyName, licenseNumber, verifiedByAdmin)
+- Must be verified by admin before full access
+- Can post official trials, message players, view private drills
+- Verified agents get badge on profile
+- New endpoints: /api/v1/agents/
+
+### Drill Tree UI Upgrade (last item in Phase 6)
+- Replace Phase 2 progression list with full Duolingo-style visual tree
+- No backend changes — UI-only upgrade using existing drill endpoints
+- Use Drill Tree Nodes design spec (connectors, glow, locked/active/completed states)
+- Build this AFTER all other Phase 6 features are confirmed working
