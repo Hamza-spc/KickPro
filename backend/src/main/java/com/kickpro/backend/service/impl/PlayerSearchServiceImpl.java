@@ -36,6 +36,7 @@ public class PlayerSearchServiceImpl implements PlayerSearchService {
     @Override
     @Transactional(readOnly = true)
     public Page<PlayerSearchResultResponse> searchPlayers(
+            String name,
             Position position,
             String city,
             PreferredFoot preferredFoot,
@@ -54,6 +55,7 @@ public class PlayerSearchServiceImpl implements PlayerSearchService {
             Pageable pageable
     ) {
         Specification<PlayerProfile> spec = PlayerProfileSpecifications.withFilters(
+                name,
                 position,
                 city,
                 preferredFoot,
@@ -127,5 +129,11 @@ public class PlayerSearchServiceImpl implements PlayerSearchService {
                     .skills(skillsSummary)
                     .build();
         });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getDistinctCities() {
+        return playerProfileRepository.findDistinctCitiesAsc();
     }
 }

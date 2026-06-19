@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
+import 'package:kickpro/features/courses/data/course_repository.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
+import 'package:kickpro/shared/models/course_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/skills_models.dart';
-import 'package:kickpro/shared/widgets/credibility_ring.dart';
+import 'package:kickpro/shared/widgets/credibility_score_card.dart';
+import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 import 'package:kickpro/shared/widgets/skill_bar.dart';
@@ -51,6 +55,7 @@ class _PlayerProfileScreenState extends ConsumerState<PlayerProfileScreen> {
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(playerProfileProvider);
     final skillsAsync = ref.watch(playerSkillsProvider);
+    final certificationsAsync = ref.watch(myCertificationsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -73,7 +78,9 @@ class _PlayerProfileScreenState extends ConsumerState<PlayerProfileScreen> {
                   child: Row(
                     children: [
                       _TabButton(label: 'Skills', selected: _tabIndex == 0, onTap: () => setState(() => _tabIndex = 0)),
-                      _TabButton(label: 'Overview', selected: _tabIndex == 1, onTap: () => setState(() => _tabIndex = 1)),
+                      _TabButton(label: 'Certs', selected: _tabIndex == 1, onTap: () => setState(() => _tabIndex = 1)),
+                      _TabButton(label: 'Score', selected: _tabIndex == 2, onTap: () => setState(() => _tabIndex = 2)),
+                      _TabButton(label: 'Overview', selected: _tabIndex == 3, onTap: () => setState(() => _tabIndex = 3)),
                     ],
                   ),
                 ),
@@ -81,13 +88,20 @@ class _PlayerProfileScreenState extends ConsumerState<PlayerProfileScreen> {
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverToBoxAdapter(
-                  child: _tabIndex == 0
-                      ? skillsAsync.when(
+                  child: switch (_tabIndex) {
+                    0 => skillsAsync.when(
                           loading: () => const ShimmerBox(height: 180, width: double.infinity),
                           error: (e, _) => Text(e.toString()),
                           data: (skills) => _SkillsTab(skills: skills),
-                        )
-                      : _OverviewTab(profile: profile),
+                        ),
+                    1 => certificationsAsync.when(
+                          loading: () => const ShimmerBox(height: 120, width: double.infinity),
+                          error: (e, _) => Text(e.toString()),
+                          data: (certs) => _CertificationsTab(certifications: certs),
+                        ),
+                    2 => CredibilityScoreCard(score: profile.credibilityScore),
+                    _ => _OverviewTab(profile: profile),
+                  },
                 ),
               ),
             ],
@@ -173,7 +187,7 @@ class _ProfileHero extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             profile.fullName,
             style: const TextStyle(
@@ -181,6 +195,11 @@ class _ProfileHero extends StatelessWidget {
               fontSize: 22,
               fontWeight: FontWeight.w700,
             ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Credibility ${profile.credibilityScore.round()}/100',
+            style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -193,8 +212,6 @@ class _ProfileHero extends StatelessWidget {
               _Badge(label: profile.preferredFoot.name.toUpperCase()),
             ],
           ),
-          const SizedBox(height: 20),
-          CredibilityRing(score: profile.credibilityScore),
         ],
       ),
     );
@@ -292,6 +309,79 @@ class _SkillsTab extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _CertificationsTab extends StatelessWidget {
+  const _CertificationsTab({required this.certifications});
+
+  final List<Certification> certifications;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KickproButton(
+          label: 'Browse Courses',
+          onPressed: () => context.push('/courses'),
+        ),
+        const SizedBox(height: 16),
+        if (certifications.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border, width: 0.5),
+            ),
+            child: const Text(
+              'No certifications yet. Complete a course quiz to earn your first badge.',
+              style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+            ),
+          )
+        else
+          ...certifications.map(
+            (cert) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border, width: 0.5),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.verified, color: AppColors.gold),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          cert.courseTitle,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Earned ${_formatDate(cert.earnedAt)}',
+                          style: const TextStyle(color: AppColors.textHint, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }
 

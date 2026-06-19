@@ -22,6 +22,7 @@ public final class PlayerProfileSpecifications {
     }
 
     public static Specification<PlayerProfile> withFilters(
+            String name,
             Position position,
             String city,
             PreferredFoot preferredFoot,
@@ -41,6 +42,9 @@ public final class PlayerProfileSpecifications {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if (name != null && !name.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("fullName")), "%" + name.trim().toLowerCase() + "%"));
+            }
             if (position != null) {
                 predicates.add(cb.equal(root.get("position"), position));
             }

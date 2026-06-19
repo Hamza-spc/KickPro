@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/scouts/players")
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class PlayerSearchController {
     @GetMapping("/search")
     @PreAuthorize("hasAnyRole('SCOUT', 'AGENT', 'ADMIN')")
     public ResponseEntity<ApiResponse<Page<PlayerSearchResultResponse>>> searchPlayers(
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) Position position,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) PreferredFoot preferredFoot,
@@ -45,6 +48,7 @@ public class PlayerSearchController {
             @RequestParam(defaultValue = "20") int size
     ) {
         Page<PlayerSearchResultResponse> results = playerSearchService.searchPlayers(
+                name,
                 position,
                 city,
                 preferredFoot,
@@ -63,5 +67,14 @@ public class PlayerSearchController {
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "credibilityScore"))
         );
         return ResponseEntity.ok(ApiResponse.success(results, "Players retrieved successfully"));
+    }
+
+    @GetMapping("/cities")
+    @PreAuthorize("hasAnyRole('SCOUT', 'AGENT', 'ADMIN')")
+    public ResponseEntity<ApiResponse<List<String>>> getCities() {
+        return ResponseEntity.ok(ApiResponse.success(
+                playerSearchService.getDistinctCities(),
+                "Cities retrieved successfully"
+        ));
     }
 }

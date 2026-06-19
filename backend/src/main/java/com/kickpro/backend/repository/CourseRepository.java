@@ -11,4 +11,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findAllByOrderByTitleAsc();
 
     List<Course> findByLevelOrderByTitleAsc(DrillLevel level);
+
+    boolean existsByTitle(String title);
 }

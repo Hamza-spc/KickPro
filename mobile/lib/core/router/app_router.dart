@@ -12,6 +12,11 @@ import 'package:kickpro/features/matches/screens/match_rating_screen.dart';
 import 'package:kickpro/features/home/screens/admin_home_screen.dart';
 import 'package:kickpro/features/home/screens/player_home_screen.dart';
 import 'package:kickpro/features/home/screens/scout_home_screen.dart';
+import 'package:kickpro/features/courses/screens/lesson_detail_screen.dart';
+import 'package:kickpro/features/courses/models/lesson_view_args.dart';
+import 'package:kickpro/features/courses/screens/course_detail_screen.dart';
+import 'package:kickpro/features/courses/screens/course_quiz_screen.dart';
+import 'package:kickpro/features/courses/screens/courses_list_screen.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/features/profile/screens/profile_setup_screen.dart';
 import 'package:kickpro/features/profile/screens/skills_setup_screen.dart';
@@ -91,6 +96,44 @@ final routerProvider = Provider<GoRouter>((ref) {
             );
           }
           return MatchRatingScreen(matchId: id);
+        },
+      ),
+      GoRoute(path: '/courses', builder: (_, _) => const CoursesListScreen()),
+      GoRoute(
+        path: '/courses/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) {
+            return const Scaffold(
+              body: Center(child: Text('Course not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return CourseDetailScreen(courseId: id);
+        },
+      ),
+      GoRoute(
+        path: '/courses/:courseId/lessons/:lessonId/quiz',
+        builder: (context, state) {
+          final courseId = int.tryParse(state.pathParameters['courseId'] ?? '');
+          final lessonId = int.tryParse(state.pathParameters['lessonId'] ?? '');
+          if (courseId == null || lessonId == null) {
+            return const Scaffold(
+              body: Center(child: Text('Quiz not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return CourseQuizScreen(courseId: courseId, lessonId: lessonId);
+        },
+      ),
+      GoRoute(
+        path: '/courses/:courseId/lessons/:lessonId',
+        builder: (context, state) {
+          final args = state.extra;
+          if (args is! LessonViewArgs) {
+            return const Scaffold(
+              body: Center(child: Text('Lesson not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return LessonDetailScreen(args: args);
         },
       ),
     ],

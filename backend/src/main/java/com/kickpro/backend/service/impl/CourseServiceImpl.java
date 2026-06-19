@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -85,7 +84,8 @@ public class CourseServiceImpl implements CourseService {
         }
 
         Course saved = courseRepository.save(course);
-        return toCourseDetail(saved, Set.of());
+        List<Lesson> lessons = lessonRepository.findByCourseIdWithQuizOrderByOrderIndexAsc(saved.getId());
+        return toCourseDetail(saved, lessons, Set.of());
     }
 
     @Override
@@ -106,8 +106,9 @@ public class CourseServiceImpl implements CourseService {
     public CourseDetailResponse getCourseDetail(Long courseId, Long userId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        List<Lesson> lessons = lessonRepository.findByCourseIdWithQuizOrderByOrderIndexAsc(courseId);
         Set<Long> certifiedCourseIds = resolveCertifiedCourseIds(userId);
-        return toCourseDetail(course, certifiedCourseIds);
+        return toCourseDetail(course, lessons, certifiedCourseIds);
     }
 
     @Override
@@ -330,17 +331,13 @@ public class CourseServiceImpl implements CourseService {
                 .title(course.getTitle())
                 .description(course.getDescription())
                 .level(course.getLevel())
-                .lessonCount(course.getLessons().size())
+                .lessonCount((int) lessonRepository.countByCourseId(course.getId()))
                 .certified(certified)
                 .createdAt(course.getCreatedAt())
                 .build();
     }
 
-    private CourseDetailResponse toCourseDetail(Course course, Set<Long> certifiedCourseIds) {
-        List<Lesson> sortedLessons = course.getLessons().stream()
-                .sorted(Comparator.comparing(Lesson::getOrderIndex))
-                .toList();
-
+    private CourseDetailResponse toCourseDetail(Course course, List<Lesson> sortedLessons, Set<Long> certifiedCourseIds) {
         int maxOrder = sortedLessons.stream()
                 .map(Lesson::getOrderIndex)
                 .max(Integer::compareTo)

@@ -172,10 +172,16 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedCourses() {
-        if (courseRepository.count() > 0) {
-            return;
+        if (!courseRepository.existsByTitle("Basic Football Tactics")) {
+            seedTacticsCourse();
         }
+        if (!courseRepository.existsByTitle("Discipline On and Off the Pitch")) {
+            seedDisciplineCourse();
+        }
+        log.info("Seeded default certification courses");
+    }
 
+    private void seedTacticsCourse() {
         Course tactics = Course.builder()
                 .title("Basic Football Tactics")
                 .description("Understand formations, pressing triggers, and off-the-ball movement.")
@@ -218,6 +224,10 @@ public class DataSeeder implements CommandLineRunner {
                 .correctAnswerIndex(0)
                 .build());
 
+        courseRepository.save(tactics);
+    }
+
+    private void seedDisciplineCourse() {
         Course discipline = Course.builder()
                 .title("Discipline On and Off the Pitch")
                 .description("Build professionalism, respect, and mental strength.")
@@ -246,8 +256,6 @@ public class DataSeeder implements CommandLineRunner {
                 .correctAnswerIndex(0)
                 .build());
 
-        courseRepository.save(tactics);
         courseRepository.save(discipline);
-        log.info("Seeded default certification courses");
     }
 }

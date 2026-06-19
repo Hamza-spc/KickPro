@@ -6,9 +6,12 @@ import com.kickpro.backend.entity.PreferredFoot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface PlayerSearchService {
 
     Page<PlayerSearchResultResponse> searchPlayers(
+            String name,
             Position position,
             String city,
             PreferredFoot preferredFoot,
@@ -26,4 +29,6 @@ public interface PlayerSearchService {
             Boolean hasCertification,
             Pageable pageable
     );
+
+    List<String> getDistinctCities();
 }

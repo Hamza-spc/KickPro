@@ -44,4 +44,18 @@ abstract final class ApiEndpoints {
   static String matchCancel(int id) => '/api/v1/matches/$id/cancel';
   static String matchRatings(int id) => '/api/v1/matches/$id/ratings';
   static String matchChatMessages(int id) => '/api/v1/matches/$id/chat/messages';
+
+  static const courses = '/api/v1/courses';
+  static String course(int id) => '/api/v1/courses/$id';
+  static String lessonQuiz(int courseId, int lessonId) =>
+      '/api/v1/courses/$courseId/lessons/$lessonId/quiz';
+  static String submitQuiz(int courseId, int lessonId) =>
+      '/api/v1/courses/$courseId/lessons/$lessonId/quiz/submit';
+  static const myCertifications = '/api/v1/courses/certifications/me';
+  static String playerCertifications(int profileId) =>
+      '/api/v1/courses/certifications/player/$profileId';
+
+  static const scoutPlayerSearch = '/api/v1/scouts/players/search';
+  static const scoutPlayerCities = '/api/v1/scouts/players/cities';
+  static String playerProfileById(int profileId) => '/api/v1/players/profile/$profileId';
 }
