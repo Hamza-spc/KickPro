@@ -142,6 +142,7 @@ class ChatMessage {
     required this.roomId,
     required this.matchId,
     required this.senderId,
+    this.senderProfileId,
     required this.senderName,
     required this.content,
     required this.sentAt,
@@ -151,6 +152,7 @@ class ChatMessage {
   final int roomId;
   final int matchId;
   final int senderId;
+  final int? senderProfileId;
   final String senderName;
   final String content;
   final DateTime sentAt;
@@ -161,6 +163,7 @@ class ChatMessage {
       roomId: json['roomId'] as int,
       matchId: json['matchId'] as int,
       senderId: json['senderId'] as int,
+      senderProfileId: (json['senderProfileId'] as num?)?.toInt(),
       senderName: json['senderName'] as String,
       content: json['content'] as String,
       sentAt: DateTime.parse(json['sentAt'] as String),

@@ -2,6 +2,7 @@ package com.kickpro.backend.service.impl;
 
 import com.kickpro.backend.dto.response.VideoResponse;
 import com.kickpro.backend.entity.PlayerProfile;
+import com.kickpro.backend.entity.PostType;
 import com.kickpro.backend.entity.TargetSkill;
 import com.kickpro.backend.entity.Video;
 import com.kickpro.backend.event.KafkaEventPublisher;
@@ -56,6 +57,7 @@ public class VideoServiceImpl implements VideoService {
                     .title(title.trim())
                     .cloudinaryUrl(videoUrl)
                     .skillTag(skillTag)
+                    .postType(PostType.VIDEO)
                     .build();
 
             Video saved = videoRepository.save(video);

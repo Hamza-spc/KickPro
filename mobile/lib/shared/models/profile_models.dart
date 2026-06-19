@@ -46,6 +46,10 @@ class PlayerProfile {
   final int weight;
   final String? profilePhotoUrl;
   final double credibilityScore;
+  final int followersCount;
+  final int followingCount;
+  final bool following;
+  final bool ownProfile;
 
   const PlayerProfile({
     required this.id,
@@ -60,6 +64,10 @@ class PlayerProfile {
     required this.weight,
     required this.profilePhotoUrl,
     required this.credibilityScore,
+    this.followersCount = 0,
+    this.followingCount = 0,
+    this.following = false,
+    this.ownProfile = false,
   });
 
   factory PlayerProfile.fromJson(Map<String, dynamic> json) {
@@ -76,6 +84,10 @@ class PlayerProfile {
       weight: (json['weight'] as num).toInt(),
       profilePhotoUrl: json['profilePhotoUrl'] as String?,
       credibilityScore: (json['credibilityScore'] as num).toDouble(),
+      followersCount: (json['followersCount'] as num?)?.toInt() ?? 0,
+      followingCount: (json['followingCount'] as num?)?.toInt() ?? 0,
+      following: json['following'] as bool? ?? false,
+      ownProfile: json['ownProfile'] as bool? ?? false,
     );
   }
 

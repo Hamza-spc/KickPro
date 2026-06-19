@@ -24,6 +24,10 @@ public class PlayerProfileResponse {
     private Integer weight;
     private String profilePhotoUrl;
     private Double credibilityScore;
+    private long followersCount;
+    private long followingCount;
+    private boolean following;
+    private boolean ownProfile;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

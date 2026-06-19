@@ -40,6 +40,11 @@ class ProfileRepository {
     return _parseProfile(response);
   }
 
+  Future<PlayerProfile> deletePhoto() async {
+    final response = await _dio.delete(ApiEndpoints.playerProfilePhoto);
+    return _parseProfile(response);
+  }
+
   Future<PlayerSkills> saveSkills(PlayerSkills skills) async {
     final response = await _dio.put(
       ApiEndpoints.playerSkills,

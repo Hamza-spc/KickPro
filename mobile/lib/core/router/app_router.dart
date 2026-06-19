@@ -20,6 +20,7 @@ import 'package:kickpro/features/courses/screens/courses_list_screen.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/features/profile/screens/profile_setup_screen.dart';
 import 'package:kickpro/features/profile/screens/skills_setup_screen.dart';
+import 'package:kickpro/features/profile/screens/user_profile_screen.dart';
 import 'package:kickpro/features/ai/screens/admin_generate_course_screen.dart';
 import 'package:kickpro/features/ai/screens/ai_coach_screen.dart';
 import 'package:kickpro/features/ai/screens/ai_text_result_screen.dart';
@@ -52,6 +53,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         redirect: (_, _) => '/home',
+      ),
+      GoRoute(
+        path: '/players/:profileId',
+        builder: (context, state) {
+          final profileId = int.tryParse(state.pathParameters['profileId'] ?? '');
+          if (profileId == null) {
+            return const Scaffold(
+              body: Center(child: Text('Profile not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return UserProfileScreen(profileId: profileId);
+        },
       ),
       GoRoute(path: '/home', builder: (_, _) => const PlayerHomeScreen()),
       GoRoute(path: '/scout-home', builder: (_, _) => const ScoutHomeScreen()),

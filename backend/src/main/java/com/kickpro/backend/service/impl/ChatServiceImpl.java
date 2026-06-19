@@ -81,15 +81,15 @@ public class ChatServiceImpl implements ChatService {
     }
 
     private ChatMessageResponse toResponse(ChatMessage message) {
-        String senderName = playerProfileRepository.findByUserId(message.getSenderId())
-                .map(PlayerProfile::getFullName)
-                .orElse("Player");
+        var senderProfile = playerProfileRepository.findByUserId(message.getSenderId()).orElse(null);
+        String senderName = senderProfile != null ? senderProfile.getFullName() : "Player";
 
         return ChatMessageResponse.builder()
                 .id(message.getId())
                 .roomId(message.getRoom().getId())
                 .matchId(message.getRoom().getMatch().getId())
                 .senderId(message.getSenderId())
+                .senderProfileId(senderProfile != null ? senderProfile.getId() : null)
                 .senderName(senderName)
                 .content(message.getContent())
                 .sentAt(message.getSentAt())

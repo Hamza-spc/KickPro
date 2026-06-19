@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
@@ -142,18 +143,28 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
                                 ),
                                 child: Row(
                                   children: [
-                                    CircleAvatar(
-                                      backgroundColor: AppColors.primary,
-                                      child: Text(
-                                        p.playerName.isNotEmpty ? p.playerName[0].toUpperCase() : '?',
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                    GestureDetector(
+                                      onTap: () => openPlayerProfile(context, p.playerId),
+                                      child: CircleAvatar(
+                                        backgroundColor: AppColors.primary,
+                                        child: Text(
+                                          p.playerName.isNotEmpty ? p.playerName[0].toUpperCase() : '?',
+                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
-                                      child: Text(p.playerName,
+                                      child: GestureDetector(
+                                        onTap: () => openPlayerProfile(context, p.playerId),
+                                        child: Text(
+                                          p.playerName,
                                           style: const TextStyle(
-                                              color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                                            color: AppColors.textPrimary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                     if (selected) const Icon(Icons.check_circle, color: AppColors.primary),
                                   ],

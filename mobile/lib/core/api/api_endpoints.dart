@@ -26,6 +26,13 @@ abstract final class ApiEndpoints {
   static const videoFeed = '/api/v1/videos/feed';
   static const videoMe = '/api/v1/videos/me';
 
+  static const posts = '/api/v1/posts';
+  static const postFeed = '/api/v1/posts/feed';
+  static String post(int id) => '/api/v1/posts/$id';
+  static String postComments(int id) => '/api/v1/posts/$id/comments';
+  static String postReactions(int id) => '/api/v1/posts/$id/reactions';
+  static String followPlayer(int profileId) => '/api/v1/players/$profileId/follow';
+
   static const drillProgression = '/api/v1/drills/progression';
   static String drillSubmit(int drillId) => '/api/v1/drills/$drillId/submit';
   static const drillBadgesMe = '/api/v1/drills/badges/me';

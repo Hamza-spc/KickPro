@@ -39,6 +39,13 @@ public class CloudinaryService {
         return result.get("secure_url").toString();
     }
 
+    public void deleteProfilePhoto(Long userId) throws IOException {
+        cloudinary.uploader().destroy(
+                "kickpro/profile-photos/user-" + userId,
+                ObjectUtils.asMap("resource_type", "image")
+        );
+    }
+
     public String uploadVideo(MultipartFile file, String folder, String publicId) throws IOException {
         Map<?, ?> result = cloudinary.uploader().upload(
                 file.getBytes(),
@@ -46,6 +53,18 @@ public class CloudinaryService {
                         "folder", folder,
                         "public_id", publicId,
                         "resource_type", "video"
+                )
+        );
+        return result.get("secure_url").toString();
+    }
+
+    public String uploadImage(MultipartFile file, String folder, String publicId) throws IOException {
+        Map<?, ?> result = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", folder,
+                        "public_id", publicId,
+                        "resource_type", "image"
                 )
         );
         return result.get("secure_url").toString();

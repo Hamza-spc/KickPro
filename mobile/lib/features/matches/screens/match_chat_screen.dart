@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/auth/auth_storage.dart';
+import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
@@ -115,9 +116,14 @@ class _MatchChatScreenState extends ConsumerState<MatchChatScreen> {
                                   isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                               children: [
                                 if (!isMine)
-                                  Text(msg.senderName,
-                                      style: const TextStyle(
-                                          color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w600)),
+                                  GestureDetector(
+                                    onTap: msg.senderProfileId == null
+                                        ? null
+                                        : () => openPlayerProfile(context, msg.senderProfileId!),
+                                    child: Text(msg.senderName,
+                                        style: const TextStyle(
+                                            color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w600)),
+                                  ),
                                 Text(msg.content, style: const TextStyle(color: AppColors.textPrimary)),
                               ],
                             ),

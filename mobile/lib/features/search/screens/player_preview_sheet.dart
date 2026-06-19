@@ -1,3 +1,4 @@
+import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
@@ -24,42 +25,8 @@ final playerPreviewProvider = FutureProvider.autoDispose
 });
 
 Future<void> showPlayerPreviewSheet(BuildContext context, WidgetRef ref, int profileId) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: AppColors.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
-    builder: (context) => DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.75,
-      minChildSize: 0.45,
-      maxChildSize: 0.92,
-      builder: (context, scrollController) {
-        return Consumer(
-          builder: (context, ref, _) {
-            final previewAsync = ref.watch(playerPreviewProvider(profileId));
-            return previewAsync.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.all(24),
-                child: ShimmerBox(height: 200, width: double.infinity),
-              ),
-              error: (error, _) => Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(apiErrorMessage(error), style: const TextStyle(color: AppColors.error)),
-              ),
-              data: (data) => _PlayerPreviewContent(
-                profile: data.profile,
-                certifications: data.certifications,
-                scrollController: scrollController,
-              ),
-            );
-          },
-        );
-      },
-    ),
-  );
+  openPlayerProfile(context, profileId);
+  return Future.value();
 }
 
 class _PlayerPreviewContent extends StatelessWidget {

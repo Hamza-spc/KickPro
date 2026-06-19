@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/courses/data/course_repository.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
+import 'package:kickpro/features/profile/widgets/profile_photo_actions.dart';
 import 'package:kickpro/shared/models/course_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/skills_models.dart';
 import 'package:kickpro/shared/widgets/credibility_score_card.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
-import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 import 'package:kickpro/shared/widgets/skill_bar.dart';
 
@@ -34,21 +33,16 @@ class _PlayerProfileScreenState extends ConsumerState<PlayerProfileScreen> {
   int _tabIndex = 0;
   bool _uploadingPhoto = false;
 
-  Future<void> _pickAndUploadPhoto() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
-    if (image == null) return;
-
-    setState(() => _uploadingPhoto = true);
-    try {
-      await ref.read(profileRepositoryProvider).uploadPhoto(image.path);
-      ref.invalidate(playerProfileProvider);
-      if (mounted) showKickproToast(context, 'Profile photo updated');
-    } catch (e) {
-      if (mounted) showKickproToast(context, e.toString(), isError: true);
-    } finally {
-      if (mounted) setState(() => _uploadingPhoto = false);
-    }
+  Future<void> _onPhotoTap(PlayerProfile profile) async {
+    if (_uploadingPhoto) return;
+    await showProfilePhotoOptions(
+      context,
+      ref,
+      profile,
+      onUploadingChanged: (uploading) {
+        if (mounted) setState(() => _uploadingPhoto = uploading);
+      },
+    );
   }
 
   @override
@@ -69,7 +63,7 @@ class _PlayerProfileScreenState extends ConsumerState<PlayerProfileScreen> {
               SliverToBoxAdapter(child: _ProfileHero(
                 profile: profile,
                 uploadingPhoto: _uploadingPhoto,
-                onPhotoTap: _pickAndUploadPhoto,
+                onPhotoTap: () => _onPhotoTap(profile),
                 onLogout: () => logout(ref),
               )),
               SliverToBoxAdapter(

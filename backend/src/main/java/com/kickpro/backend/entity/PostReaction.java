@@ -10,8 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,59 +21,38 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "videos")
+@Table(
+        name = "post_reactions",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"post_id", "reactor_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Video {
+public class PostReaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "player_id", nullable = false)
-    private PlayerProfile player;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Video post;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column
-    private String cloudinaryUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column
-    private TargetSkill skillTag;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "reactor_id", nullable = false)
+    private User reactor;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
-    private PostType postType = PostType.VIDEO;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer viewsCount = 0;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Double averageRating = 0.0;
+    private ReactionType reactionType;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime uploadedAt;
-
-    @Column
-    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 
     @PrePersist
     void onCreate() {
-        uploadedAt = LocalDateTime.now();
-        updatedAt = uploadedAt;
-    }
-
-    @PreUpdate
-    void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
     }
 }

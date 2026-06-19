@@ -13,6 +13,7 @@ public class ChatMessageResponse {
     private Long roomId;
     private Long matchId;
     private Long senderId;
+    private Long senderProfileId;
     private String senderName;
     private String content;
     private LocalDateTime sentAt;

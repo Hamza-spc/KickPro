@@ -6,6 +6,7 @@ import com.kickpro.backend.entity.PlayerProfile;
 import com.kickpro.backend.entity.User;
 import com.kickpro.backend.exception.BadRequestException;
 import com.kickpro.backend.exception.ResourceNotFoundException;
+import com.kickpro.backend.repository.PlayerFollowRepository;
 import com.kickpro.backend.repository.PlayerProfileRepository;
 import com.kickpro.backend.repository.UserRepository;
 import com.kickpro.backend.service.PlayerProfileService;
@@ -22,6 +23,7 @@ import java.io.IOException;
 public class PlayerProfileServiceImpl implements PlayerProfileService {
 
     private final PlayerProfileRepository playerProfileRepository;
+    private final PlayerFollowRepository playerFollowRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
 
@@ -47,7 +49,7 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
             profile.setCredibilityScore(0.0);
         }
 
-        return toResponse(playerProfileRepository.save(profile));
+        return toResponse(playerProfileRepository.save(profile), userId);
     }
 
     @Override
@@ -55,15 +57,15 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
     public PlayerProfileResponse getMyProfile(Long userId) {
         PlayerProfile profile = playerProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Player profile not found"));
-        return toResponse(profile);
+        return toResponse(profile, userId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PlayerProfileResponse getProfileById(Long profileId) {
+    public PlayerProfileResponse getProfileById(Long profileId, Long viewerUserId) {
         PlayerProfile profile = playerProfileRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Player profile not found"));
-        return toResponse(profile);
+        return toResponse(profile, viewerUserId);
     }
 
     @Override
@@ -79,16 +81,41 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
         try {
             String photoUrl = cloudinaryService.uploadProfilePhoto(file, userId);
             profile.setProfilePhotoUrl(photoUrl);
-            return toResponse(playerProfileRepository.save(profile));
+            return toResponse(playerProfileRepository.save(profile), userId);
         } catch (IOException ex) {
             throw new BadRequestException("Failed to upload profile photo");
         }
     }
 
-    private PlayerProfileResponse toResponse(PlayerProfile profile) {
+    @Override
+    @Transactional
+    public PlayerProfileResponse deleteProfilePhoto(Long userId) {
+        PlayerProfile profile = playerProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Create your profile before managing a photo"));
+
+        if (profile.getProfilePhotoUrl() == null) {
+            return toResponse(profile, userId);
+        }
+
+        try {
+            cloudinaryService.deleteProfilePhoto(userId);
+        } catch (IOException ex) {
+            throw new BadRequestException("Failed to delete profile photo");
+        }
+
+        profile.setProfilePhotoUrl(null);
+        return toResponse(playerProfileRepository.save(profile), userId);
+    }
+
+    private PlayerProfileResponse toResponse(PlayerProfile profile, Long viewerUserId) {
+        Long profileUserId = profile.getUser().getId();
+        boolean ownProfile = viewerUserId != null && viewerUserId.equals(profileUserId);
+        boolean following = viewerUserId != null && !ownProfile
+                && playerFollowRepository.existsByFollowerIdAndFollowingId(viewerUserId, profile.getId());
+
         return PlayerProfileResponse.builder()
                 .id(profile.getId())
-                .userId(profile.getUser().getId())
+                .userId(profileUserId)
                 .fullName(profile.getFullName())
                 .dateOfBirth(profile.getDateOfBirth())
                 .city(profile.getCity())
@@ -99,6 +126,10 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
                 .weight(profile.getWeight())
                 .profilePhotoUrl(profile.getProfilePhotoUrl())
                 .credibilityScore(profile.getCredibilityScore())
+                .followersCount(playerFollowRepository.countByFollowingId(profile.getId()))
+                .followingCount(playerFollowRepository.countByFollowerId(profileUserId))
+                .following(following)
+                .ownProfile(ownProfile)
                 .createdAt(profile.getCreatedAt())
                 .updatedAt(profile.getUpdatedAt())
                 .build();

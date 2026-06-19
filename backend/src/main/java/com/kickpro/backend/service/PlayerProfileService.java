@@ -10,7 +10,9 @@ public interface PlayerProfileService {
 
     PlayerProfileResponse getMyProfile(Long userId);
 
-    PlayerProfileResponse getProfileById(Long profileId);
+    PlayerProfileResponse getProfileById(Long profileId, Long viewerUserId);
 
     PlayerProfileResponse uploadProfilePhoto(Long userId, MultipartFile file);
+
+    PlayerProfileResponse deleteProfilePhoto(Long userId);
 }

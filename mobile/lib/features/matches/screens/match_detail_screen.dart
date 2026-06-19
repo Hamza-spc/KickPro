@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/auth/auth_storage.dart';
+import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
@@ -281,7 +282,10 @@ class _ParticipantTile extends StatelessWidget {
       ParticipantStatus.rejected => (AppColors.error, 'Rejected'),
     };
 
-    return Container(
+    return InkWell(
+      onTap: () => openPlayerProfile(context, participant.playerId),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -320,6 +324,7 @@ class _ParticipantTile extends StatelessWidget {
             ),
           ],
         ],
+      ),
       ),
     );
   }
