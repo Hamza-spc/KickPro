@@ -34,24 +34,22 @@ class AdminStadium extends Stadium {
     required super.id,
     required super.name,
     required super.location,
+    super.city = '',
     super.phoneNumber,
     super.description,
     required super.pricePerHour,
     super.photos = const [],
+    super.allowedFormats = const [],
+    super.pitchTypes = const [],
+    super.openTime,
+    super.closeTime,
+    super.grassType,
     this.pitchCount = 1,
-    this.pitchTypes = const [],
-    this.openTime,
-    this.closeTime,
-    this.grassType,
     this.latitude,
     this.longitude,
   });
 
   final int pitchCount;
-  final List<String> pitchTypes;
-  final String? openTime;
-  final String? closeTime;
-  final String? grassType;
   final double? latitude;
   final double? longitude;
 
@@ -60,10 +58,12 @@ class AdminStadium extends Stadium {
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
       location: json['location'] as String,
+      city: json['city'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String?,
       description: json['description'] as String?,
       pricePerHour: (json['pricePerHour'] as num).toDouble(),
       photos: (json['photos'] as List<dynamic>? ?? []).cast<String>(),
+      allowedFormats: (json['allowedFormats'] as List<dynamic>? ?? []).cast<String>(),
       pitchCount: (json['pitchCount'] as num?)?.toInt() ?? 1,
       pitchTypes: (json['pitchTypes'] as List<dynamic>? ?? []).cast<String>(),
       openTime: json['openTime'] as String?,
@@ -78,11 +78,13 @@ class AdminStadium extends Stadium {
     return {
       'name': name,
       'location': location,
+      'city': city,
       if (phoneNumber != null && phoneNumber!.isNotEmpty) 'phoneNumber': phoneNumber,
       'description': description,
       'pricePerHour': pricePerHour,
       'pitchCount': pitchCount,
       'pitchTypes': pitchTypes,
+      if (allowedFormats.isNotEmpty) 'allowedFormats': allowedFormats,
       if (openTime != null) 'openTime': openTime,
       if (closeTime != null) 'closeTime': closeTime,
       if (grassType != null) 'grassType': grassType,

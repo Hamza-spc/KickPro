@@ -46,33 +46,101 @@ class Stadium {
     required this.id,
     required this.name,
     required this.location,
+    required this.city,
     this.phoneNumber,
     this.description,
     required this.pricePerHour,
     this.photos = const [],
+    this.allowedFormats = const [],
+    this.pitchTypes = const [],
+    this.openTime,
+    this.closeTime,
+    this.grassType,
   });
 
   final int id;
   final String name;
   final String location;
+  final String city;
   final String? phoneNumber;
   final String? description;
   final double pricePerHour;
   final List<String> photos;
+  final List<String> allowedFormats;
+  final List<String> pitchTypes;
+  final String? openTime;
+  final String? closeTime;
+  final String? grassType;
+
+  String? get coverPhoto => photos.isNotEmpty ? photos.first : null;
 
   factory Stadium.fromJson(Map<String, dynamic> json) {
     return Stadium(
       id: json['id'] as int,
       name: json['name'] as String,
       location: json['location'] as String,
+      city: json['city'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String?,
       description: json['description'] as String?,
       pricePerHour: (json['pricePerHour'] as num).toDouble(),
       photos: (json['photos'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
+      allowedFormats: (json['allowedFormats'] as List<dynamic>? ?? [])
+          .map((e) => e as String)
+          .toList(),
+      pitchTypes: (json['pitchTypes'] as List<dynamic>? ?? [])
+          .map((e) => e as String)
+          .toList(),
+      openTime: json['openTime'] as String?,
+      closeTime: json['closeTime'] as String?,
+      grassType: json['grassType'] as String?,
     );
   }
+}
+
+class StadiumTimeSlot {
+  const StadiumTimeSlot({required this.time, required this.available});
+
+  final String time;
+  final bool available;
+
+  factory StadiumTimeSlot.fromJson(Map<String, dynamic> json) {
+    return StadiumTimeSlot(
+      time: json['time'] as String,
+      available: json['available'] as bool,
+    );
+  }
+}
+
+class StadiumAvailability {
+  const StadiumAvailability({
+    required this.stadiumId,
+    required this.date,
+    required this.slots,
+  });
+
+  final int stadiumId;
+  final String date;
+  final List<StadiumTimeSlot> slots;
+
+  factory StadiumAvailability.fromJson(Map<String, dynamic> json) {
+    return StadiumAvailability(
+      stadiumId: (json['stadiumId'] as num).toInt(),
+      date: json['date'] as String,
+      slots: (json['slots'] as List<dynamic>? ?? [])
+          .map((e) => StadiumTimeSlot.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+int maxPlayersForFormat(String format) {
+  final normalized = format.toLowerCase().replaceAll(' ', '');
+  if (normalized.contains('11')) return 22;
+  if (normalized.contains('7')) return 14;
+  if (normalized.contains('6')) return 12;
+  return 10;
 }
 
 class MatchParticipant {

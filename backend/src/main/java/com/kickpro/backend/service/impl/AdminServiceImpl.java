@@ -114,7 +114,11 @@ public class AdminServiceImpl implements AdminService {
         if (files == null || files.isEmpty()) {
             throw new BadRequestException("At least one photo is required");
         }
-        List<String> photos = new ArrayList<>(stadium.getPhotos());
+        List<String> photos = stadium.getPhotos();
+        if (photos == null) {
+            photos = new ArrayList<>();
+            stadium.setPhotos(photos);
+        }
         for (MultipartFile file : files) {
             if (file == null || file.isEmpty()) {
                 continue;
@@ -126,8 +130,9 @@ public class AdminServiceImpl implements AdminService {
                 throw new BadRequestException("Failed to upload stadium photo");
             }
         }
-        stadium.setPhotos(photos);
-        return toStadiumResponse(stadiumRepository.save(stadium));
+        Stadium saved = stadiumRepository.save(stadium);
+        stadiumRepository.flush();
+        return toStadiumResponse(stadiumRepository.findById(saved.getId()).orElse(saved));
     }
 
     @Override
@@ -321,11 +326,17 @@ public class AdminServiceImpl implements AdminService {
     private Stadium applyStadiumFields(Stadium stadium, StadiumRequest request) {
         stadium.setName(request.getName().trim());
         stadium.setLocation(request.getLocation().trim());
+        if (request.getCity() != null && !request.getCity().isBlank()) {
+            stadium.setCity(request.getCity().trim());
+        } else if (stadium.getCity() == null || stadium.getCity().isBlank()) {
+            stadium.setCity("Casablanca");
+        }
         stadium.setPhoneNumber(request.getPhoneNumber() == null ? null : request.getPhoneNumber().trim());
         stadium.setDescription(request.getDescription());
         stadium.setPricePerHour(request.getPricePerHour());
         stadium.setPitchCount(request.getPitchCount());
         stadium.setPitchTypes(request.getPitchTypes() == null ? List.of() : request.getPitchTypes());
+        stadium.setAllowedFormats(request.getAllowedFormats() == null ? List.of() : request.getAllowedFormats());
         stadium.setOpenTime(request.getOpenTime());
         stadium.setCloseTime(request.getCloseTime());
         stadium.setGrassType(request.getGrassType());
@@ -350,11 +361,13 @@ public class AdminServiceImpl implements AdminService {
                 .id(stadium.getId())
                 .name(stadium.getName())
                 .location(stadium.getLocation())
+                .city(stadium.getCity())
                 .phoneNumber(stadium.getPhoneNumber())
                 .description(stadium.getDescription())
                 .pricePerHour(stadium.getPricePerHour())
                 .pitchCount(stadium.getPitchCount())
                 .pitchTypes(stadium.getPitchTypes())
+                .allowedFormats(stadium.getAllowedFormats())
                 .openTime(stadium.getOpenTime())
                 .closeTime(stadium.getCloseTime())
                 .grassType(stadium.getGrassType())

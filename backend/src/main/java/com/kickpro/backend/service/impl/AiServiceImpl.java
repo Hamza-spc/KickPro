@@ -115,15 +115,30 @@ public class AiServiceImpl implements AiService {
         assertApiKeyConfigured();
         PlayerProfile profile = loadPlayerProfile(userId);
         Map<String, Object> stats = buildPlayerStats(profile);
+        double score = profile.getCredibilityScore() == null ? 0.0 : profile.getCredibilityScore();
 
         String prompt = """
-                Explain this player's KickPro credibility score in plain, encouraging English (3-5 short paragraphs).
-                Tell them what is helping their score and what they can do to improve.
-                Do NOT use JSON. Write for the player directly using "you".
+                Explain this player's KickPro credibility score in plain English (3-5 short paragraphs).
+                Write directly to the player using "you". Do NOT use JSON.
+
+                The player's credibility score is exactly %.1f out of 100. You MUST reference this number in your opening sentence.
+
+                Score calibration — use this tone strictly:
+                - 0–30: needs significant improvement, just getting started. Never praise the score itself.
+                - 31–50: below average, clear room to grow.
+                - 51–70: average, making progress.
+                - 71–85: good, standing out among peers.
+                - 86–100: excellent, elite level.
+
+                Rules:
+                - NEVER call a score below 51 "impressive", "great", "strong", or "excellent".
+                - Be honest and calibrated to the actual score above.
+                - Identify the player's weakest areas from the stats (low skills, few drills, no certifications, low match ratings, etc.).
+                - Give 2-3 specific, actionable steps tied to those weak areas.
 
                 Player stats JSON:
                 %s
-                """.formatted(toJson(stats));
+                """.formatted(score, toJson(stats));
 
         return AiTextResponse.builder().content(callText(prompt)).build();
     }

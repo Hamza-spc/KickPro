@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
+import 'package:kickpro/features/matches/screens/book_match_flow.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
-import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 final openMatchesProvider = FutureProvider.autoDispose
@@ -17,10 +16,6 @@ final openMatchesProvider = FutureProvider.autoDispose
 
 final myMatchesProvider = FutureProvider.autoDispose<List<FootballMatch>>((ref) {
   return ref.read(matchRepositoryProvider).getMyMatches();
-});
-
-final stadiumsProvider = FutureProvider.autoDispose<List<Stadium>>((ref) {
-  return ref.read(matchRepositoryProvider).getStadiums();
 });
 
 const kMatchCities = [
@@ -77,17 +72,11 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
   }
 
   Future<void> _openBookSheet() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BookMatchFlowScreen(onBooked: _refresh),
       ),
-      builder: (_) => _BookMatchSheet(onBooked: () {
-        _refresh();
-        if (mounted) Navigator.pop(context);
-      }),
     );
   }
 
@@ -379,247 +368,6 @@ class _AvatarStack extends StatelessWidget {
         const SizedBox(width: 4),
         Text('$count/$max', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
       ],
-    );
-  }
-}
-
-class _BookMatchSheet extends ConsumerStatefulWidget {
-  const _BookMatchSheet({required this.onBooked});
-
-  final VoidCallback onBooked;
-
-  @override
-  ConsumerState<_BookMatchSheet> createState() => _BookMatchSheetState();
-}
-
-class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
-  Stadium? _selectedStadium;
-  DateTime? _selectedDateTime;
-  int _maxPlayers = 4;
-  RangeValues _ageRange = const RangeValues(18, 35);
-  MatchGender _gender = MatchGender.mixed;
-  bool _submitting = false;
-
-  Future<void> _pickDateTime() async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final date = await showDatePicker(
-      context: context,
-      initialDate: today.add(const Duration(days: 1)),
-      firstDate: today,
-      lastDate: today.add(const Duration(days: 365)),
-    );
-    if (date == null || !mounted) return;
-
-    final time = await showTimePicker(
-      context: context,
-      initialTime: const TimeOfDay(hour: 18, minute: 0),
-    );
-    if (time == null || !mounted) return;
-
-    setState(() {
-      _selectedDateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    });
-  }
-
-  Future<void> _submit() async {
-    if (_selectedStadium == null || _selectedDateTime == null) {
-      showKickproToast(context, 'Select a stadium and date/time', isError: true);
-      return;
-    }
-    if (_selectedDateTime!.isBefore(DateTime.now().add(const Duration(minutes: 30)))) {
-      showKickproToast(context, 'Pick a time at least 30 minutes from now', isError: true);
-      return;
-    }
-
-    setState(() => _submitting = true);
-    try {
-      await ref.read(matchRepositoryProvider).createMatch(
-            stadiumId: _selectedStadium!.id,
-            dateTime: _selectedDateTime!,
-            maxPlayers: _maxPlayers,
-            minAge: _ageRange.start.round(),
-            maxAge: _ageRange.end.round(),
-            gender: _gender,
-          );
-      if (mounted) {
-        showKickproToast(context, 'Match booked!');
-        widget.onBooked();
-      }
-    } catch (e) {
-      if (mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
-    } finally {
-      if (mounted) setState(() => _submitting = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final stadiumsAsync = ref.watch(stadiumsProvider);
-
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Book a Match',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 16),
-          stadiumsAsync.when(
-            loading: () => const ShimmerBox(height: 80, width: double.infinity),
-            error: (e, _) => Text(e.toString(), style: const TextStyle(color: AppColors.error)),
-            data: (stadiums) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Stadium', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                const SizedBox(height: 8),
-                ...stadiums.map((stadium) {
-                  final selected = _selectedStadium?.id == stadium.id;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedStadium = stadium),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: selected ? AppColors.primary : AppColors.border,
-                            width: selected ? 1.5 : 0.5,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                gradient: const LinearGradient(
-                                  colors: [AppColors.primary, Color(0xFF1D4ED8)],
-                                ),
-                              ),
-                              child: const Icon(Icons.stadium_outlined, color: Colors.white),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(stadium.name,
-                                      style: const TextStyle(
-                                          color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                                  Text(
-                                    '${stadium.location} · ${stadium.pricePerHour.toStringAsFixed(0)} MAD/hr',
-                                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                                  ),
-                                  if (stadium.phoneNumber != null && stadium.phoneNumber!.isNotEmpty)
-                                    Text(
-                                      stadium.phoneNumber!,
-                                      style: const TextStyle(color: AppColors.textHint, fontSize: 12),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            if (selected) const Icon(Icons.check_circle, color: AppColors.primary),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text('Age range', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-          Row(
-            children: [
-              Expanded(
-                child: RangeSlider(
-                  values: _ageRange,
-                  min: 13,
-                  max: 60,
-                  divisions: 47,
-                  activeColor: AppColors.primary,
-                  labels: RangeLabels(
-                    _ageRange.start.round().toString(),
-                    _ageRange.end.round().toString(),
-                  ),
-                  onChanged: (values) => setState(() => _ageRange = values),
-                ),
-              ),
-              Text(
-                '${_ageRange.start.round()}–${_ageRange.end.round()}',
-                style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          const Text('Gender', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: MatchGender.values.map((gender) {
-              final selected = _gender == gender;
-              return FilterChip(
-                label: Text(gender.label),
-                selected: selected,
-                onSelected: (_) => setState(() => _gender = gender),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: _pickDateTime,
-                  child: Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.inputBorder),
-                    ),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      _selectedDateTime == null
-                          ? 'Pick date & time'
-                          : '${_selectedDateTime!.day}/${_selectedDateTime!.month} ${_selectedDateTime!.hour}:${_selectedDateTime!.minute.toString().padLeft(2, '0')}',
-                      style: TextStyle(
-                        color: _selectedDateTime == null ? AppColors.textHint : AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              DropdownButton<int>(
-                value: _maxPlayers,
-                dropdownColor: AppColors.surface,
-                style: const TextStyle(color: AppColors.textPrimary),
-                items: const [4, 6, 8, 10, 14, 22]
-                    .map((n) => DropdownMenuItem(value: n, child: Text('$n players')))
-                    .toList(),
-                onChanged: (v) => setState(() => _maxPlayers = v ?? 4),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          KickproButton(label: 'Confirm Booking', isLoading: _submitting, onPressed: _submit),
-        ],
-      ),
     );
   }
 }

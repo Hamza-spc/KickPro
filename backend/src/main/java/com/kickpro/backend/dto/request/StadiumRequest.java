@@ -25,6 +25,10 @@ public class StadiumRequest {
     @Size(max = 500)
     private String location;
 
+    @NotBlank
+    @Size(max = 100)
+    private String city;
+
     @Size(max = 30)
     private String phoneNumber;
 
@@ -39,6 +43,8 @@ public class StadiumRequest {
     private Integer pitchCount;
 
     private List<PitchType> pitchTypes;
+
+    private List<String> allowedFormats;
 
     private LocalTime openTime;
 

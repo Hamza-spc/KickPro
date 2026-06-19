@@ -15,9 +15,25 @@ class MatchRepository {
 
   final Dio _dio;
 
-  Future<List<Stadium>> getStadiums() async {
-    final response = await _dio.get(ApiEndpoints.stadiums);
+  Future<List<Stadium>> getStadiums({String? city}) async {
+    final response = await _dio.get(
+      ApiEndpoints.stadiums,
+      queryParameters: city != null && city.isNotEmpty ? {'city': city} : null,
+    );
     return _parseList(response, Stadium.fromJson);
+  }
+
+  Future<StadiumAvailability> getStadiumAvailability({
+    required int stadiumId,
+    required DateTime date,
+  }) async {
+    final dateStr =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final response = await _dio.get(
+      ApiEndpoints.stadiumAvailability(stadiumId),
+      queryParameters: {'date': dateStr},
+    );
+    return _parseSingle(response, StadiumAvailability.fromJson);
   }
 
   Future<List<FootballMatch>> getOpenMatches({String? city}) async {

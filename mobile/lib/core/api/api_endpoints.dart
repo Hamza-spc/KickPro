@@ -41,6 +41,7 @@ abstract final class ApiEndpoints {
 
   static const stadiums = '/api/v1/stadiums';
   static String stadium(int id) => '/api/v1/stadiums/$id';
+  static String stadiumAvailability(int id) => '/api/v1/stadiums/$id/availability';
 
   static const matches = '/api/v1/matches';
   static const matchesOpen = '/api/v1/matches/open';

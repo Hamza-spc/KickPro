@@ -32,6 +32,19 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             @Param("slotEnd") LocalDateTime slotEnd
     );
 
+    @Query("""
+            SELECT m FROM Match m
+            WHERE m.stadium.id = :stadiumId
+            AND m.status <> com.kickpro.backend.entity.MatchStatus.CANCELLED
+            AND m.dateTime >= :dayStart
+            AND m.dateTime < :dayEnd
+            """)
+    List<Match> findByStadiumIdAndDate(
+            @Param("stadiumId") Long stadiumId,
+            @Param("dayStart") LocalDateTime dayStart,
+            @Param("dayEnd") LocalDateTime dayEnd
+    );
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM Stadium s WHERE s.id = :stadiumId")
     com.kickpro.backend.entity.Stadium lockStadiumForBooking(@Param("stadiumId") Long stadiumId);

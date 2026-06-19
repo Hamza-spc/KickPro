@@ -16,11 +16,13 @@ public class StadiumResponse {
     private Long id;
     private String name;
     private String location;
+    private String city;
     private String phoneNumber;
     private String description;
     private BigDecimal pricePerHour;
     private Integer pitchCount;
     private List<PitchType> pitchTypes;
+    private List<String> allowedFormats;
     private LocalTime openTime;
     private LocalTime closeTime;
     private GrassType grassType;

@@ -45,6 +45,9 @@ public class Stadium {
     @Column(nullable = false)
     private String location;
 
+    @Column(nullable = false)
+    private String city;
+
     @Column(length = 30)
     private String phoneNumber;
 
@@ -64,6 +67,12 @@ public class Stadium {
     @Column(name = "pitch_type")
     @Builder.Default
     private List<PitchType> pitchTypes = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "stadium_allowed_formats", joinColumns = @JoinColumn(name = "stadium_id"))
+    @Column(name = "format_label")
+    @Builder.Default
+    private List<String> allowedFormats = new ArrayList<>();
 
     @Column
     private LocalTime openTime;
