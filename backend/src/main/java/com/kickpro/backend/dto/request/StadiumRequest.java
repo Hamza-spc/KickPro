@@ -25,6 +25,9 @@ public class StadiumRequest {
     @Size(max = 500)
     private String location;
 
+    @Size(max = 30)
+    private String phoneNumber;
+
     @Size(max = 2000)
     private String description;
 

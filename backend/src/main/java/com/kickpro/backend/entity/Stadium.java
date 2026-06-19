@@ -45,6 +45,9 @@ public class Stadium {
     @Column(nullable = false)
     private String location;
 
+    @Column(length = 30)
+    private String phoneNumber;
+
     @Column(length = 2000)
     private String description;
 

@@ -6,6 +6,7 @@ import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/auth/data/auth_repository.dart';
 import 'package:kickpro/shared/models/user_role.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/kickpro_text_field.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 
@@ -68,6 +69,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
+              const Center(child: KickproLogo(height: 40)),
+              const SizedBox(height: 24),
               const Text(
                 'Create account',
                 style: TextStyle(

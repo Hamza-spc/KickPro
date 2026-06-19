@@ -16,6 +16,7 @@ public class StadiumResponse {
     private Long id;
     private String name;
     private String location;
+    private String phoneNumber;
     private String description;
     private BigDecimal pricePerHour;
     private Integer pitchCount;

@@ -4,13 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
+import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
-final openMatchesProvider = FutureProvider.autoDispose<List<FootballMatch>>((ref) {
-  return ref.read(matchRepositoryProvider).getOpenMatches();
+final openMatchesProvider = FutureProvider.autoDispose
+    .family<List<FootballMatch>, String?>((ref, city) {
+  return ref.read(matchRepositoryProvider).getOpenMatches(city: city);
 });
 
 final myMatchesProvider = FutureProvider.autoDispose<List<FootballMatch>>((ref) {
@@ -21,6 +23,17 @@ final stadiumsProvider = FutureProvider.autoDispose<List<Stadium>>((ref) {
   return ref.read(matchRepositoryProvider).getStadiums();
 });
 
+const kMatchCities = [
+  'Rabat',
+  'Casablanca',
+  'Marrakech',
+  'Fes',
+  'Tanger',
+  'Agadir',
+  'Oujda',
+  'Meknes',
+];
+
 class MatchBookingScreen extends ConsumerStatefulWidget {
   const MatchBookingScreen({super.key});
 
@@ -30,9 +43,36 @@ class MatchBookingScreen extends ConsumerStatefulWidget {
 
 class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
   int _tabIndex = 0;
+  String? _selectedCity;
+  bool _cityInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDefaultCity());
+  }
+
+  Future<void> _loadDefaultCity() async {
+    if (_cityInitialized) return;
+    try {
+      final profile = await ref.read(profileRepositoryProvider).getMyProfile();
+      if (!mounted) return;
+      setState(() {
+        _selectedCity = kMatchCities.contains(profile.city) ? profile.city : kMatchCities.first;
+        _cityInitialized = true;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _selectedCity = kMatchCities.first;
+          _cityInitialized = true;
+        });
+      }
+    }
+  }
 
   Future<void> _refresh() async {
-    ref.invalidate(openMatchesProvider);
+    ref.invalidate(openMatchesProvider(_selectedCity));
     ref.invalidate(myMatchesProvider);
   }
 
@@ -54,7 +94,9 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
   @override
   Widget build(BuildContext context) {
     final matchesAsync = _tabIndex == 0
-        ? ref.watch(openMatchesProvider)
+        ? (_cityInitialized
+            ? ref.watch(openMatchesProvider(_selectedCity))
+            : const AsyncLoading<List<FootballMatch>>())
         : ref.watch(myMatchesProvider);
 
     return Scaffold(
@@ -102,6 +144,27 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
                   ),
                 ),
               ),
+              if (_tabIndex == 0 && _cityInitialized) ...[
+                SliverToBoxAdapter(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Row(
+                      children: kMatchCities.map((city) {
+                        final selected = _selectedCity == city;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: _TabChip(
+                            label: city,
+                            selected: selected,
+                            onTap: () => setState(() => _selectedCity = city),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
               matchesAsync.when(
                 loading: () => const SliverToBoxAdapter(
@@ -242,6 +305,11 @@ class _MatchCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(match.stadiumLocation, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            const SizedBox(height: 6),
+            Text(
+              'Ages ${match.minAge}–${match.maxAge} · ${match.gender.label}',
+              style: const TextStyle(color: AppColors.textHint, fontSize: 12),
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -328,6 +396,8 @@ class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
   Stadium? _selectedStadium;
   DateTime? _selectedDateTime;
   int _maxPlayers = 4;
+  RangeValues _ageRange = const RangeValues(18, 35);
+  MatchGender _gender = MatchGender.mixed;
   bool _submitting = false;
 
   Future<void> _pickDateTime() async {
@@ -368,6 +438,9 @@ class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
             stadiumId: _selectedStadium!.id,
             dateTime: _selectedDateTime!,
             maxPlayers: _maxPlayers,
+            minAge: _ageRange.start.round(),
+            maxAge: _ageRange.end.round(),
+            gender: _gender,
           );
       if (mounted) {
         showKickproToast(context, 'Match booked!');
@@ -450,6 +523,11 @@ class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
                                     '${stadium.location} · ${stadium.pricePerHour.toStringAsFixed(0)} MAD/hr',
                                     style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                                   ),
+                                  if (stadium.phoneNumber != null && stadium.phoneNumber!.isNotEmpty)
+                                    Text(
+                                      stadium.phoneNumber!,
+                                      style: const TextStyle(color: AppColors.textHint, fontSize: 12),
+                                    ),
                                 ],
                               ),
                             ),
@@ -462,6 +540,43 @@ class _BookMatchSheetState extends ConsumerState<_BookMatchSheet> {
                 }),
               ],
             ),
+          ),
+          const SizedBox(height: 16),
+          const Text('Age range', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          Row(
+            children: [
+              Expanded(
+                child: RangeSlider(
+                  values: _ageRange,
+                  min: 13,
+                  max: 60,
+                  divisions: 47,
+                  activeColor: AppColors.primary,
+                  labels: RangeLabels(
+                    _ageRange.start.round().toString(),
+                    _ageRange.end.round().toString(),
+                  ),
+                  onChanged: (values) => setState(() => _ageRange = values),
+                ),
+              ),
+              Text(
+                '${_ageRange.start.round()}–${_ageRange.end.round()}',
+                style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const Text('Gender', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: MatchGender.values.map((gender) {
+              final selected = _gender == gender;
+              return FilterChip(
+                label: Text(gender.label),
+                selected: selected,
+                onSelected: (_) => setState(() => _gender = gender),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 12),
           Row(

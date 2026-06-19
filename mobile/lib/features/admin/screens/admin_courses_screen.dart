@@ -7,6 +7,7 @@ import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
 import 'package:kickpro/features/admin/models/admin_models.dart';
 import 'package:kickpro/shared/models/drill_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
@@ -28,10 +29,16 @@ class AdminCoursesScreen extends ConsumerWidget {
                 const Expanded(
                   child: Text('Courses', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
                 ),
-                TextButton.icon(
+                TextButton(
                   onPressed: () => context.push('/admin/generate-course'),
-                  icon: const Icon(Icons.auto_awesome),
-                  label: const Text('AI + Create'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      KickproChatbotLogo(size: 18),
+                      SizedBox(width: 6),
+                      Text('AI + Create'),
+                    ],
+                  ),
                 ),
               ],
             ),

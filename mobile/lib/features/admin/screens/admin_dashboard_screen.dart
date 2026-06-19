@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -58,7 +59,26 @@ class AdminDashboardScreen extends ConsumerWidget {
               children: [
                 _QuickAction(label: 'Add venue', icon: Icons.add_location_alt, onTap: () {}),
                 _QuickAction(label: 'Review drills', icon: Icons.check_circle_outline, onTap: () {}),
-                _QuickAction(label: 'Generate course', icon: Icons.auto_awesome, onTap: () => context.push('/admin/generate-course')),
+                InkWell(
+                  onTap: () => context.push('/admin/generate-course'),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        KickproChatbotLogo(size: 18),
+                        SizedBox(width: 8),
+                        Text('Generate course', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
                 _QuickAction(label: 'Moderate posts', icon: Icons.shield_outlined, onTap: () {}),
               ],
             ),

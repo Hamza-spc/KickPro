@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_theme.dart';
 import 'package:kickpro/features/auth/screens/login_screen.dart';
-import 'package:kickpro/shared/widgets/shimmer_box.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +26,8 @@ class KickproApp extends ConsumerWidget {
       builder: (context, child) {
         return session.when(
           loading: () => const Scaffold(
-            body: Center(child: ShimmerBox(height: 48, width: 160)),
+            backgroundColor: Color(0xFF0D1117),
+            body: Center(child: KickproLogo(height: 56)),
           ),
           error: (_, _) => child ?? const LoginScreen(),
           data: (hasToken) {

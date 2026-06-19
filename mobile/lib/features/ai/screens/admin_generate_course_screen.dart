@@ -6,6 +6,7 @@ import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/ai/data/ai_repository.dart';
 import 'package:kickpro/shared/models/ai_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 
 class AdminGenerateCourseScreen extends ConsumerStatefulWidget {
@@ -64,6 +65,8 @@ class _AdminGenerateCourseScreenState extends ConsumerState<AdminGenerateCourseS
                   onPressed: () => context.pop(),
                   icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                 ),
+                const KickproChatbotLogo(size: 24),
+                const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
                     'Generate Course',

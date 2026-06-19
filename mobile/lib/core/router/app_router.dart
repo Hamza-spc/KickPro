@@ -10,6 +10,7 @@ import 'package:kickpro/features/matches/screens/match_chat_screen.dart';
 import 'package:kickpro/features/matches/screens/match_detail_screen.dart';
 import 'package:kickpro/features/matches/screens/match_rating_screen.dart';
 import 'package:kickpro/features/admin/screens/admin_shell.dart';
+import 'package:kickpro/features/leaderboard/screens/leaderboard_screen.dart';
 import 'package:kickpro/features/home/screens/player_home_screen.dart';
 import 'package:kickpro/features/home/screens/scout_home_screen.dart';
 import 'package:kickpro/features/courses/screens/lesson_detail_screen.dart';
@@ -18,6 +19,7 @@ import 'package:kickpro/features/courses/screens/course_detail_screen.dart';
 import 'package:kickpro/features/courses/screens/course_quiz_screen.dart';
 import 'package:kickpro/features/courses/screens/courses_list_screen.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
+import 'package:kickpro/features/profile/screens/edit_profile_screen.dart';
 import 'package:kickpro/features/profile/screens/profile_setup_screen.dart';
 import 'package:kickpro/features/profile/screens/skills_setup_screen.dart';
 import 'package:kickpro/features/profile/screens/user_profile_screen.dart';
@@ -49,6 +51,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
       GoRoute(path: '/profile-setup', builder: (_, _) => const ProfileSetupScreen()),
+      GoRoute(path: '/profile/edit', builder: (_, _) => const EditProfileScreen()),
       GoRoute(path: '/skills-setup', builder: (_, _) => const SkillsSetupScreen()),
       GoRoute(
         path: '/profile',
@@ -66,6 +69,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return UserProfileScreen(profileId: profileId);
         },
       ),
+      GoRoute(path: '/leaderboard', builder: (_, _) => const LeaderboardScreen()),
       GoRoute(path: '/home', builder: (_, _) => const PlayerHomeScreen()),
       GoRoute(path: '/scout-home', builder: (_, _) => const ScoutHomeScreen()),
       GoRoute(path: '/admin-home', builder: (_, _) => const AdminShell()),

@@ -1,5 +1,6 @@
 package com.kickpro.backend.dto.response;
 
+import com.kickpro.backend.entity.MatchGender;
 import com.kickpro.backend.entity.MatchStatus;
 import com.kickpro.backend.entity.ParticipantStatus;
 import lombok.Builder;
@@ -20,6 +21,10 @@ public class MatchResponse {
     private String organizerName;
     private LocalDateTime dateTime;
     private Integer maxPlayers;
+    private Integer minAge;
+    private Integer maxAge;
+    private MatchGender gender;
+    private String city;
     private Integer approvedCount;
     private MatchStatus status;
     private Long chatRoomId;

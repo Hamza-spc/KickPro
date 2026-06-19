@@ -59,6 +59,8 @@ class AdminVenuesScreen extends ConsumerWidget {
                         children: [
                           Text(venue.name, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
                           Text(venue.location, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                          if (venue.phoneNumber != null && venue.phoneNumber!.isNotEmpty)
+                            Text(venue.phoneNumber!, style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
                           const SizedBox(height: 6),
                           Text('${venue.pitchCount} pitches · ${venue.pricePerHour.toStringAsFixed(0)} MAD/hr',
                               style: const TextStyle(color: AppColors.accent, fontSize: 12)),
@@ -115,6 +117,7 @@ class AdminVenuesScreen extends ConsumerWidget {
   Future<void> _openVenueForm(BuildContext context, WidgetRef ref, {AdminStadium? venue}) async {
     final nameCtrl = TextEditingController(text: venue?.name ?? '');
     final locationCtrl = TextEditingController(text: venue?.location ?? '');
+    final phoneCtrl = TextEditingController(text: venue?.phoneNumber ?? '');
     final descCtrl = TextEditingController(text: venue?.description ?? '');
     final priceCtrl = TextEditingController(text: venue?.pricePerHour.toString() ?? '');
     final pitchCountCtrl = TextEditingController(text: '${venue?.pitchCount ?? 1}');
@@ -141,6 +144,7 @@ class AdminVenuesScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               KickproTextField(controller: nameCtrl, label: 'Name'),
               KickproTextField(controller: locationCtrl, label: 'Location / address'),
+              KickproTextField(controller: phoneCtrl, label: 'Phone number', keyboardType: TextInputType.phone),
               KickproTextField(controller: descCtrl, label: 'Description', maxLines: 2),
               KickproTextField(controller: priceCtrl, label: 'Price per hour (MAD)', keyboardType: TextInputType.number),
               KickproTextField(controller: pitchCountCtrl, label: 'Number of pitches', keyboardType: TextInputType.number),
@@ -186,6 +190,7 @@ class AdminVenuesScreen extends ConsumerWidget {
                   final body = {
                     'name': nameCtrl.text.trim(),
                     'location': locationCtrl.text.trim(),
+                    if (phoneCtrl.text.trim().isNotEmpty) 'phoneNumber': phoneCtrl.text.trim(),
                     'description': descCtrl.text.trim(),
                     'pricePerHour': double.tryParse(priceCtrl.text.trim()) ?? 0,
                     'pitchCount': int.tryParse(pitchCountCtrl.text.trim()) ?? 1,

@@ -231,6 +231,8 @@ class _InfoCard extends StatelessWidget {
           const SizedBox(height: 12),
           _Row(icon: Icons.calendar_today, label: '${d.day}/${d.month}/${d.year} at ${d.hour}:${d.minute.toString().padLeft(2, '0')}'),
           _Row(icon: Icons.groups, label: '${match.approvedCount}/${match.maxPlayers} players confirmed'),
+          _Row(icon: Icons.cake_outlined, label: 'Ages ${match.minAge}–${match.maxAge}'),
+          _Row(icon: Icons.wc_outlined, label: match.gender.label),
           _Row(icon: Icons.person, label: 'Organizer: ${match.organizerName}'),
         ],
       ),

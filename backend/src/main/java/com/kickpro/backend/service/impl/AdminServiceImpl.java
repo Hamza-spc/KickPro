@@ -321,6 +321,7 @@ public class AdminServiceImpl implements AdminService {
     private Stadium applyStadiumFields(Stadium stadium, StadiumRequest request) {
         stadium.setName(request.getName().trim());
         stadium.setLocation(request.getLocation().trim());
+        stadium.setPhoneNumber(request.getPhoneNumber() == null ? null : request.getPhoneNumber().trim());
         stadium.setDescription(request.getDescription());
         stadium.setPricePerHour(request.getPricePerHour());
         stadium.setPitchCount(request.getPitchCount());
@@ -349,6 +350,7 @@ public class AdminServiceImpl implements AdminService {
                 .id(stadium.getId())
                 .name(stadium.getName())
                 .location(stadium.getLocation())
+                .phoneNumber(stadium.getPhoneNumber())
                 .description(stadium.getDescription())
                 .pricePerHour(stadium.getPricePerHour())
                 .pitchCount(stadium.getPitchCount())

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 
 class AiCoachScreen extends StatelessWidget {
   const AiCoachScreen({super.key});
@@ -18,6 +19,8 @@ class AiCoachScreen extends StatelessWidget {
                   onPressed: () => context.pop(),
                   icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                 ),
+                const KickproChatbotLogo(size: 28),
+                const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
                     'AI Coach',
@@ -37,21 +40,18 @@ class AiCoachScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _CoachCard(
-              icon: Icons.fitness_center,
               title: 'Drill Recommendations',
               subtitle: 'Drills tailored to your skill profile',
               onTap: () => context.push('/ai/drill-recommendations'),
             ),
             const SizedBox(height: 12),
             _CoachCard(
-              icon: Icons.restaurant,
               title: 'Meal Plan',
               subtitle: 'Football-specific nutrition for your position',
               onTap: () => context.push('/ai/text/meal-plan'),
             ),
             const SizedBox(height: 12),
             _CoachCard(
-              icon: Icons.healing,
               title: 'Recovery Plan',
               subtitle: 'Return-to-play guidance after an injury',
               onTap: () => context.push('/ai/recovery-plan'),
@@ -65,13 +65,11 @@ class AiCoachScreen extends StatelessWidget {
 
 class _CoachCard extends StatelessWidget {
   const _CoachCard({
-    required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
   });
 
-  final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -93,12 +91,12 @@ class _CoachCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: AppColors.accent),
+                child: const KickproChatbotLogo(size: 28),
               ),
               const SizedBox(width: 16),
               Expanded(

@@ -4,6 +4,7 @@ import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/ai/data/ai_repository.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 
 Future<void> showScoutAssistSheet(BuildContext context, WidgetRef ref) {
@@ -75,7 +76,7 @@ class _ScoutAssistSheetState extends ConsumerState<_ScoutAssistSheet> {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: AppColors.accent),
+              const KickproChatbotLogo(size: 24),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(

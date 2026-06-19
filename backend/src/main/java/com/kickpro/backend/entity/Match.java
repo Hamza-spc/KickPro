@@ -49,6 +49,19 @@ public class Match {
   @Column(nullable = false)
   private Integer maxPlayers;
 
+  @Column(nullable = false)
+  private String city;
+
+  @Column(nullable = false)
+  private Integer minAge;
+
+  @Column(nullable = false)
+  private Integer maxAge;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private MatchGender gender;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private MatchStatus status;

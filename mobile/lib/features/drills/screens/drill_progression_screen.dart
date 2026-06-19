@@ -5,6 +5,7 @@ import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/drills/data/drill_repository.dart';
 import 'package:kickpro/shared/models/drill_models.dart';
 import 'package:kickpro/shared/models/video_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 final drillProgressionProvider = FutureProvider.autoDispose
@@ -40,12 +41,12 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
           },
           child: CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 24, 24, 8),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 16, 8),
                   child: Row(
                     children: [
-                      Expanded(
+                      const Expanded(
                         child: Text(
                           'Drill Progression',
                           style: TextStyle(
@@ -55,6 +56,11 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
                           ),
                         ),
                       ),
+                      IconButton(
+                        onPressed: () => context.push('/leaderboard'),
+                        icon: const Icon(Icons.leaderboard_outlined, color: AppColors.accent),
+                        tooltip: 'Leaderboard',
+                      ),
                     ],
                   ),
                 ),
@@ -62,14 +68,20 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: OutlinedButton.icon(
+                  child: OutlinedButton(
                     onPressed: () => context.push('/ai/coach'),
-                    icon: const Icon(Icons.auto_awesome, size: 18),
-                    label: const Text('AI Coach'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.accent,
                       side: const BorderSide(color: AppColors.primary),
                       minimumSize: const Size.fromHeight(44),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        KickproChatbotLogo(size: 20),
+                        SizedBox(width: 8),
+                        Text('AI Coach'),
+                      ],
                     ),
                   ),
                 ),

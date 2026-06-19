@@ -36,20 +36,68 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
         PlayerProfile profile = playerProfileRepository.findByUserId(userId)
                 .orElse(PlayerProfile.builder().user(user).build());
 
-        profile.setFullName(request.getFullName().trim());
-        profile.setDateOfBirth(request.getDateOfBirth());
-        profile.setCity(request.getCity().trim());
-        profile.setPosition(request.getPosition());
-        profile.setPreferredFoot(request.getPreferredFoot());
-        profile.setBio(request.getBio());
-        profile.setHeight(request.getHeight());
-        profile.setWeight(request.getWeight());
+        boolean isNew = profile.getId() == null;
+        if (isNew) {
+            validateCompleteProfileRequest(request);
+        }
+        applyProfileFields(profile, request);
 
         if (profile.getCredibilityScore() == null) {
             profile.setCredibilityScore(0.0);
         }
 
         return toResponse(playerProfileRepository.save(profile), userId);
+    }
+
+    private void validateCompleteProfileRequest(PlayerProfileRequest request) {
+        if (request.getFullName() == null || request.getFullName().isBlank()) {
+            throw new BadRequestException("Full name is required");
+        }
+        if (request.getDateOfBirth() == null) {
+            throw new BadRequestException("Date of birth is required");
+        }
+        if (request.getCity() == null || request.getCity().isBlank()) {
+            throw new BadRequestException("City is required");
+        }
+        if (request.getPosition() == null) {
+            throw new BadRequestException("Position is required");
+        }
+        if (request.getPreferredFoot() == null) {
+            throw new BadRequestException("Preferred foot is required");
+        }
+        if (request.getHeight() == null) {
+            throw new BadRequestException("Height is required");
+        }
+        if (request.getWeight() == null) {
+            throw new BadRequestException("Weight is required");
+        }
+    }
+
+    private void applyProfileFields(PlayerProfile profile, PlayerProfileRequest request) {
+        if (request.getFullName() != null && !request.getFullName().isBlank()) {
+            profile.setFullName(request.getFullName().trim());
+        }
+        if (request.getDateOfBirth() != null) {
+            profile.setDateOfBirth(request.getDateOfBirth());
+        }
+        if (request.getCity() != null && !request.getCity().isBlank()) {
+            profile.setCity(request.getCity().trim());
+        }
+        if (request.getPosition() != null) {
+            profile.setPosition(request.getPosition());
+        }
+        if (request.getPreferredFoot() != null) {
+            profile.setPreferredFoot(request.getPreferredFoot());
+        }
+        if (request.getBio() != null) {
+            profile.setBio(request.getBio().isBlank() ? null : request.getBio().trim());
+        }
+        if (request.getHeight() != null) {
+            profile.setHeight(request.getHeight());
+        }
+        if (request.getWeight() != null) {
+            profile.setWeight(request.getWeight());
+        }
     }
 
     @Override

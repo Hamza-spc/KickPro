@@ -37,6 +37,8 @@ abstract final class ApiEndpoints {
   static String drillSubmit(int drillId) => '/api/v1/drills/$drillId/submit';
   static const drillBadgesMe = '/api/v1/drills/badges/me';
 
+  static const leaderboard = '/api/v1/leaderboard';
+
   static const stadiums = '/api/v1/stadiums';
   static String stadium(int id) => '/api/v1/stadiums/$id';
 

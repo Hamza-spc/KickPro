@@ -15,6 +15,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     List<Match> findByStatusOrderByDateTimeAsc(MatchStatus status);
 
+    List<Match> findByStatusAndCityIgnoreCaseOrderByDateTimeAsc(MatchStatus status, String city);
+
     List<Match> findByOrganizerIdOrderByDateTimeDesc(Long organizerId);
 
     @Query("""

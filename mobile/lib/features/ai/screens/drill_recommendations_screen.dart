@@ -5,6 +5,7 @@ import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/ai/data/ai_repository.dart';
 import 'package:kickpro/shared/models/ai_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 final drillRecommendationsProvider = FutureProvider.autoDispose<DrillRecommendationResponse>((ref) {
@@ -31,6 +32,8 @@ class DrillRecommendationsScreen extends ConsumerWidget {
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                   ),
+                  const KickproChatbotLogo(size: 24),
+                  const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
                       'Recommended Drills',

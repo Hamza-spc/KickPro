@@ -69,11 +69,19 @@ public class MatchServiceImpl implements MatchService {
             throw new BadRequestException("Match must be scheduled at least 15 minutes in the future");
         }
 
+        if (request.getMinAge() > request.getMaxAge()) {
+            throw new BadRequestException("Minimum age cannot exceed maximum age");
+        }
+
         Match match = Match.builder()
                 .stadium(stadium)
                 .organizer(organizerUser)
                 .dateTime(request.getDateTime())
                 .maxPlayers(request.getMaxPlayers())
+                .minAge(request.getMinAge())
+                .maxAge(request.getMaxAge())
+                .gender(request.getGender())
+                .city(organizer.getCity())
                 .status(MatchStatus.OPEN)
                 .build();
 
@@ -101,8 +109,12 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MatchResponse> getOpenMatches() {
-        return matchRepository.findByStatusOrderByDateTimeAsc(MatchStatus.OPEN).stream()
+    public List<MatchResponse> getOpenMatches(String city) {
+        List<Match> matches = (city == null || city.isBlank())
+                ? matchRepository.findByStatusOrderByDateTimeAsc(MatchStatus.OPEN)
+                : matchRepository.findByStatusAndCityIgnoreCaseOrderByDateTimeAsc(
+                        MatchStatus.OPEN, city.trim());
+        return matches.stream()
                 .map(this::toMatchResponse)
                 .toList();
     }
@@ -372,6 +384,10 @@ public class MatchServiceImpl implements MatchService {
                 .organizerName(resolveOrganizerName(match))
                 .dateTime(match.getDateTime())
                 .maxPlayers(match.getMaxPlayers())
+                .minAge(match.getMinAge())
+                .maxAge(match.getMaxAge())
+                .gender(match.getGender())
+                .city(match.getCity())
                 .approvedCount((int) approvedCount)
                 .status(match.getStatus())
                 .chatRoomId(chatRoomId)

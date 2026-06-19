@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -42,9 +43,19 @@ public class MatchController {
                 .body(ApiResponse.success(response, "Match booked successfully"));
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<MatchResponse>>> getMatches(
+            @RequestParam(required = false) String city
+    ) {
+        List<MatchResponse> matches = matchService.getOpenMatches(city);
+        return ResponseEntity.ok(ApiResponse.success(matches, "Matches retrieved successfully"));
+    }
+
     @GetMapping("/open")
-    public ResponseEntity<ApiResponse<List<MatchResponse>>> getOpenMatches() {
-        List<MatchResponse> matches = matchService.getOpenMatches();
+    public ResponseEntity<ApiResponse<List<MatchResponse>>> getOpenMatches(
+            @RequestParam(required = false) String city
+    ) {
+        List<MatchResponse> matches = matchService.getOpenMatches(city);
         return ResponseEntity.ok(ApiResponse.success(matches, "Open matches retrieved successfully"));
     }
 

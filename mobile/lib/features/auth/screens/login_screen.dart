@@ -5,6 +5,7 @@ import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/auth/data/auth_repository.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/kickpro_text_field.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 
@@ -55,18 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             children: [
               const SizedBox(height: 32),
-              Image.asset(
-                '../assets/fullwordmark_logo.png',
-                height: 48,
-                errorBuilder: (_, _, _) => const Text(
-                  'KickPro',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              const KickproLogo(height: 48),
               const SizedBox(height: 8),
               const Text(
                 'Your digital football CV',

@@ -64,6 +64,11 @@ class _PlayerProfileScreenState extends ConsumerState<PlayerProfileScreen> {
                 profile: profile,
                 uploadingPhoto: _uploadingPhoto,
                 onPhotoTap: () => _onPhotoTap(profile),
+                onEdit: () async {
+                  await context.push('/profile/edit');
+                  ref.invalidate(playerProfileProvider);
+                  ref.invalidate(playerSkillsProvider);
+                },
                 onLogout: () => logout(ref),
               )),
               SliverToBoxAdapter(
@@ -115,12 +120,14 @@ class _ProfileHero extends StatelessWidget {
     required this.uploadingPhoto,
     required this.onPhotoTap,
     required this.onLogout,
+    required this.onEdit,
   });
 
   final PlayerProfile profile;
   final bool uploadingPhoto;
   final VoidCallback onPhotoTap;
   final VoidCallback onLogout;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +145,11 @@ class _ProfileHero extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+              IconButton(
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_outlined, color: AppColors.accent),
+                tooltip: 'Edit profile',
               ),
               IconButton(
                 onPressed: onLogout,

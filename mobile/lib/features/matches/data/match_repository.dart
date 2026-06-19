@@ -20,8 +20,11 @@ class MatchRepository {
     return _parseList(response, Stadium.fromJson);
   }
 
-  Future<List<FootballMatch>> getOpenMatches() async {
-    final response = await _dio.get(ApiEndpoints.matchesOpen);
+  Future<List<FootballMatch>> getOpenMatches({String? city}) async {
+    final response = await _dio.get(
+      ApiEndpoints.matches,
+      queryParameters: city != null && city.isNotEmpty ? {'city': city} : null,
+    );
     return _parseList(response, FootballMatch.fromJson);
   }
 
@@ -39,6 +42,9 @@ class MatchRepository {
     required int stadiumId,
     required DateTime dateTime,
     required int maxPlayers,
+    required int minAge,
+    required int maxAge,
+    required MatchGender gender,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.matches,
@@ -46,6 +52,9 @@ class MatchRepository {
         'stadiumId': stadiumId,
         'dateTime': formatMatchDateTime(dateTime),
         'maxPlayers': maxPlayers,
+        'minAge': minAge,
+        'maxAge': maxAge,
+        'gender': gender.apiValue,
       },
     );
     return _parseSingle(response, FootballMatch.fromJson);

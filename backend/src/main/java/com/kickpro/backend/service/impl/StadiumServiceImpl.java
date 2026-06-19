@@ -38,6 +38,7 @@ public class StadiumServiceImpl implements StadiumService {
                 .id(stadium.getId())
                 .name(stadium.getName())
                 .location(stadium.getLocation())
+                .phoneNumber(stadium.getPhoneNumber())
                 .description(stadium.getDescription())
                 .pricePerHour(stadium.getPricePerHour())
                 .pitchCount(stadium.getPitchCount())

@@ -11,6 +11,24 @@ enum MatchStatus {
       MatchStatus.values.firstWhere((e) => e.apiValue == value, orElse: () => MatchStatus.open);
 }
 
+enum MatchGender {
+  maleOnly('MALE_ONLY'),
+  femaleOnly('FEMALE_ONLY'),
+  mixed('MIXED');
+
+  const MatchGender(this.apiValue);
+  final String apiValue;
+
+  static MatchGender fromApi(String value) =>
+      MatchGender.values.firstWhere((e) => e.apiValue == value, orElse: () => MatchGender.mixed);
+
+  String get label => switch (this) {
+        MatchGender.maleOnly => 'Men only',
+        MatchGender.femaleOnly => 'Women only',
+        MatchGender.mixed => 'Mixed',
+      };
+}
+
 enum ParticipantStatus {
   pending('PENDING'),
   approved('APPROVED'),
@@ -28,6 +46,7 @@ class Stadium {
     required this.id,
     required this.name,
     required this.location,
+    this.phoneNumber,
     this.description,
     required this.pricePerHour,
     this.photos = const [],
@@ -36,6 +55,7 @@ class Stadium {
   final int id;
   final String name;
   final String location;
+  final String? phoneNumber;
   final String? description;
   final double pricePerHour;
   final List<String> photos;
@@ -45,6 +65,7 @@ class Stadium {
       id: json['id'] as int,
       name: json['name'] as String,
       location: json['location'] as String,
+      phoneNumber: json['phoneNumber'] as String?,
       description: json['description'] as String?,
       pricePerHour: (json['pricePerHour'] as num).toDouble(),
       photos: (json['photos'] as List<dynamic>? ?? [])
@@ -93,6 +114,10 @@ class FootballMatch {
     required this.organizerName,
     required this.dateTime,
     required this.maxPlayers,
+    required this.minAge,
+    required this.maxAge,
+    required this.gender,
+    required this.city,
     required this.approvedCount,
     required this.status,
     this.chatRoomId,
@@ -107,6 +132,10 @@ class FootballMatch {
   final String organizerName;
   final DateTime dateTime;
   final int maxPlayers;
+  final int minAge;
+  final int maxAge;
+  final MatchGender gender;
+  final String city;
   final int approvedCount;
   final MatchStatus status;
   final int? chatRoomId;
@@ -126,6 +155,10 @@ class FootballMatch {
       organizerName: json['organizerName'] as String,
       dateTime: DateTime.parse(json['dateTime'] as String),
       maxPlayers: json['maxPlayers'] as int,
+      minAge: (json['minAge'] as num?)?.toInt() ?? 16,
+      maxAge: (json['maxAge'] as num?)?.toInt() ?? 99,
+      gender: MatchGender.fromApi(json['gender'] as String? ?? 'MIXED'),
+      city: json['city'] as String? ?? '',
       approvedCount: json['approvedCount'] as int,
       status: MatchStatus.fromApi(json['status'] as String),
       chatRoomId: json['chatRoomId'] as int?,

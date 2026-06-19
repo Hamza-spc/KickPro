@@ -9,6 +9,7 @@ import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/search_models.dart';
 import 'package:kickpro/shared/widgets/credibility_ring.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 final scoutSearchProvider = FutureProvider.autoDispose
@@ -98,7 +99,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                   ),
                   IconButton(
                     onPressed: () => showScoutAssistSheet(context, ref),
-                    icon: const Icon(Icons.auto_awesome, color: AppColors.accent),
+                    icon: const KickproChatbotLogo(size: 24),
                     tooltip: 'AI Scout Assistant',
                   ),
                 ],

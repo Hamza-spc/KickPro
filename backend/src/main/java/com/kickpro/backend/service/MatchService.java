@@ -12,7 +12,7 @@ public interface MatchService {
 
     MatchResponse createMatch(Long userId, CreateMatchRequest request);
 
-    List<MatchResponse> getOpenMatches();
+    List<MatchResponse> getOpenMatches(String city);
 
     List<MatchResponse> getMyMatches(Long userId);
 

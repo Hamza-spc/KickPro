@@ -34,6 +34,7 @@ class AdminStadium extends Stadium {
     required super.id,
     required super.name,
     required super.location,
+    super.phoneNumber,
     super.description,
     required super.pricePerHour,
     super.photos = const [],
@@ -59,6 +60,7 @@ class AdminStadium extends Stadium {
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
       location: json['location'] as String,
+      phoneNumber: json['phoneNumber'] as String?,
       description: json['description'] as String?,
       pricePerHour: (json['pricePerHour'] as num).toDouble(),
       photos: (json['photos'] as List<dynamic>? ?? []).cast<String>(),
@@ -76,6 +78,7 @@ class AdminStadium extends Stadium {
     return {
       'name': name,
       'location': location,
+      if (phoneNumber != null && phoneNumber!.isNotEmpty) 'phoneNumber': phoneNumber,
       'description': description,
       'pricePerHour': pricePerHour,
       'pitchCount': pitchCount,

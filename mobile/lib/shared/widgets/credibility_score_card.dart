@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/shared/widgets/credibility_ring.dart';
+import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 
 class CredibilityScoreCard extends StatelessWidget {
   const CredibilityScoreCard({
@@ -74,13 +75,19 @@ class CredibilityScoreCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
+                    child: OutlinedButton(
                       onPressed: onExplainWithAi,
-                      icon: const Icon(Icons.auto_awesome, size: 18),
-                      label: const Text('Explain with AI'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.accent,
                         side: const BorderSide(color: AppColors.primary),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          KickproChatbotLogo(size: 18),
+                          SizedBox(width: 8),
+                          Text('Explain with AI'),
+                        ],
                       ),
                     ),
                   ),
