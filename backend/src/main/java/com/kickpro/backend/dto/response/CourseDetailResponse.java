@@ -29,5 +29,7 @@ public class CourseDetailResponse {
         private Integer orderIndex;
         private boolean hasQuiz;
         private boolean finalLesson;
+        private String mediaUrl;
+        private String mediaType;
     }
 }

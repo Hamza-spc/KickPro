@@ -1,6 +1,8 @@
 package com.kickpro.backend.config;
 
 import com.kickpro.backend.entity.Role;
+import com.kickpro.backend.entity.User;
+import com.kickpro.backend.repository.UserRepository;
 import com.kickpro.backend.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,6 +23,7 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -42,6 +45,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String email = jwtUtil.extractUsername(token);
                 Long userId = jwtUtil.extractUserId(token);
                 Role role = jwtUtil.extractRole(token);
+
+                User user = userRepository.findById(userId).orElse(null);
+                if (user == null || Boolean.FALSE.equals(user.getEnabled())) {
+                    SecurityContextHolder.clearContext();
+                    filterChain.doFilter(request, response);
+                    return;
+                }
 
                 UserPrincipal principal = new UserPrincipal(userId, email, role);
                 UsernamePasswordAuthenticationToken authentication =

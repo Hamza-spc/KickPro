@@ -4,6 +4,8 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,6 +22,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +50,33 @@ public class Stadium {
 
     @Column(nullable = false)
     private BigDecimal pricePerHour;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer pitchCount = 1;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "stadium_pitch_types", joinColumns = @JoinColumn(name = "stadium_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pitch_type")
+    @Builder.Default
+    private List<PitchType> pitchTypes = new ArrayList<>();
+
+    @Column
+    private LocalTime openTime;
+
+    @Column
+    private LocalTime closeTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private GrassType grassType;
+
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "stadium_photos", joinColumns = @JoinColumn(name = "stadium_id"))

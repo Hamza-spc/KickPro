@@ -40,6 +40,13 @@ public class StadiumServiceImpl implements StadiumService {
                 .location(stadium.getLocation())
                 .description(stadium.getDescription())
                 .pricePerHour(stadium.getPricePerHour())
+                .pitchCount(stadium.getPitchCount())
+                .pitchTypes(stadium.getPitchTypes())
+                .openTime(stadium.getOpenTime())
+                .closeTime(stadium.getCloseTime())
+                .grassType(stadium.getGrassType())
+                .latitude(stadium.getLatitude())
+                .longitude(stadium.getLongitude())
                 .photos(stadium.getPhotos())
                 .build();
     }

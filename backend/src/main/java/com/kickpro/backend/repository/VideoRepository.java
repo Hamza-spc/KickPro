@@ -11,5 +11,13 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
     Page<Video> findAllByOrderByUploadedAtDesc(Pageable pageable);
 
+    Page<Video> findAllByHiddenFalseOrderByUploadedAtDesc(Pageable pageable);
+
+    List<Video> findAllByOrderByUploadedAtDesc();
+
+    List<Video> findByFlaggedTrueOrderByUploadedAtDesc();
+
+    long countByFlaggedTrue();
+
     List<Video> findByPlayerIdOrderByUploadedAtDesc(Long playerId);
 }

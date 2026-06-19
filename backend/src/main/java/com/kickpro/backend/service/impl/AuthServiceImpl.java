@@ -38,6 +38,8 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail().toLowerCase().trim())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .enabled(true)
+                .agentVerified(false)
                 .build();
 
         userRepository.save(user);
@@ -53,6 +55,10 @@ public class AuthServiceImpl implements AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("Invalid email or password");
+        }
+
+        if (Boolean.FALSE.equals(user.getEnabled())) {
+            throw new UnauthorizedException("Your account has been suspended");
         }
 
         return buildAuthResponse(user);

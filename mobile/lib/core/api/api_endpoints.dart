@@ -72,4 +72,24 @@ abstract final class ApiEndpoints {
   static const aiMealPlan = '/api/v1/ai/meal-plan';
   static const aiRecoveryPlan = '/api/v1/ai/recovery-plan';
   static const aiGenerateCourse = '/api/v1/ai/generate-course';
+
+  static const adminDashboard = '/api/v1/admin/dashboard';
+  static const adminStadiums = '/api/v1/admin/stadiums';
+  static String adminStadium(int id) => '/api/v1/admin/stadiums/$id';
+  static String adminStadiumPhotos(int id) => '/api/v1/admin/stadiums/$id/photos';
+  static const adminDrills = '/api/v1/admin/drills';
+  static String adminDrill(int id) => '/api/v1/admin/drills/$id';
+  static const adminPendingSubmissions = '/api/v1/admin/drills/submissions/pending';
+  static String adminReviewSubmission(int id) => '/api/v1/admin/drills/submissions/$id/review';
+  static const adminCourses = '/api/v1/admin/courses';
+  static String adminCourse(int id) => '/api/v1/admin/courses/$id';
+  static String adminLessonMedia(int courseId, int lessonId) =>
+      '/api/v1/admin/courses/$courseId/lessons/$lessonId/media';
+  static const adminUsers = '/api/v1/admin/users';
+  static String adminBanUser(int id) => '/api/v1/admin/users/$id/ban';
+  static String adminUnbanUser(int id) => '/api/v1/admin/users/$id/unban';
+  static String adminVerifyAgent(int id) => '/api/v1/admin/users/$id/verify-agent';
+  static const adminPosts = '/api/v1/admin/posts';
+  static String adminPost(int id) => '/api/v1/admin/posts/$id';
+  static String adminFlagPost(int id) => '/api/v1/admin/posts/$id/flag';
 }

@@ -16,4 +16,6 @@ public interface DrillSubmissionRepository extends JpaRepository<DrillSubmission
     Optional<DrillSubmission> findTopByPlayerIdAndDrillIdOrderBySubmittedAtDesc(Long playerId, Long drillId);
 
     boolean existsByPlayerIdAndDrillIdAndStatus(Long playerId, Long drillId, SubmissionStatus status);
+
+    long countByStatus(SubmissionStatus status);
 }

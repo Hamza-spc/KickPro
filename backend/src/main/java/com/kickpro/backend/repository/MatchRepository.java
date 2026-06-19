@@ -41,4 +41,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             ORDER BY m.dateTime DESC
             """)
     List<Match> findMatchesForPlayer(@Param("userId") Long userId);
+
+    long countByStatusIn(List<MatchStatus> statuses);
 }

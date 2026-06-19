@@ -9,7 +9,7 @@ import 'package:kickpro/features/drills/screens/drill_submission_screen.dart';
 import 'package:kickpro/features/matches/screens/match_chat_screen.dart';
 import 'package:kickpro/features/matches/screens/match_detail_screen.dart';
 import 'package:kickpro/features/matches/screens/match_rating_screen.dart';
-import 'package:kickpro/features/home/screens/admin_home_screen.dart';
+import 'package:kickpro/features/admin/screens/admin_shell.dart';
 import 'package:kickpro/features/home/screens/player_home_screen.dart';
 import 'package:kickpro/features/home/screens/scout_home_screen.dart';
 import 'package:kickpro/features/courses/screens/lesson_detail_screen.dart';
@@ -68,7 +68,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/home', builder: (_, _) => const PlayerHomeScreen()),
       GoRoute(path: '/scout-home', builder: (_, _) => const ScoutHomeScreen()),
-      GoRoute(path: '/admin-home', builder: (_, _) => const AdminHomeScreen()),
+      GoRoute(path: '/admin-home', builder: (_, _) => const AdminShell()),
       GoRoute(
         path: '/drills/:id/submit',
         builder: (context, state) {

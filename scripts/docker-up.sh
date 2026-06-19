@@ -18,6 +18,9 @@ if docker compose ps postgres 2>/dev/null | grep -q "Up"; then
   echo "Applying DB migrations (player follows follower -> users)..."
   docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
     < backend/scripts/migrate-player-follows-follower-to-users.sql >/dev/null 2>&1 || true
+  echo "Applying DB migrations (admin phase)..."
+  docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
+    < backend/scripts/migrate-admin-phase.sql >/dev/null 2>&1 || true
 fi
 
 echo "Starting Kafka..."

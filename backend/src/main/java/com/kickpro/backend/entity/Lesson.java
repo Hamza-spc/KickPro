@@ -3,6 +3,8 @@ package com.kickpro.backend.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,6 +43,13 @@ public class Lesson {
 
     @Column(nullable = false)
     private Integer orderIndex;
+
+    @Column
+    private String mediaUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private LessonMediaType mediaType;
 
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
     private Quiz quiz;

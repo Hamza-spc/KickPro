@@ -135,7 +135,7 @@ public class PostServiceImpl implements PostService {
     public Page<PostResponse> getFeed(Long viewerUserId, Pageable pageable) {
         PlayerProfile viewer = viewerUserId == null ? null : playerProfileRepository.findByUserId(viewerUserId).orElse(null);
 
-        return videoRepository.findAllByOrderByUploadedAtDesc(pageable)
+        return videoRepository.findAllByHiddenFalseOrderByUploadedAtDesc(pageable)
                 .map(post -> {
                     boolean own = viewer != null && post.getPlayer().getId().equals(viewer.getId());
                     boolean following = viewerUserId != null

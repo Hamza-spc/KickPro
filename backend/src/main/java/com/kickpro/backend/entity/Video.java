@@ -66,6 +66,14 @@ public class Video {
     @Column
     private LocalDateTime updatedAt;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean hidden = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean flagged = false;
+
     @PrePersist
     void onCreate() {
         uploadedAt = LocalDateTime.now();

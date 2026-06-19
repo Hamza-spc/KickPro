@@ -357,6 +357,8 @@ public class CourseServiceImpl implements CourseService {
                                 .orderIndex(lesson.getOrderIndex())
                                 .hasQuiz(lesson.getQuiz() != null)
                                 .finalLesson(lesson.getOrderIndex().equals(maxOrder))
+                                .mediaUrl(lesson.getMediaUrl())
+                                .mediaType(lesson.getMediaType() == null ? null : lesson.getMediaType().name())
                                 .build())
                         .toList())
                 .createdAt(course.getCreatedAt())

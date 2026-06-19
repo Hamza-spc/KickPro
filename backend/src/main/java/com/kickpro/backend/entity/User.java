@@ -41,6 +41,14 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean enabled = true;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean agentVerified = false;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
