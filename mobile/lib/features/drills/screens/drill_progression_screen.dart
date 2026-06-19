@@ -43,12 +43,33 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(24, 24, 24, 8),
-                  child: Text(
-                    'Drill Progression',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Drill Progression',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.push('/ai/coach'),
+                    icon: const Icon(Icons.auto_awesome, size: 18),
+                    label: const Text('AI Coach'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.accent,
+                      side: const BorderSide(color: AppColors.primary),
+                      minimumSize: const Size.fromHeight(44),
                     ),
                   ),
                 ),

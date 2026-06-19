@@ -99,7 +99,10 @@ class _PlayerProfileScreenState extends ConsumerState<PlayerProfileScreen> {
                           error: (e, _) => Text(e.toString()),
                           data: (certs) => _CertificationsTab(certifications: certs),
                         ),
-                    2 => CredibilityScoreCard(score: profile.credibilityScore),
+                    2 => CredibilityScoreCard(
+                          score: profile.credibilityScore,
+                          onExplainWithAi: () => context.push('/ai/text/explain-score'),
+                        ),
                     _ => _OverviewTab(profile: profile),
                   },
                 ),

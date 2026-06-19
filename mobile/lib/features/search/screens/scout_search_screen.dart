@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
+import 'package:kickpro/features/ai/screens/scout_assist_sheet.dart';
 import 'package:kickpro/features/search/data/search_repository.dart';
 import 'package:kickpro/features/search/screens/player_preview_sheet.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
@@ -81,15 +82,26 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 24, 24, 8),
-              child: Text(
-                'Find Players',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Find Players',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => showScoutAssistSheet(context, ref),
+                    icon: const Icon(Icons.auto_awesome, color: AppColors.accent),
+                    tooltip: 'AI Scout Assistant',
+                  ),
+                ],
               ),
             ),
             Padding(

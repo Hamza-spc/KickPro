@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
+import 'package:kickpro/shared/widgets/kickpro_button.dart';
 
 class AdminHomeScreen extends ConsumerWidget {
   const AdminHomeScreen({super.key});
@@ -36,6 +38,11 @@ class AdminHomeScreen extends ConsumerWidget {
               const Text(
                 'Drill validation is done via API for now. Use Postman or curl to approve player submissions.',
                 style: TextStyle(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              KickproButton(
+                label: 'Generate Course with AI',
+                onPressed: () => context.push('/admin/generate-course'),
               ),
               const SizedBox(height: 24),
               Container(

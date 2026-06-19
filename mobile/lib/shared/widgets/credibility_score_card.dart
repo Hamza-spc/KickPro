@@ -7,10 +7,12 @@ class CredibilityScoreCard extends StatelessWidget {
     super.key,
     required this.score,
     this.compact = false,
+    this.onExplainWithAi,
   });
 
   final double score;
   final bool compact;
+  final VoidCallback? onExplainWithAi;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +70,21 @@ class CredibilityScoreCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 const _ScoreFactors(),
+                if (onExplainWithAi != null) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: onExplainWithAi,
+                      icon: const Icon(Icons.auto_awesome, size: 18),
+                      label: const Text('Explain with AI'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.accent,
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
     );

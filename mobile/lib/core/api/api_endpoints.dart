@@ -58,4 +58,11 @@ abstract final class ApiEndpoints {
   static const scoutPlayerSearch = '/api/v1/scouts/players/search';
   static const scoutPlayerCities = '/api/v1/scouts/players/cities';
   static String playerProfileById(int profileId) => '/api/v1/players/profile/$profileId';
+
+  static const aiScoutAssist = '/api/v1/ai/scout-assist';
+  static const aiExplainScore = '/api/v1/ai/explain-score';
+  static const aiRecommendDrills = '/api/v1/ai/recommend-drills';
+  static const aiMealPlan = '/api/v1/ai/meal-plan';
+  static const aiRecoveryPlan = '/api/v1/ai/recovery-plan';
+  static const aiGenerateCourse = '/api/v1/ai/generate-course';
 }

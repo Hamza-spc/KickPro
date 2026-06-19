@@ -20,6 +20,12 @@ import 'package:kickpro/features/courses/screens/courses_list_screen.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/features/profile/screens/profile_setup_screen.dart';
 import 'package:kickpro/features/profile/screens/skills_setup_screen.dart';
+import 'package:kickpro/features/ai/screens/admin_generate_course_screen.dart';
+import 'package:kickpro/features/ai/screens/ai_coach_screen.dart';
+import 'package:kickpro/features/ai/screens/ai_text_result_screen.dart';
+import 'package:kickpro/features/ai/screens/drill_recommendations_screen.dart';
+import 'package:kickpro/features/ai/screens/recovery_plan_screen.dart';
+import 'package:kickpro/shared/models/ai_models.dart';
 import 'package:kickpro/shared/models/drill_models.dart';
 import 'package:kickpro/shared/models/user_role.dart';
 
@@ -135,6 +141,32 @@ final routerProvider = Provider<GoRouter>((ref) {
           }
           return LessonDetailScreen(args: args);
         },
+      ),
+      GoRoute(path: '/ai/coach', builder: (_, _) => const AiCoachScreen()),
+      GoRoute(
+        path: '/ai/drill-recommendations',
+        builder: (_, _) => const DrillRecommendationsScreen(),
+      ),
+      GoRoute(path: '/ai/recovery-plan', builder: (_, _) => const RecoveryPlanScreen()),
+      GoRoute(
+        path: '/ai/text/:action',
+        builder: (context, state) {
+          final action = switch (state.pathParameters['action']) {
+            'meal-plan' => AiTextAction.mealPlan,
+            'explain-score' => AiTextAction.explainScore,
+            _ => null,
+          };
+          if (action == null) {
+            return const Scaffold(
+              body: Center(child: Text('AI action not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return AiTextResultScreen(action: action);
+        },
+      ),
+      GoRoute(
+        path: '/admin/generate-course',
+        builder: (_, _) => const AdminGenerateCourseScreen(),
       ),
     ],
   );
