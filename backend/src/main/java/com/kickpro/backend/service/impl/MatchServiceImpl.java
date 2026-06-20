@@ -7,6 +7,7 @@ import com.kickpro.backend.dto.response.MatchResponse;
 import com.kickpro.backend.dto.response.PlayerRatingResponse;
 import com.kickpro.backend.entity.ChatRoom;
 import com.kickpro.backend.entity.Match;
+import com.kickpro.backend.entity.NotificationType;
 import com.kickpro.backend.entity.MatchParticipant;
 import com.kickpro.backend.entity.MatchStatus;
 import com.kickpro.backend.entity.ParticipantStatus;
@@ -28,6 +29,7 @@ import com.kickpro.backend.repository.StadiumRepository;
 import com.kickpro.backend.repository.UserRepository;
 import com.kickpro.backend.service.CredibilityService;
 import com.kickpro.backend.service.MatchService;
+import com.kickpro.backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,7 @@ public class MatchServiceImpl implements MatchService {
     private final PlayerRatingRepository playerRatingRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
     private final CredibilityService credibilityService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -81,7 +84,7 @@ public class MatchServiceImpl implements MatchService {
                 .minAge(request.getMinAge())
                 .maxAge(request.getMaxAge())
                 .gender(request.getGender())
-                .city(organizer.getCity())
+                .city(stadium.getCity())
                 .status(MatchStatus.OPEN)
                 .build();
 
@@ -152,6 +155,10 @@ public class MatchServiceImpl implements MatchService {
             throw new BadRequestException("You are already the organizer of this match");
         }
 
+        if (Boolean.TRUE.equals(player.getInjured())) {
+            throw new BadRequestException("You cannot join matches while recovering from an injury");
+        }
+
         if (participantRepository.existsByMatchIdAndPlayerId(matchId, player.getId())) {
             throw new BadRequestException("You have already requested to join this match");
         }
@@ -161,6 +168,15 @@ public class MatchServiceImpl implements MatchService {
                 .player(player)
                 .status(ParticipantStatus.PENDING)
                 .build());
+
+        notificationService.notifyUser(
+                match.getOrganizer().getId(),
+                "New join request",
+                player.getFullName() + " wants to join your match",
+                NotificationType.MATCH_JOIN_REQUEST,
+                "MATCH",
+                matchId
+        );
 
         return toMatchResponse(matchRepository.findById(matchId).orElseThrow());
     }
@@ -214,6 +230,18 @@ public class MatchServiceImpl implements MatchService {
                 match.setStatus(MatchStatus.FULL);
                 matchRepository.save(match);
             }
+        }
+
+        Long playerUserId = participant.getPlayer().getUser().getId();
+        if (request.getStatus() == ParticipantStatus.APPROVED) {
+            notificationService.notifyUser(
+                    playerUserId,
+                    "Join request approved",
+                    "You were approved for the match at " + match.getStadium().getName(),
+                    NotificationType.MATCH_JOIN_APPROVED,
+                    "MATCH",
+                    matchId
+            );
         }
 
         return toMatchResponse(matchRepository.findById(matchId).orElseThrow());
@@ -380,6 +408,9 @@ public class MatchServiceImpl implements MatchService {
                 .stadiumId(match.getStadium().getId())
                 .stadiumName(match.getStadium().getName())
                 .stadiumLocation(match.getStadium().getLocation())
+                .stadiumCoverPhotoUrl(match.getStadium().getPhotos() != null && !match.getStadium().getPhotos().isEmpty()
+                        ? match.getStadium().getPhotos().getFirst()
+                        : null)
                 .organizerId(match.getOrganizer().getId())
                 .organizerName(resolveOrganizerName(match))
                 .dateTime(match.getDateTime())

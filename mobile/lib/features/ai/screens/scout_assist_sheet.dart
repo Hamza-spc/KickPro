@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/ai/data/ai_repository.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
@@ -41,7 +42,7 @@ class _ScoutAssistSheetState extends ConsumerState<_ScoutAssistSheet> {
   Future<void> _submit() async {
     final query = _queryController.text.trim();
     if (query.isEmpty) {
-      showKickproToast(context, 'Describe what you are looking for', isError: true);
+      showKickproToast(context, ref.tr.describeWhatLookingFor, isError: true);
       return;
     }
 
@@ -78,10 +79,10 @@ class _ScoutAssistSheetState extends ConsumerState<_ScoutAssistSheet> {
             children: [
               const KickproChatbotLogo(size: 24),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Scout AI Assistant',
-                  style: TextStyle(
+                  ref.tr.scoutAssistant,
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -95,9 +96,9 @@ class _ScoutAssistSheetState extends ConsumerState<_ScoutAssistSheet> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Describe the player profile you need in plain English.',
-            style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+          Text(
+            ref.tr.scoutAssistSubtitle,
+            style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -105,7 +106,7 @@ class _ScoutAssistSheetState extends ConsumerState<_ScoutAssistSheet> {
             maxLines: 3,
             style: const TextStyle(color: AppColors.textPrimary),
             decoration: InputDecoration(
-              hintText: 'e.g. Fast strikers in Casablanca with good dribbling',
+              hintText: ref.tr.scoutAssistHint,
               hintStyle: const TextStyle(color: AppColors.textHint),
               filled: true,
               fillColor: AppColors.background,
@@ -121,7 +122,7 @@ class _ScoutAssistSheetState extends ConsumerState<_ScoutAssistSheet> {
           ),
           const SizedBox(height: 16),
           KickproButton(
-            label: 'Find Players',
+            label: ref.tr.findPlayers,
             isLoading: _loading,
             onPressed: _submit,
           ),
@@ -138,7 +139,7 @@ class _ScoutAssistSheetState extends ConsumerState<_ScoutAssistSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${_matchedIds.length} player${_matchedIds.length == 1 ? '' : 's'} matched',
+                    ref.tr.nPlayersMatched(_matchedIds.length),
                     style: const TextStyle(
                       color: AppColors.accent,
                       fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
 import 'package:kickpro/features/admin/models/admin_models.dart';
@@ -36,17 +37,17 @@ class _AdminManageScreenState extends ConsumerState<AdminManageScreen> with Sing
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Text('Manage', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Text(ref.tr.manage, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
           ),
           TabBar(
             controller: _tabs,
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textHint,
-            tabs: const [
-              Tab(text: 'Users'),
-              Tab(text: 'Posts'),
+            tabs: [
+              Tab(text: ref.tr.users),
+              Tab(text: ref.tr.posts),
             ],
           ),
           Expanded(
@@ -104,10 +105,10 @@ class _UserTile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(user.email, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-          Text('${user.role.name.toUpperCase()} · ${user.enabled ? 'Active' : 'Banned'}',
+          Text('${user.role.name.toUpperCase()} · ${user.enabled ? ref.tr.active : ref.tr.banned}',
               style: TextStyle(color: user.enabled ? AppColors.success : AppColors.error, fontSize: 12)),
           if (user.role == UserRole.agent && !user.agentVerified)
-            const Text('Agent pending verification', style: TextStyle(color: AppColors.gold, fontSize: 11)),
+            Text(ref.tr.agentPendingVerification, style: const TextStyle(color: AppColors.gold, fontSize: 11)),
           Row(
             children: [
               if (user.role != UserRole.admin)
@@ -124,7 +125,7 @@ class _UserTile extends ConsumerWidget {
                       if (context.mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
                     }
                   },
-                  child: Text(user.enabled ? 'Ban' : 'Unban', style: TextStyle(color: user.enabled ? AppColors.error : AppColors.success)),
+                  child: Text(user.enabled ? ref.tr.ban : ref.tr.unban, style: TextStyle(color: user.enabled ? AppColors.error : AppColors.success)),
                 ),
               if (user.role == UserRole.agent && !user.agentVerified)
                 TextButton(
@@ -132,12 +133,12 @@ class _UserTile extends ConsumerWidget {
                     try {
                       await ref.read(adminRepositoryProvider).verifyAgent(user.id);
                       ref.invalidate(adminUsersProvider);
-                      if (context.mounted) showKickproToast(context, 'Agent verified');
+                      if (context.mounted) showKickproToast(context, ref.tr.agentVerified);
                     } catch (e) {
                       if (context.mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
                     }
                   },
-                  child: const Text('Verify agent'),
+                  child: Text(ref.tr.verifyAgent),
                 ),
             ],
           ),
@@ -163,7 +164,7 @@ class _PostsTabState extends ConsumerState<_PostsTab> {
     return Column(
       children: [
         SwitchListTile(
-          title: const Text('Flagged only', style: TextStyle(color: AppColors.textPrimary)),
+          title: Text(ref.tr.flaggedOnly, style: const TextStyle(color: AppColors.textPrimary)),
           value: _flaggedOnly,
           onChanged: (v) => setState(() => _flaggedOnly = v),
         ),
@@ -203,15 +204,15 @@ class _PostsTabState extends ConsumerState<_PostsTab> {
                                 ref.invalidate(adminPostsProvider(_flaggedOnly));
                                 ref.invalidate(adminDashboardProvider);
                               },
-                              child: Text(post.flagged ? 'Unflag' : 'Flag'),
+                              child: Text(post.flagged ? ref.tr.unflag : ref.tr.flag),
                             ),
                             TextButton(
                               onPressed: () async {
                                 await ref.read(adminRepositoryProvider).removePost(post.id);
                                 ref.invalidate(adminPostsProvider(_flaggedOnly));
-                                if (context.mounted) showKickproToast(context, 'Post removed');
+                                if (context.mounted) showKickproToast(context, ref.tr.postRemoved);
                               },
-                              child: const Text('Remove', style: TextStyle(color: AppColors.error)),
+                              child: Text(ref.tr.remove, style: const TextStyle(color: AppColors.error)),
                             ),
                           ],
                         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/drills/data/drill_repository.dart';
 import 'package:kickpro/features/drills/screens/drill_progression_screen.dart';
@@ -30,7 +31,7 @@ class _DrillSubmissionScreenState extends ConsumerState<DrillSubmissionScreen> {
 
   Future<void> _submit() async {
     if (_videoPath == null) {
-      showKickproToast(context, 'Select a video first', isError: true);
+      showKickproToast(context, ref.tr.selectVideoFirst, isError: true);
       return;
     }
 
@@ -42,7 +43,7 @@ class _DrillSubmissionScreenState extends ConsumerState<DrillSubmissionScreen> {
           );
       ref.invalidate(drillProgressionProvider(widget.drill.level));
       if (!mounted) return;
-      showKickproToast(context, 'Submitted for admin review');
+      showKickproToast(context, ref.tr.submittedForReview);
       context.pop();
     } catch (e) {
       if (mounted) showKickproToast(context, e.toString(), isError: true);
@@ -88,7 +89,7 @@ class _DrillSubmissionScreenState extends ConsumerState<DrillSubmissionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Rules', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                    Text(ref.tr.rules, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Text(drill.rules, style: const TextStyle(color: AppColors.textSecondary)),
                   ],
@@ -112,12 +113,12 @@ class _DrillSubmissionScreenState extends ConsumerState<DrillSubmissionScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _videoPath == null ? 'No video selected' : 'Video ready to submit',
+                      _videoPath == null ? ref.tr.noVideoSelected : ref.tr.videoReady,
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 16),
                     KickproButton(
-                      label: _videoPath == null ? 'Record / Pick Video' : 'Change Video',
+                      label: _videoPath == null ? ref.tr.recordPickVideo : ref.tr.changeVideo,
                       variant: KickproButtonVariant.ghost,
                       onPressed: _pickVideo,
                     ),
@@ -126,7 +127,7 @@ class _DrillSubmissionScreenState extends ConsumerState<DrillSubmissionScreen> {
               ),
               const SizedBox(height: 24),
               KickproButton(
-                label: 'Submit for Review',
+                label: ref.tr.submitForReview,
                 isLoading: _submitting,
                 onPressed: _submit,
               ),

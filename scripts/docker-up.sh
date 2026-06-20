@@ -33,6 +33,17 @@ if docker compose ps postgres 2>/dev/null | grep -q "Up"; then
   echo "Applying DB migrations (stadium booking)..."
   docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
     < backend/scripts/migrate-stadium-booking.sql >/dev/null 2>&1 || true
+  docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
+    < backend/scripts/migrate-stadium-city-backfill.sql >/dev/null 2>&1 || true
+  echo "Applying DB migrations (player injury status)..."
+  docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
+    < backend/scripts/migrate-player-injury.sql >/dev/null 2>&1 || true
+  echo "Applying DB migrations (announcement image)..."
+  docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
+    < backend/scripts/migrate-announcement-image.sql >/dev/null 2>&1 || true
+  echo "Applying DB migrations (squad join requests)..."
+  docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
+    < backend/scripts/migrate-squad-join-requests.sql >/dev/null 2>&1 || true
 fi
 
 echo "Starting Kafka..."

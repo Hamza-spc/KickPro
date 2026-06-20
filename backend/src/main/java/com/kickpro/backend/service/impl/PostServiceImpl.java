@@ -220,6 +220,24 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
+    public void deletePost(Long userId, Long postId) {
+        PlayerProfile player = playerProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player profile not found"));
+
+        Video post = videoRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        if (!post.getPlayer().getId().equals(player.getId())) {
+            throw new BadRequestException("You can only delete your own posts");
+        }
+
+        postCommentRepository.deleteByPostId(postId);
+        postReactionRepository.deleteByPostId(postId);
+        videoRepository.delete(post);
+    }
+
+    @Override
+    @Transactional
     public void follow(Long userId, Long targetProfileId) {
         User follower = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

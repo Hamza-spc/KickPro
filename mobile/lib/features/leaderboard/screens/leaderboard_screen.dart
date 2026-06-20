@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/leaderboard/data/leaderboard_repository.dart';
 import 'package:kickpro/features/leaderboard/models/leaderboard_models.dart';
+import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -17,18 +19,34 @@ class LeaderboardScreen extends ConsumerStatefulWidget {
 
 class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   LeaderboardType _type = LeaderboardType.matches;
+  PlayerPosition? _position;
+  LeaderboardAgeGroup? _ageGroup;
+  final _cityCtrl = TextEditingController();
+
+  LeaderboardQuery get _query => LeaderboardQuery(
+        type: _type,
+        position: _position,
+        city: _cityCtrl.text.trim().isEmpty ? null : _cityCtrl.text.trim(),
+        ageGroup: _ageGroup,
+      );
+
+  @override
+  void dispose() {
+    _cityCtrl.dispose();
+    super.dispose();
+  }
 
   String _metricLabel(LeaderboardEntry entry) {
     return switch (_type) {
-      LeaderboardType.matches => '${entry.metricValue.toInt()} matches',
-      LeaderboardType.badges => '${entry.metricValue.toInt()} badges',
+      LeaderboardType.matches => ref.tr.nMatches(entry.metricValue.toInt()),
+      LeaderboardType.badges => ref.tr.nBadges(entry.metricValue.toInt()),
       LeaderboardType.ratings => entry.metricValue.toStringAsFixed(1),
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final entriesAsync = ref.watch(leaderboardProvider(_type));
+    final entriesAsync = ref.watch(leaderboardProvider(_query));
 
     return Scaffold(
       body: SafeArea(
@@ -43,10 +61,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Leaderboard',
-                      style: TextStyle(
+                      ref.tr.leaderboardTitle,
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -58,32 +76,120 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Row(
                 children: [
                   _TypeTab(
-                    label: 'Most Matches',
+                    label: ref.tr.mostMatches,
                     selected: _type == LeaderboardType.matches,
                     onTap: () => setState(() => _type = LeaderboardType.matches),
                   ),
                   const SizedBox(width: 8),
                   _TypeTab(
-                    label: 'Most Badges',
+                    label: ref.tr.mostBadges,
                     selected: _type == LeaderboardType.badges,
                     onTap: () => setState(() => _type = LeaderboardType.badges),
                   ),
                   const SizedBox(width: 8),
                   _TypeTab(
-                    label: 'Best Rated',
+                    label: ref.tr.bestRated,
                     selected: _type == LeaderboardType.ratings,
                     onTap: () => setState(() => _type = LeaderboardType.ratings),
                   ),
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(ref.tr.filterByPosition,
+                  style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: ref.tr.allPositions,
+                    selected: _position == null,
+                    onTap: () => setState(() => _position = null),
+                  ),
+                  ...PlayerPosition.values.map(
+                    (pos) => Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: _FilterChip(
+                        label: pos.label,
+                        selected: _position == pos,
+                        onTap: () => setState(() => _position = pos),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(ref.tr.filterByAgeGroup,
+                  style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: ref.tr.allAgeGroups,
+                    selected: _ageGroup == null,
+                    onTap: () => setState(() => _ageGroup = null),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: ref.tr.ageGroupU18,
+                    selected: _ageGroup == LeaderboardAgeGroup.u18,
+                    onTap: () => setState(() => _ageGroup = LeaderboardAgeGroup.u18),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: ref.tr.ageGroupU21,
+                    selected: _ageGroup == LeaderboardAgeGroup.u21,
+                    onTap: () => setState(() => _ageGroup = LeaderboardAgeGroup.u21),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: ref.tr.ageGroupOpen,
+                    selected: _ageGroup == LeaderboardAgeGroup.open,
+                    onTap: () => setState(() => _ageGroup = LeaderboardAgeGroup.open),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: TextField(
+                controller: _cityCtrl,
+                onChanged: (_) => setState(() {}),
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: ref.tr.allCities,
+                  hintStyle: const TextStyle(color: AppColors.textSecondary),
+                  prefixIcon: const Icon(Icons.location_city, color: AppColors.textSecondary, size: 20),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () async => ref.invalidate(leaderboardProvider(_type)),
+                onRefresh: () async => ref.invalidate(leaderboardProvider(_query)),
                 child: entriesAsync.when(
                   loading: () => ListView(
                     children: const [
@@ -108,12 +214,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                   data: (entries) {
                     if (entries.isEmpty) {
                       return ListView(
-                        children: const [
-                          SizedBox(height: 80),
+                        children: [
+                          const SizedBox(height: 80),
                           Center(
                             child: Text(
-                              'No players ranked yet',
-                              style: TextStyle(color: AppColors.textHint),
+                              ref.tr.noPlayersRanked,
+                              style: const TextStyle(color: AppColors.textHint),
                             ),
                           ),
                         ],
@@ -172,6 +278,41 @@ class _TypeTab extends StatelessWidget {
             color: selected ? Colors.white : AppColors.textSecondary,
             fontWeight: FontWeight.w600,
             fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary.withValues(alpha: 0.2) : AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? AppColors.accent : AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
           ),
         ),
       ),

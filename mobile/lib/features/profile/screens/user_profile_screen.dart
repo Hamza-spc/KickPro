@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kickpro/core/auth/auth_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/courses/data/course_repository.dart';
+import 'package:kickpro/features/profile/widgets/profile_timeline_tab.dart';
+import 'package:kickpro/features/scout_notes/widgets/scout_note_sheet.dart';
 import 'package:kickpro/features/search/data/search_repository.dart';
 import 'package:kickpro/features/videos/data/post_repository.dart';
+import 'package:kickpro/features/squads/data/squad_repository.dart';
 import 'package:kickpro/shared/models/course_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
+import 'package:kickpro/shared/models/user_role.dart';
+import 'package:kickpro/shared/models/squad_models.dart';
 import 'package:kickpro/shared/widgets/credibility_score_card.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
@@ -72,6 +80,7 @@ class _UserProfileContent extends ConsumerStatefulWidget {
 class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
   late PlayerProfile _profile;
   bool _acting = false;
+  int _tabIndex = 0;
 
   @override
   void initState() {
@@ -118,6 +127,12 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
           followingCount: _profile.followingCount,
           following: !_profile.following,
           ownProfile: _profile.ownProfile,
+          injured: _profile.injured,
+          injuryType: _profile.injuryType,
+          injuryBodyPart: _profile.injuryBodyPart,
+          injurySeverity: _profile.injurySeverity,
+          referralCode: _profile.referralCode,
+          referralCount: _profile.referralCount,
         );
       });
       widget.onFollowChanged();
@@ -129,9 +144,58 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
     }
   }
 
+  Future<void> _inviteToSquad(BuildContext context) async {
+    setState(() => _acting = true);
+    try {
+      final squads = await ref.read(squadRepositoryProvider).getMySquads();
+      final ownSquads = squads.where((s) => s.ownSquad).toList();
+      if (!mounted) return;
+      if (ownSquads.isEmpty) {
+        showKickproToast(context, ref.tr.noCaptainSquads, isError: true);
+        return;
+      }
+      final squad = ownSquads.length == 1
+          ? ownSquads.first
+          : await showModalBottomSheet<SquadSummary>(
+              context: context,
+              backgroundColor: AppColors.surface,
+              builder: (_) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: ownSquads
+                      .map(
+                        (s) => ListTile(
+                          title: Text(s.name, style: const TextStyle(color: AppColors.textPrimary)),
+                          subtitle: Text(s.city, style: const TextStyle(color: AppColors.textSecondary)),
+                          onTap: () => Navigator.pop(context, s),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            );
+      if (squad == null) return;
+      await ref.read(squadRepositoryProvider).invitePlayer(
+            squadId: squad.id,
+            profileId: _profile.id,
+          );
+      if (mounted) showKickproToast(context, ref.tr.playerInvitedToSquad);
+    } catch (e) {
+      if (mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
+    } finally {
+      if (mounted) setState(() => _acting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
+    return FutureBuilder<String?>(
+      future: ref.read(authStorageProvider).getRole(),
+      builder: (context, roleSnapshot) {
+        final isScout = roleSnapshot.data == UserRole.scout.apiValue ||
+            roleSnapshot.data == UserRole.agent.apiValue;
+
+        return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
@@ -153,6 +217,17 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (isScout)
+                  IconButton(
+                    onPressed: () => showScoutNoteSheet(
+                      context: context,
+                      ref: ref,
+                      profileId: _profile.id,
+                      playerName: _profile.fullName,
+                    ),
+                    icon: const Icon(Icons.note_alt_outlined, color: AppColors.accent),
+                    tooltip: ref.tr.privateNotes,
+                  ),
               ],
             ),
           ),
@@ -190,27 +265,52 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${_profile.position.label} · ${_profile.city}',
+                  '${context.tr.positionLabel(_profile.position)} · ${_profile.city}',
                   style: const TextStyle(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _FollowStat(count: _profile.followersCount, label: 'Followers'),
+                    _FollowStat(count: _profile.followersCount, label: ref.tr.followers),
                     const SizedBox(width: 32),
-                    _FollowStat(count: _profile.followingCount, label: 'Following'),
+                    _FollowStat(count: _profile.followingCount, label: ref.tr.following),
                   ],
                 ),
                 if (!_profile.ownProfile) ...[
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: 160,
-                    child: KickproButton(
-                      label: _profile.following ? 'Following' : 'Follow',
-                      onPressed: _acting ? null : _toggleFollow,
-                      isLoading: _acting,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        child: KickproButton(
+                          label: _profile.following ? ref.tr.following : ref.tr.follow,
+                          onPressed: _acting ? null : _toggleFollow,
+                          isLoading: _acting,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 120,
+                        child: KickproButton(
+                          label: ref.tr.sendMessage,
+                          onPressed: _acting
+                              ? null
+                              : () => context.push(
+                                    '/messages/chat/${_profile.userId}?label=${Uri.encodeComponent(_profile.fullName)}',
+                                  ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 120,
+                        child: KickproButton(
+                          label: ref.tr.inviteToSquad,
+                          onPressed: _acting ? null : () => _inviteToSquad(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -219,10 +319,80 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
                   runSpacing: 8,
                   alignment: WrapAlignment.center,
                   children: [
-                    _Badge(label: _profile.position.label),
+                    _Badge(label: context.tr.positionLabel(_profile.position)),
                     _Badge(label: _profile.city),
-                    _Badge(label: _profile.preferredFoot.name.toUpperCase()),
+                    _Badge(label: context.tr.preferredFootLabel(_profile.preferredFoot)),
+                    if (_profile.injured)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.error.withValues(alpha: 0.5)),
+                        ),
+                        child: Text(
+                          ref.tr.currentlyRecovering,
+                          style: const TextStyle(color: AppColors.error, fontSize: 11, fontWeight: FontWeight.w600),
+                        ),
+                      ),
                   ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _tabIndex = 0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: _tabIndex == 0 ? AppColors.primary : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        ref.tr.overview,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: _tabIndex == 0 ? AppColors.primary : AppColors.textHint,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _tabIndex = 1),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: _tabIndex == 1 ? AppColors.primary : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        ref.tr.timeline,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: _tabIndex == 1 ? AppColors.primary : AppColors.textHint,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -231,28 +401,29 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
           sliver: SliverToBoxAdapter(
-            child: Column(
+            child: _tabIndex == 0
+                ? Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 CredibilityScoreCard(score: _profile.credibilityScore, compact: true),
                 const SizedBox(height: 16),
-                _InfoTile(label: 'Height', value: '${_profile.height} cm'),
-                _InfoTile(label: 'Weight', value: '${_profile.weight} kg'),
+                _InfoTile(label: ref.tr.height, value: '${_profile.height} cm'),
+                _InfoTile(label: ref.tr.weight, value: '${_profile.weight} kg'),
                 _InfoTile(
-                  label: 'Born',
+                  label: ref.tr.born,
                   value:
                       '${_profile.dateOfBirth.day}/${_profile.dateOfBirth.month}/${_profile.dateOfBirth.year}',
                 ),
                 if (_profile.bio != null && _profile.bio!.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  const Text('Bio', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                  Text(ref.tr.bio, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
                   Text(_profile.bio!, style: const TextStyle(color: AppColors.textSecondary, height: 1.4)),
                 ],
                 if (widget.certifications.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  const Text('Certifications',
-                      style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                  Text(ref.tr.certifications,
+                      style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   ...widget.certifications.map(
                     (cert) => Padding(
@@ -271,10 +442,13 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
                   ),
                 ],
               ],
-            ),
+            )
+                : ProfileTimelineTab(profileId: _profile.id),
           ),
         ),
       ],
+    );
+      },
     );
   }
 }

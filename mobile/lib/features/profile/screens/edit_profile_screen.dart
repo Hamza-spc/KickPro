@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/features/profile/screens/player_profile_screen.dart';
@@ -96,7 +97,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _save(PlayerProfile existing) async {
     if (_dateOfBirth == null || _city == null) {
-      showKickproToast(context, 'Complete all required fields', isError: true);
+      showKickproToast(context, ref.tr.completeAllFields, isError: true);
       return;
     }
 
@@ -137,7 +138,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ref.invalidate(playerSkillsProvider);
 
       if (mounted) {
-        showKickproToast(context, 'Profile updated');
+        showKickproToast(context, ref.tr.profileUpdated);
         context.pop();
       }
     } catch (e) {
@@ -163,7 +164,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             data: (skills) {
               _prefill(profile, skills);
               final dobLabel = _dateOfBirth == null
-                  ? 'Select date'
+                  ? ref.tr.selectDate
                   : DateFormat('dd MMM yyyy').format(_dateOfBirth!);
 
               return Column(
@@ -176,10 +177,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           onPressed: () => context.pop(),
                           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'Edit Profile',
-                            style: TextStyle(
+                            ref.tr.editProfile,
+                            style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
@@ -242,14 +243,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        KickproTextField(controller: _nameController, label: 'Full name'),
+                        KickproTextField(controller: _nameController, label: ref.tr.fullName),
                         const SizedBox(height: 16),
                         GestureDetector(
                           onTap: _pickDate,
                           child: AbsorbPointer(
                             child: KickproTextField(
                               controller: TextEditingController(text: dobLabel),
-                              label: 'Date of birth',
+                              label: ref.tr.dateOfBirth,
                             ),
                           ),
                         ),
@@ -257,7 +258,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         DropdownButtonFormField<String>(
                           value: _city,
                           dropdownColor: AppColors.surface,
-                          decoration: const InputDecoration(labelText: 'City'),
+                          decoration: InputDecoration(labelText: ref.tr.city),
                           items: _profileCities
                               .map((city) => DropdownMenuItem(value: city, child: Text(city)))
                               .toList(),
@@ -267,7 +268,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         DropdownButtonFormField<PlayerPosition>(
                           value: _position,
                           dropdownColor: AppColors.surface,
-                          decoration: const InputDecoration(labelText: 'Position'),
+                          decoration: InputDecoration(labelText: ref.tr.position),
                           items: PlayerPosition.values
                               .map((p) => DropdownMenuItem(value: p, child: Text(p.label)))
                               .toList(),
@@ -279,7 +280,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         DropdownButtonFormField<PreferredFoot>(
                           value: _foot,
                           dropdownColor: AppColors.surface,
-                          decoration: const InputDecoration(labelText: 'Preferred foot'),
+                          decoration: InputDecoration(labelText: ref.tr.preferredFoot),
                           items: PreferredFoot.values
                               .map((f) => DropdownMenuItem(
                                     value: f,
@@ -296,7 +297,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             Expanded(
                               child: KickproTextField(
                                 controller: _heightController,
-                                label: 'Height (cm)',
+                                label: ref.tr.heightCm,
                                 keyboardType: TextInputType.number,
                               ),
                             ),
@@ -304,7 +305,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             Expanded(
                               child: KickproTextField(
                                 controller: _weightController,
-                                label: 'Weight (kg)',
+                                label: ref.tr.weightKg,
                                 keyboardType: TextInputType.number,
                               ),
                             ),
@@ -313,24 +314,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         const SizedBox(height: 16),
                         KickproTextField(
                           controller: _bioController,
-                          label: 'Bio',
+                          label: ref.tr.bio,
                           maxLines: 3,
                         ),
                         const SizedBox(height: 24),
-                        const Text(
-                          'Skill ratings',
-                          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                        Text(
+                          ref.tr.skillRatings,
+                          style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
-                        SkillSlider(label: 'Dribbling', value: _dribbling, onChanged: (v) => setState(() => _dribbling = v)),
-                        SkillSlider(label: 'Shooting', value: _shooting, onChanged: (v) => setState(() => _shooting = v)),
-                        SkillSlider(label: 'Passing', value: _passing, onChanged: (v) => setState(() => _passing = v)),
-                        SkillSlider(label: 'Speed', value: _speed, onChanged: (v) => setState(() => _speed = v)),
-                        SkillSlider(label: 'Heading', value: _heading, onChanged: (v) => setState(() => _heading = v)),
-                        SkillSlider(label: 'Stamina', value: _stamina, onChanged: (v) => setState(() => _stamina = v)),
+                        SkillSlider(label: ref.tr.dribbling, value: _dribbling, onChanged: (v) => setState(() => _dribbling = v)),
+                        SkillSlider(label: ref.tr.shooting, value: _shooting, onChanged: (v) => setState(() => _shooting = v)),
+                        SkillSlider(label: ref.tr.passing, value: _passing, onChanged: (v) => setState(() => _passing = v)),
+                        SkillSlider(label: ref.tr.speed, value: _speed, onChanged: (v) => setState(() => _speed = v)),
+                        SkillSlider(label: ref.tr.heading, value: _heading, onChanged: (v) => setState(() => _heading = v)),
+                        SkillSlider(label: ref.tr.stamina, value: _stamina, onChanged: (v) => setState(() => _stamina = v)),
                         const SizedBox(height: 24),
                         KickproButton(
-                          label: 'Save changes',
+                          label: ref.tr.saveChanges,
                           isLoading: _loading,
                           onPressed: () => _save(profile),
                         ),

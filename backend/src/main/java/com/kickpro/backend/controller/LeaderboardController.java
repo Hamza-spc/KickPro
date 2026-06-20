@@ -2,7 +2,9 @@ package com.kickpro.backend.controller;
 
 import com.kickpro.backend.dto.ApiResponse;
 import com.kickpro.backend.dto.response.LeaderboardEntryResponse;
+import com.kickpro.backend.entity.AgeGroup;
 import com.kickpro.backend.entity.LeaderboardType;
+import com.kickpro.backend.entity.Position;
 import com.kickpro.backend.service.LeaderboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +26,12 @@ public class LeaderboardController {
     @GetMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'SCOUT')")
     public ResponseEntity<ApiResponse<List<LeaderboardEntryResponse>>> getLeaderboard(
-            @RequestParam LeaderboardType type
+            @RequestParam LeaderboardType type,
+            @RequestParam(required = false) Position position,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) AgeGroup ageGroup
     ) {
-        List<LeaderboardEntryResponse> entries = leaderboardService.getLeaderboard(type);
+        List<LeaderboardEntryResponse> entries = leaderboardService.getLeaderboard(type, position, city, ageGroup);
         return ResponseEntity.ok(ApiResponse.success(entries, "Leaderboard retrieved successfully"));
     }
 }

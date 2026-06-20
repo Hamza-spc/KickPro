@@ -30,10 +30,22 @@ public class StadiumServiceImpl implements StadiumService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StadiumResponse> getAllStadiums(String city) {
-        List<Stadium> stadiums = (city == null || city.isBlank())
-                ? stadiumRepository.findAll()
-                : stadiumRepository.findByCityIgnoreCaseOrderByNameAsc(city.trim());
+    public List<StadiumResponse> getAllStadiums(String city, String name) {
+        String cityFilter = city != null && !city.isBlank() ? city.trim() : null;
+        String nameFilter = name != null && !name.isBlank() ? name.trim() : null;
+
+        List<Stadium> stadiums;
+        if (cityFilter != null && nameFilter != null) {
+            stadiums = stadiumRepository.findByCityIgnoreCaseAndNameContainingIgnoreCaseOrderByNameAsc(
+                    cityFilter, nameFilter);
+        } else if (cityFilter != null) {
+            stadiums = stadiumRepository.findByCityIgnoreCaseOrderByNameAsc(cityFilter);
+        } else if (nameFilter != null) {
+            stadiums = stadiumRepository.findByNameContainingIgnoreCaseOrderByNameAsc(nameFilter);
+        } else {
+            stadiums = stadiumRepository.findAll();
+        }
+
         return stadiums.stream()
                 .map(this::toResponse)
                 .toList();

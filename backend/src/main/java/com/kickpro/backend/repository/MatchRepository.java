@@ -58,4 +58,9 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findMatchesForPlayer(@Param("userId") Long userId);
 
     long countByStatusIn(List<MatchStatus> statuses);
+
+    long countByStatusAndCityIgnoreCase(MatchStatus status, String city);
+
+    List<Match> findByStatusAndCityIgnoreCaseAndDateTimeAfterOrderByDateTimeAsc(
+            MatchStatus status, String city, LocalDateTime after);
 }

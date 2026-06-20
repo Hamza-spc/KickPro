@@ -45,6 +45,24 @@ class ProfileRepository {
     return _parseProfile(response);
   }
 
+  Future<PlayerProfile> updateInjury({
+    required bool injured,
+    String? injuryType,
+    String? injuryBodyPart,
+    String? injurySeverity,
+  }) async {
+    final response = await _dio.patch(
+      ApiEndpoints.playerProfileInjury,
+      data: {
+        'injured': injured,
+        'injuryType': injuryType,
+        'injuryBodyPart': injuryBodyPart,
+        'injurySeverity': injurySeverity,
+      },
+    );
+    return _parseProfile(response);
+  }
+
   Future<PlayerSkills> saveSkills(PlayerSkills skills) async {
     final response = await _dio.put(
       ApiEndpoints.playerSkills,

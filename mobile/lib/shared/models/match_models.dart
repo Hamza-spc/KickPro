@@ -56,6 +56,8 @@ class Stadium {
     this.openTime,
     this.closeTime,
     this.grassType,
+    this.latitude,
+    this.longitude,
   });
 
   final int id;
@@ -71,6 +73,10 @@ class Stadium {
   final String? openTime;
   final String? closeTime;
   final String? grassType;
+  final double? latitude;
+  final double? longitude;
+
+  bool get hasLocation => latitude != null && longitude != null;
 
   String? get coverPhoto => photos.isNotEmpty ? photos.first : null;
 
@@ -95,6 +101,8 @@ class Stadium {
       openTime: json['openTime'] as String?,
       closeTime: json['closeTime'] as String?,
       grassType: json['grassType'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 }
@@ -178,6 +186,7 @@ class FootballMatch {
     required this.stadiumId,
     required this.stadiumName,
     required this.stadiumLocation,
+    this.stadiumCoverPhotoUrl,
     required this.organizerId,
     required this.organizerName,
     required this.dateTime,
@@ -196,6 +205,7 @@ class FootballMatch {
   final int stadiumId;
   final String stadiumName;
   final String stadiumLocation;
+  final String? stadiumCoverPhotoUrl;
   final int organizerId;
   final String organizerName;
   final DateTime dateTime;
@@ -219,6 +229,7 @@ class FootballMatch {
       stadiumId: json['stadiumId'] as int,
       stadiumName: json['stadiumName'] as String,
       stadiumLocation: json['stadiumLocation'] as String,
+      stadiumCoverPhotoUrl: json['stadiumCoverPhotoUrl'] as String?,
       organizerId: json['organizerId'] as int,
       organizerName: json['organizerName'] as String,
       dateTime: DateTime.parse(json['dateTime'] as String),

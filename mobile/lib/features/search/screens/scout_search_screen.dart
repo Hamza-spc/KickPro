@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/ai/screens/scout_assist_sheet.dart';
+import 'package:kickpro/features/search/data/bookmark_repository.dart';
 import 'package:kickpro/features/search/data/search_repository.dart';
 import 'package:kickpro/features/search/screens/player_preview_sheet.dart';
+import 'package:kickpro/features/search/widgets/scout_player_card.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/search_models.dart';
-import 'package:kickpro/shared/widgets/credibility_ring.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
@@ -77,6 +79,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
   Widget build(BuildContext context) {
     final searchAsync = ref.watch(scoutSearchProvider(_filters));
     final citiesAsync = ref.watch(scoutCitiesProvider);
+    final bookmarkIdsAsync = ref.watch(scoutBookmarkIdsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -87,10 +90,10 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Find Players',
-                      style: TextStyle(
+                      ref.tr.findPlayersTitle,
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -100,7 +103,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                   IconButton(
                     onPressed: () => showScoutAssistSheet(context, ref),
                     icon: const KickproChatbotLogo(size: 24),
-                    tooltip: 'AI Scout Assistant',
+                    tooltip: ref.tr.scoutAssistTooltip,
                   ),
                 ],
               ),
@@ -111,7 +114,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                 controller: _nameController,
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: _inputDecoration(
-                  hint: 'Search by player name...',
+                  hint: ref.tr.searchByPlayer,
                   prefixIcon: Icons.person_search,
                 ),
                 onSubmitted: (_) => _applyFilters(),
@@ -126,9 +129,9 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                   key: ValueKey(_selectedCity),
                   initialValue: _selectedCity,
                   dropdownColor: AppColors.surface,
-                  decoration: _inputDecoration(hint: 'All cities', prefixIcon: Icons.location_city),
-                  items: const [
-                    DropdownMenuItem<String?>(value: null, child: Text('All cities')),
+                  decoration: _inputDecoration(hint: ref.tr.allCities, prefixIcon: Icons.location_city),
+                  items: [
+                    DropdownMenuItem<String?>(value: null, child: Text(ref.tr.allCities)),
                   ],
                   onChanged: (value) {
                     setState(() => _selectedCity = value);
@@ -139,11 +142,11 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                   key: ValueKey(_selectedCity),
                   initialValue: _selectedCity,
                   dropdownColor: AppColors.surface,
-                  decoration: _inputDecoration(hint: 'All cities', prefixIcon: Icons.location_city),
+                  decoration: _inputDecoration(hint: ref.tr.allCities, prefixIcon: Icons.location_city),
                   items: [
-                    const DropdownMenuItem<String?>(
+                    DropdownMenuItem<String?>(
                       value: null,
-                      child: Text('All cities', style: TextStyle(color: AppColors.textSecondary)),
+                      child: Text(ref.tr.allCities, style: const TextStyle(color: AppColors.textSecondary)),
                     ),
                     ...cities.map(
                       (city) => DropdownMenuItem<String?>(
@@ -180,7 +183,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                     ),
                   ),
                   _FilterChip(
-                    label: 'Certified',
+                    label: ref.tr.certified,
                     selected: _certifiedOnly,
                     onTap: () {
                       setState(() => _certifiedOnly = !_certifiedOnly);
@@ -196,14 +199,14 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                 children: [
                   Expanded(
                     child: KickproButton(
-                      label: 'Search',
+                      label: ref.tr.searchBtn,
                       onPressed: _applyFilters,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: KickproButton(
-                      label: 'Reset',
+                      label: ref.tr.resetBtn,
                       variant: KickproButtonVariant.ghost,
                       onPressed: _resetFilters,
                     ),
@@ -217,6 +220,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                 onRefresh: () async {
                   ref.invalidate(scoutSearchProvider);
                   ref.invalidate(scoutCitiesProvider);
+                  ref.invalidate(scoutBookmarkIdsProvider);
                 },
                 child: searchAsync.when(
                   loading: () => ListView(
@@ -240,14 +244,19 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                     ],
                   ),
                   data: (page) {
+                    final bookmarkIds = bookmarkIdsAsync.maybeWhen(
+                      data: (ids) => ids,
+                      orElse: () => <int>{},
+                    );
+
                     if (page.content.isEmpty) {
                       return ListView(
-                        children: const [
-                          SizedBox(height: 80),
+                        children: [
+                          const SizedBox(height: 80),
                           Center(
                             child: Text(
-                              'No players match your filters',
-                              style: TextStyle(color: AppColors.textHint),
+                              ref.tr.noPlayersMatch,
+                              style: const TextStyle(color: AppColors.textHint),
                             ),
                           ),
                         ],
@@ -261,9 +270,20 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                         final player = page.content[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _PlayerSearchCard(
+                          child: ScoutPlayerCard(
                             player: player,
+                            isBookmarked: bookmarkIds.contains(player.profileId),
                             onTap: () => showPlayerPreviewSheet(context, ref, player.profileId),
+                            onBookmarkToggle: () async {
+                              final repo = ref.read(bookmarkRepositoryProvider);
+                              if (bookmarkIds.contains(player.profileId)) {
+                                await repo.unbookmark(player.profileId);
+                              } else {
+                                await repo.bookmark(player.profileId);
+                              }
+                              ref.invalidate(scoutBookmarkIdsProvider);
+                              ref.invalidate(scoutBookmarksProvider);
+                            },
                           ),
                         );
                       },
@@ -329,77 +349,6 @@ class _FilterChip extends StatelessWidget {
             color: selected ? Colors.white : AppColors.textSecondary,
             fontWeight: FontWeight.w600,
             fontSize: 12,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlayerSearchCard extends StatelessWidget {
-  const _PlayerSearchCard({required this.player, required this.onTap});
-
-  final PlayerSearchResult player;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border, width: 0.5),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: AppColors.primary,
-                backgroundImage: player.profilePhotoUrl != null
-                    ? NetworkImage(player.profilePhotoUrl!)
-                    : null,
-                child: player.profilePhotoUrl == null
-                    ? Text(
-                        player.fullName.isNotEmpty ? player.fullName[0].toUpperCase() : '?',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      player.fullName,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${player.position.label} · ${player.city} · ${player.age} yrs',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                    ),
-                    if (player.skills != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Top: Speed ${player.skills!.speed}/10 · Shooting ${player.skills!.shooting}/10',
-                        style: const TextStyle(color: AppColors.textHint, fontSize: 11),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              CredibilityRing(score: player.credibilityScore, size: 56),
-            ],
           ),
         ),
       ),

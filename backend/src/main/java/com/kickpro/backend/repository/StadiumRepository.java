@@ -8,4 +8,8 @@ import java.util.List;
 public interface StadiumRepository extends JpaRepository<Stadium, Long> {
 
     List<Stadium> findByCityIgnoreCaseOrderByNameAsc(String city);
+
+    List<Stadium> findByNameContainingIgnoreCaseOrderByNameAsc(String name);
+
+    List<Stadium> findByCityIgnoreCaseAndNameContainingIgnoreCaseOrderByNameAsc(String city, String name);
 }

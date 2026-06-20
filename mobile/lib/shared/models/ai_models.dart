@@ -174,4 +174,11 @@ class GeneratedCourseResponse {
   }
 }
 
-enum AiTextAction { explainScore, mealPlan }
+enum AiTextAction { explainScore, mealPlan, videoFeedback }
+
+class VideoFeedbackParams {
+  const VideoFeedbackParams({required this.videoUrl, this.skillTag});
+
+  final String videoUrl;
+  final String? skillTag;
+}

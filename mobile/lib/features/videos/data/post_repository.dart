@@ -113,6 +113,10 @@ class PostRepository {
     return _parsePost(response);
   }
 
+  Future<void> deletePost(int postId) async {
+    await _dio.delete(ApiEndpoints.post(postId));
+  }
+
   Future<void> follow(int profileId) async {
     final response = await _dio.post(ApiEndpoints.followPlayer(profileId));
     _ensureSuccess(response);

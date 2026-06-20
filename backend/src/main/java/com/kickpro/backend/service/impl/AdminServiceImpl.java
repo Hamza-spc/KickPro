@@ -252,9 +252,11 @@ public class AdminServiceImpl implements AdminService {
         LessonMediaType mediaType = resolveMediaType(file);
         try {
             String publicId = "lesson-" + lessonId + "-" + System.currentTimeMillis();
-            String url = mediaType == LessonMediaType.VIDEO
-                    ? cloudinaryService.uploadVideo(file, "kickpro/lesson-media", publicId)
-                    : cloudinaryService.uploadImage(file, "kickpro/lesson-media", publicId);
+            String url = switch (mediaType) {
+                case VIDEO -> cloudinaryService.uploadVideo(file, "kickpro/lesson-media", publicId);
+                case IMAGE -> cloudinaryService.uploadImage(file, "kickpro/lesson-media", publicId);
+                case DOCUMENT -> cloudinaryService.uploadRaw(file, "kickpro/lesson-media", publicId);
+            };
             lesson.setMediaUrl(url);
             lesson.setMediaType(mediaType);
             lessonRepository.save(lesson);

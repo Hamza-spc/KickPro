@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
 import 'package:kickpro/features/admin/models/admin_models.dart';
@@ -39,17 +40,17 @@ class _AdminDrillsScreenState extends ConsumerState<AdminDrillsScreen> with Sing
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Text('Drills', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Text(ref.tr.drills, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
           ),
           TabBar(
             controller: _tabs,
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textHint,
-            tabs: const [
-              Tab(text: 'Submissions'),
-              Tab(text: 'Drill library'),
+            tabs: [
+              Tab(text: ref.tr.submissions),
+              Tab(text: ref.tr.drillLibrary),
             ],
           ),
           Expanded(
@@ -83,7 +84,7 @@ class _PendingSubmissionsTab extends ConsumerWidget {
         error: (e, _) => ListTile(title: Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.error))),
         data: (subs) {
           if (subs.isEmpty) {
-            return const ListTile(title: Text('No pending submissions', style: TextStyle(color: AppColors.textSecondary)));
+            return ListTile(title: Text(ref.tr.noPendingSubmissions, style: const TextStyle(color: AppColors.textSecondary)));
           }
           return ListView.separated(
             padding: const EdgeInsets.all(16),
@@ -150,12 +151,12 @@ class _SubmissionCardState extends ConsumerState<_SubmissionCard> {
           Text(s.playerName, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
           Text(s.drillTitle, style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 8),
-          KickproTextField(controller: _scoreCtrl, label: 'Score (if approving)', keyboardType: TextInputType.number),
+          KickproTextField(controller: _scoreCtrl, label: ref.tr.scoreIfApproving, keyboardType: TextInputType.number),
           Row(
             children: [
               Expanded(
                 child: KickproButton(
-                  label: 'Approve',
+                  label: ref.tr.approve,
                   isLoading: _acting,
                   onPressed: _acting ? null : () => _review('APPROVED'),
                 ),
@@ -163,7 +164,7 @@ class _SubmissionCardState extends ConsumerState<_SubmissionCard> {
               const SizedBox(width: 8),
               Expanded(
                 child: KickproButton(
-                  label: 'Reject',
+                  label: ref.tr.reject,
                   variant: KickproButtonVariant.ghost,
                   onPressed: _acting ? null : () => _review('REJECTED'),
                 ),
@@ -195,7 +196,7 @@ class _DrillLibraryTab extends ConsumerWidget {
               child: TextButton.icon(
                 onPressed: () => _openDrillForm(context, ref),
                 icon: const Icon(Icons.add),
-                label: const Text('Create drill'),
+                label: Text(ref.tr.createDrill),
               ),
             ),
             ...drills.map(
@@ -257,10 +258,10 @@ class _DrillLibraryTab extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              KickproTextField(controller: titleCtrl, label: 'Title'),
-              KickproTextField(controller: descCtrl, label: 'Description', maxLines: 2),
-              KickproTextField(controller: rulesCtrl, label: 'Rules', maxLines: 2),
-              KickproTextField(controller: orderCtrl, label: 'Progression order', keyboardType: TextInputType.number),
+              KickproTextField(controller: titleCtrl, label: ref.tr.title),
+              KickproTextField(controller: descCtrl, label: ref.tr.description, maxLines: 2),
+              KickproTextField(controller: rulesCtrl, label: ref.tr.rules, maxLines: 2),
+              KickproTextField(controller: orderCtrl, label: ref.tr.progressionOrder, keyboardType: TextInputType.number),
               DropdownButtonFormField<DrillLevel>(
                 value: level,
                 dropdownColor: AppColors.surface,
@@ -275,7 +276,7 @@ class _DrillLibraryTab extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               KickproButton(
-                label: drill == null ? 'Create drill' : 'Save drill',
+                label: drill == null ? ref.tr.createDrill : ref.tr.saveDrill,
                 onPressed: () async {
                   final body = {
                     'title': titleCtrl.text.trim(),

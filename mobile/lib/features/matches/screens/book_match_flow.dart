@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
 import 'package:kickpro/features/matches/screens/match_booking_screen.dart';
@@ -10,16 +14,27 @@ import 'package:kickpro/shared/models/match_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
+import 'package:latlong2/latlong.dart';
 
-final stadiumsByCityProvider = FutureProvider.autoDispose
-    .family<List<Stadium>, String>((ref, city) {
-  return ref.read(matchRepositoryProvider).getStadiums(city: city);
+typedef StadiumSearchParams = ({String city, String? name});
+
+final stadiumsSearchProvider = FutureProvider.autoDispose
+    .family<List<Stadium>, StadiumSearchParams>((ref, params) {
+  return ref.read(matchRepositoryProvider).getStadiums(
+        city: params.city,
+        name: params.name,
+      );
 });
 
 class BookMatchFlowScreen extends ConsumerStatefulWidget {
-  const BookMatchFlowScreen({super.key, required this.onBooked});
+  const BookMatchFlowScreen({
+    super.key,
+    required this.onBooked,
+    this.initialCity,
+  });
 
   final VoidCallback onBooked;
+  final String? initialCity;
 
   @override
   ConsumerState<BookMatchFlowScreen> createState() => _BookMatchFlowScreenState();
@@ -48,16 +63,21 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
 
   Future<void> _initCity() async {
     if (_cityInitialized) return;
+    String? resolvedCity;
+    if (widget.initialCity != null && kMatchCities.contains(widget.initialCity)) {
+      resolvedCity = widget.initialCity;
+    }
     try {
       final profile = await ref.read(profileRepositoryProvider).getMyProfile();
-      if (!mounted) return;
-      setState(() {
-        _city = kMatchCities.contains(profile.city) ? profile.city : null;
-        _cityInitialized = true;
-      });
-    } catch (_) {
-      if (mounted) setState(() => _cityInitialized = true);
-    }
+      if (resolvedCity == null && kMatchCities.contains(profile.city)) {
+        resolvedCity = profile.city;
+      }
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _city = resolvedCity ?? kMatchCities.first;
+      _cityInitialized = true;
+    });
   }
 
   Future<void> _loadSlots(DateTime date) async {
@@ -95,7 +115,7 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
 
   Future<void> _submit() async {
     if (_stadium == null || _selectedDate == null || _selectedTime == null || _selectedFormat == null) {
-      showKickproToast(context, 'Complete all booking steps', isError: true);
+      showKickproToast(context, ref.tr.completeBookingSteps, isError: true);
       return;
     }
 
@@ -119,7 +139,7 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
             gender: _gender,
           );
       if (mounted) {
-        showKickproToast(context, 'Match booked!');
+        showKickproToast(context, ref.tr.matchBooked);
         widget.onBooked();
         Navigator.pop(context);
       }
@@ -132,18 +152,21 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
 
   void _nextStep() {
     if (_step == 0 && _city == null) {
-      showKickproToast(context, 'Select a city', isError: true);
+      showKickproToast(context, ref.tr.selectACity, isError: true);
       return;
     }
     if (_step == 1 && _stadium == null) {
-      showKickproToast(context, 'Select a stadium', isError: true);
+      showKickproToast(context, ref.tr.selectAStadium, isError: true);
       return;
     }
     if (_step == 2 && (_selectedTime == null || _selectedTime!.isEmpty)) {
-      showKickproToast(context, 'Select an available time slot', isError: true);
+      showKickproToast(context, ref.tr.selectTimeSlot, isError: true);
       return;
     }
     setState(() => _step++);
+    if (_step == 1 && _city != null) {
+      ref.invalidate(stadiumsSearchProvider((city: _city!, name: null)));
+    }
   }
 
   void _back() {
@@ -198,13 +221,13 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
             if (_step < 3)
               Padding(
                 padding: const EdgeInsets.all(24),
-                child: KickproButton(label: 'Continue', onPressed: _nextStep),
+                child: KickproButton(label: ref.tr.continueBtn, onPressed: _nextStep),
               )
             else
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: KickproButton(
-                  label: 'Confirm Booking',
+                  label: ref.tr.confirmBooking,
                   isLoading: _submitting,
                   onPressed: _submit,
                 ),
@@ -216,10 +239,10 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
   }
 
   String get _stepTitle => switch (_step) {
-        0 => 'Choose city',
-        1 => 'Choose stadium',
-        2 => 'Pick date & time',
-        _ => 'Match details',
+        0 => ref.tr.chooseCity,
+        1 => ref.tr.chooseStadium,
+        2 => ref.tr.pickDateTime,
+        _ => ref.tr.matchDetails,
       };
 
   Widget _buildStep() {
@@ -288,9 +311,9 @@ class _CityStep extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        const Text(
-          'Where do you want to play?',
-          style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+        Text(
+          context.tr.wherePlay,
+          style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
         ),
         const SizedBox(height: 20),
         Wrap(
@@ -323,7 +346,7 @@ class _CityStep extends StatelessWidget {
   }
 }
 
-class _StadiumStep extends ConsumerWidget {
+class _StadiumStep extends ConsumerStatefulWidget {
   const _StadiumStep({
     required this.city,
     required this.selected,
@@ -337,43 +360,265 @@ class _StadiumStep extends ConsumerWidget {
   final ValueChanged<Stadium> onInfo;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final stadiumsAsync = ref.watch(stadiumsByCityProvider(city));
+  ConsumerState<_StadiumStep> createState() => _StadiumStepState();
+}
 
-    return stadiumsAsync.when(
-      loading: () => const Center(child: ShimmerBox(height: 120, width: double.infinity)),
-      error: (e, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.error)),
+class _StadiumStepState extends ConsumerState<_StadiumStep> {
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
+  String? _searchQuery;
+  bool _mapView = false;
+
+  static const _defaultCenter = LatLng(33.5731, -7.5898);
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      setState(() {
+        _searchQuery = value.trim().isEmpty ? null : value.trim();
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final searchParams = (city: widget.city, name: _searchQuery);
+    final stadiumsAsync = ref.watch(stadiumsSearchProvider(searchParams));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: _onSearchChanged,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: ref.tr.searchByName,
+                    hintStyle: const TextStyle(color: AppColors.textSecondary),
+                    prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _ViewToggle(
+                mapView: _mapView,
+                onList: () => setState(() => _mapView = false),
+                onMap: () => setState(() => _mapView = true),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: stadiumsAsync.when(
+            loading: () => const Center(child: ShimmerBox(height: 120, width: double.infinity)),
+            error: (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.error)),
+              ),
+            ),
+            data: (stadiums) {
+              if (stadiums.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      _searchQuery != null
+                          ? ref.tr.noStadiumsFound
+                          : ref.tr.noStadiumsInCity(widget.city),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                );
+              }
+
+              if (_mapView) {
+                final mapped = stadiums.where((s) => s.hasLocation).toList();
+                if (mapped.isEmpty) {
+                  return Center(
+                    child: Text(
+                      ref.tr.noStadiumsFound,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  );
+                }
+                final center = mapped.length == 1
+                    ? LatLng(mapped.first.latitude!, mapped.first.longitude!)
+                    : _defaultCenter;
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: FlutterMap(
+                      options: MapOptions(
+                        initialCenter: center,
+                        initialZoom: 11,
+                        onTap: (_, point) {
+                          Stadium? nearest;
+                          double nearestDist = double.infinity;
+                          for (final stadium in mapped) {
+                            final dist = const Distance().distance(
+                              LatLng(stadium.latitude!, stadium.longitude!),
+                              point,
+                            );
+                            if (dist < nearestDist) {
+                              nearestDist = dist;
+                              nearest = stadium;
+                            }
+                          }
+                          if (nearest != null && nearestDist < 500) {
+                            widget.onSelected(nearest);
+                          }
+                        },
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.kickpro.app',
+                        ),
+                        MarkerLayer(
+                          markers: mapped.map((stadium) {
+                            final selected = widget.selected?.id == stadium.id;
+                            return Marker(
+                              point: LatLng(stadium.latitude!, stadium.longitude!),
+                              width: 44,
+                              height: 44,
+                              child: GestureDetector(
+                                onTap: () => widget.onSelected(stadium),
+                                child: Icon(
+                                  Icons.location_pin,
+                                  color: selected ? AppColors.accent : AppColors.primary,
+                                  size: 36,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: stadiums.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (_, index) {
+                  final stadium = stadiums[index];
+                  final isSelected = widget.selected?.id == stadium.id;
+                  return _StadiumCard(
+                    stadium: stadium,
+                    selected: isSelected,
+                    onTap: () => widget.onSelected(stadium),
+                    onInfo: () => widget.onInfo(stadium),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ViewToggle extends ConsumerWidget {
+  const _ViewToggle({
+    required this.mapView,
+    required this.onList,
+    required this.onMap,
+  });
+
+  final bool mapView;
+  final VoidCallback onList;
+  final VoidCallback onMap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ToggleBtn(
+            label: ref.tr.listView,
+            selected: !mapView,
+            onTap: onList,
+          ),
+          _ToggleBtn(
+            label: ref.tr.mapView,
+            selected: mapView,
+            onTap: onMap,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ToggleBtn extends StatelessWidget {
+  const _ToggleBtn({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
         ),
       ),
-      data: (stadiums) {
-        if (stadiums.isEmpty) {
-          return Center(
-            child: Text(
-              'No stadiums in $city yet.\nTry another city.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-          );
-        }
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: stadiums.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (_, index) {
-            final stadium = stadiums[index];
-            final isSelected = selected?.id == stadium.id;
-            return _StadiumCard(
-              stadium: stadium,
-              selected: isSelected,
-              onTap: () => onSelected(stadium),
-              onInfo: () => onInfo(stadium),
-            );
-          },
-        );
-      },
     );
   }
 }
@@ -516,7 +761,7 @@ class _StadiumDetailSheet extends StatelessWidget {
           if (stadium.description != null && stadium.description!.isNotEmpty)
             Text(stadium.description!, style: const TextStyle(color: AppColors.textPrimary, height: 1.5)),
           const SizedBox(height: 16),
-          const Text('Allowed formats', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+          Text(context.tr.allowedFormats, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -526,7 +771,7 @@ class _StadiumDetailSheet extends StatelessWidget {
           ),
           if (stadium.photos.length > 1) ...[
             const SizedBox(height: 16),
-            const Text('Photos', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+            Text(context.tr.photos, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             SizedBox(
               height: 100,
@@ -569,7 +814,7 @@ class _SlotStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateLabel = selectedDate == null
-        ? 'Select a date'
+        ? context.tr.selectADate
         : DateFormat('EEE, d MMM yyyy').format(selectedDate!);
 
     return ListView(
@@ -598,14 +843,14 @@ class _SlotStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        const Text('Available slots', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+        Text(context.tr.availableSlots, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
         const SizedBox(height: 12),
         if (selectedDate == null)
-          const Text('Pick a date to see time slots', style: TextStyle(color: AppColors.textHint))
+          Text(context.tr.pickDateToSeeSlots, style: const TextStyle(color: AppColors.textHint))
         else if (loading)
           const ShimmerBox(height: 80, width: double.infinity)
         else if (availability == null || availability!.slots.isEmpty)
-          const Text('No slots for this date', style: TextStyle(color: AppColors.textHint))
+          Text(context.tr.noSlotsForDate, style: const TextStyle(color: AppColors.textHint))
         else
           Wrap(
             spacing: 8,
@@ -679,7 +924,7 @@ class _FormatStep extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        const Text('Match format', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+        Text(context.tr.matchFormat, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -696,12 +941,12 @@ class _FormatStep extends StatelessWidget {
         if (selectedFormat != null) ...[
           const SizedBox(height: 8),
           Text(
-            '${maxPlayersForFormat(selectedFormat!)} players max',
+            context.tr.playersMax(maxPlayersForFormat(selectedFormat!)),
             style: const TextStyle(color: AppColors.textHint, fontSize: 12),
           ),
         ],
         const SizedBox(height: 20),
-        const Text('Age range', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+        Text(context.tr.ageRange, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
         Row(
           children: [
             Expanded(
@@ -724,7 +969,7 @@ class _FormatStep extends StatelessWidget {
             ),
           ],
         ),
-        const Text('Gender', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+        Text(context.tr.gender, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,

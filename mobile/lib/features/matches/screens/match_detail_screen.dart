@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/auth/auth_storage.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
+import 'package:kickpro/features/matches/services/match_reminder_service.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
@@ -37,7 +39,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
     try {
       await ref.read(matchRepositoryProvider).requestToJoin(widget.matchId);
       await _refresh();
-      if (mounted) showKickproToast(context, 'Join request sent');
+      if (mounted) showKickproToast(context, ref.tr.joinRequestSent);
     } catch (e) {
       if (mounted) showKickproToast(context, e.toString(), isError: true);
     } finally {
@@ -66,7 +68,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
     try {
       await ref.read(matchRepositoryProvider).completeMatch(widget.matchId);
       await _refresh();
-      if (mounted) showKickproToast(context, 'Match completed — rate your teammates!');
+      if (mounted) showKickproToast(context, ref.tr.matchCompletedToast);
     } catch (e) {
       if (mounted) showKickproToast(context, e.toString(), isError: true);
     } finally {
@@ -79,11 +81,11 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Cancel match?', style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text('This cannot be undone.', style: TextStyle(color: AppColors.textSecondary)),
+        title: Text(ref.tr.cancelMatchTitle, style: const TextStyle(color: AppColors.textPrimary)),
+        content: Text(ref.tr.cancelMatchBody, style: const TextStyle(color: AppColors.textSecondary)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Cancel match')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(ref.tr.keep)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(ref.tr.cancelMatchBtn)),
         ],
       ),
     );
@@ -93,7 +95,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
     try {
       await ref.read(matchRepositoryProvider).cancelMatch(widget.matchId);
       await _refresh();
-      if (mounted) showKickproToast(context, 'Match cancelled');
+      if (mounted) showKickproToast(context, ref.tr.matchCancelledToast);
     } catch (e) {
       if (mounted) showKickproToast(context, e.toString(), isError: true);
     } finally {
@@ -110,7 +112,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
-        title: const Text('Match Details'),
+        title: Text(ref.tr.matchDetailsTitle),
       ),
       body: matchAsync.when(
         loading: () => const Center(child: ShimmerBox(height: 200, width: double.infinity)),
@@ -122,7 +124,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
               children: [
                 Text(e.toString(), style: const TextStyle(color: AppColors.error)),
                 const SizedBox(height: 12),
-                KickproButton(label: 'Retry', onPressed: _refresh),
+                KickproButton(label: ref.tr.retry, onPressed: _refresh),
               ],
             ),
           ),
@@ -150,6 +152,13 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
             final canChat = match.chatRoomId != null && isApproved;
             final canRate = match.isCompleted && isApproved;
 
+            if (isApproved) {
+              ref.read(matchReminderServiceProvider).syncApprovedMatches(
+                    matches: [match],
+                    myProfileId: myProfile.id,
+                  );
+            }
+
             return RefreshIndicator(
               onRefresh: _refresh,
               child: ListView(
@@ -157,7 +166,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
                 children: [
                   _InfoCard(match: match),
                   const SizedBox(height: 16),
-                  const Text('Players', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                  Text(ref.tr.players, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   ...match.participants.map((p) => _ParticipantTile(
                         participant: p,
@@ -167,16 +176,22 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
                         onReject: () => _review(p, ParticipantStatus.rejected),
                       )),
                   const SizedBox(height: 24),
-                  if (!isOrganizer && match.isOpen && myParticipant == null)
-                    KickproButton(label: 'Request to Join', isLoading: _acting, onPressed: _join),
+                  if (!isOrganizer && match.isOpen && myParticipant == null && myProfile.injured)
+                    Text(
+                      ref.tr.cannotJoinWhileInjured,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.error),
+                    ),
+                  if (!isOrganizer && match.isOpen && myParticipant == null && !myProfile.injured)
+                    KickproButton(label: ref.tr.requestToJoin, isLoading: _acting, onPressed: _join),
                   if (myParticipant?.status == ParticipantStatus.pending)
-                    const Text('Your join request is pending approval.',
-                        textAlign: TextAlign.center, style: TextStyle(color: AppColors.gold)),
+                    Text(ref.tr.joinPending,
+                        textAlign: TextAlign.center, style: const TextStyle(color: AppColors.gold)),
                   if (isOrganizer && !match.isCompleted && match.status != MatchStatus.cancelled) ...[
-                    KickproButton(label: 'Mark as Completed', isLoading: _acting, onPressed: _complete),
+                    KickproButton(label: ref.tr.markCompleted, isLoading: _acting, onPressed: _complete),
                     const SizedBox(height: 8),
                     KickproButton(
-                      label: 'Cancel Match',
+                      label: ref.tr.cancelMatch,
                       variant: KickproButtonVariant.ghost,
                       isLoading: _acting,
                       onPressed: _cancel,
@@ -185,14 +200,14 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen> {
                   if (canChat) ...[
                     const SizedBox(height: 8),
                     KickproButton(
-                      label: 'Open Chat',
+                      label: ref.tr.openChat,
                       onPressed: () => context.push('/matches/${match.id}/chat'),
                     ),
                   ],
                   if (canRate) ...[
                     const SizedBox(height: 8),
                     KickproButton(
-                      label: 'Rate Players',
+                      label: ref.tr.ratePlayers,
                       onPressed: () => context.push('/matches/${match.id}/rate'),
                     ),
                   ],
@@ -230,10 +245,10 @@ class _InfoCard extends StatelessWidget {
           Text(match.stadiumLocation, style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 12),
           _Row(icon: Icons.calendar_today, label: '${d.day}/${d.month}/${d.year} at ${d.hour}:${d.minute.toString().padLeft(2, '0')}'),
-          _Row(icon: Icons.groups, label: '${match.approvedCount}/${match.maxPlayers} players confirmed'),
-          _Row(icon: Icons.cake_outlined, label: 'Ages ${match.minAge}–${match.maxAge}'),
+          _Row(icon: Icons.groups, label: context.tr.nPlayersConfirmed(match.approvedCount, match.maxPlayers)),
+          _Row(icon: Icons.cake_outlined, label: context.tr.agesRange(match.minAge, match.maxAge)),
           _Row(icon: Icons.wc_outlined, label: match.gender.label),
-          _Row(icon: Icons.person, label: 'Organizer: ${match.organizerName}'),
+          _Row(icon: Icons.person, label: context.tr.organizerName(match.organizerName)),
         ],
       ),
     );
@@ -278,10 +293,11 @@ class _ParticipantTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
     final (statusColor, statusLabel) = switch (participant.status) {
-      ParticipantStatus.approved => (AppColors.success, 'Approved'),
-      ParticipantStatus.pending => (AppColors.gold, 'Pending'),
-      ParticipantStatus.rejected => (AppColors.error, 'Rejected'),
+      ParticipantStatus.approved => (AppColors.success, tr.approved),
+      ParticipantStatus.pending => (AppColors.gold, tr.pending),
+      ParticipantStatus.rejected => (AppColors.error, tr.rejected),
     };
 
     return InkWell(

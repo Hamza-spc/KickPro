@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/navigation_helpers.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/courses/data/course_repository.dart';
@@ -31,7 +32,7 @@ class _CourseQuizScreenState extends ConsumerState<CourseQuizScreen> {
 
   Future<void> _submit(CourseQuiz quiz) async {
     if (_selectedAnswers.length != quiz.questions.length) {
-      showKickproToast(context, 'Please answer all questions', isError: true);
+      showKickproToast(context, ref.tr.answerAllQuestions, isError: true);
       return;
     }
 
@@ -78,12 +79,12 @@ class _CourseQuizScreenState extends ConsumerState<CourseQuizScreen> {
         body: SafeArea(
           child: quizAsync.when(
             loading: () => _QuizHeader(
-              title: 'Course Quiz',
+              title: ref.tr.courseQuiz,
               onBack: _goBack,
               body: const Center(child: ShimmerBox(height: 200, width: double.infinity)),
             ),
             error: (error, _) => _QuizHeader(
-              title: 'Course Quiz',
+              title: ref.tr.courseQuiz,
               onBack: _goBack,
               body: Center(
                 child: Text(apiErrorMessage(error), style: const TextStyle(color: AppColors.error)),
@@ -187,10 +188,10 @@ class _QuizForm extends StatelessWidget {
                 onPressed: onBack,
                 icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               ),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Course Quiz',
-                  style: TextStyle(
+                  context.tr.courseQuiz,
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -221,7 +222,7 @@ class _QuizForm extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(16),
           child: KickproButton(
-            label: 'Submit Quiz',
+            label: context.tr.submitQuiz,
             isLoading: submitting,
             onPressed: onSubmit,
           ),
@@ -257,7 +258,7 @@ class _QuestionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Question $index',
+            context.tr.questionN(index),
             style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
@@ -338,10 +339,10 @@ class _QuizResultView extends StatelessWidget {
                 onPressed: onBack,
                 icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               ),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Quiz Result',
-                  style: TextStyle(
+                  context.tr.quizResult,
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -364,7 +365,7 @@ class _QuizResultView extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  passed ? 'Quiz Passed!' : 'Keep Practising',
+                  passed ? context.tr.quizPassed : context.tr.keepPractising,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 24,
@@ -373,7 +374,7 @@ class _QuizResultView extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${result.scorePercent}% (${result.correctCount}/${result.totalQuestions} correct)',
+                  context.tr.quizScore(result.scorePercent, result.correctCount, result.totalQuestions),
                   style: const TextStyle(color: AppColors.textSecondary),
                 ),
                 if (result.certificationEarned) ...[
@@ -387,9 +388,9 @@ class _QuizResultView extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        const Text(
-                          'Certification Earned',
-                          style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700),
+                        Text(
+                          context.tr.certificationEarned,
+                          style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700),
                         ),
                         if (result.certification != null) ...[
                           const SizedBox(height: 4),
@@ -404,7 +405,7 @@ class _QuizResultView extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 32),
-                KickproButton(label: 'Back to Course', onPressed: onDone),
+                KickproButton(label: context.tr.backToCourse, onPressed: onDone),
               ],
             ),
           ),

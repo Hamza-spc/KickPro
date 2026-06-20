@@ -50,6 +50,12 @@ class PlayerProfile {
   final int followingCount;
   final bool following;
   final bool ownProfile;
+  final bool injured;
+  final String? injuryType;
+  final String? injuryBodyPart;
+  final String? injurySeverity;
+  final String? referralCode;
+  final int referralCount;
 
   const PlayerProfile({
     required this.id,
@@ -68,6 +74,12 @@ class PlayerProfile {
     this.followingCount = 0,
     this.following = false,
     this.ownProfile = false,
+    this.injured = false,
+    this.injuryType,
+    this.injuryBodyPart,
+    this.injurySeverity,
+    this.referralCode,
+    this.referralCount = 0,
   });
 
   factory PlayerProfile.fromJson(Map<String, dynamic> json) {
@@ -88,6 +100,12 @@ class PlayerProfile {
       followingCount: (json['followingCount'] as num?)?.toInt() ?? 0,
       following: json['following'] as bool? ?? false,
       ownProfile: json['ownProfile'] as bool? ?? false,
+      injured: json['injured'] as bool? ?? false,
+      injuryType: json['injuryType'] as String?,
+      injuryBodyPart: json['injuryBodyPart'] as String?,
+      injurySeverity: json['injurySeverity'] as String?,
+      referralCode: json['referralCode'] as String?,
+      referralCount: (json['referralCount'] as num?)?.toInt() ?? 0,
     );
   }
 

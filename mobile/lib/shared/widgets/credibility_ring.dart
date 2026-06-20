@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 
 class CredibilityRing extends StatelessWidget {
@@ -26,16 +27,16 @@ class CredibilityRing extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                score.round().toString(),
-                style: const TextStyle(
+                '${score.round()}/100',
+                style: TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 22,
+                  fontSize: size > 80 ? 22 : 18,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const Text(
-                'Score',
-                style: TextStyle(color: AppColors.textHint, fontSize: 11),
+              Text(
+                context.tr.score,
+                style: const TextStyle(color: AppColors.textHint, fontSize: 11),
               ),
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/courses/data/course_repository.dart';
 import 'package:kickpro/features/search/data/search_repository.dart';
@@ -97,18 +98,18 @@ class _PlayerPreviewContent extends StatelessWidget {
         const SizedBox(height: 16),
         CredibilityScoreCard(score: profile.credibilityScore, compact: true),
         const SizedBox(height: 16),
-        _InfoTile(label: 'Preferred foot', value: profile.preferredFoot.name.toUpperCase()),
-        _InfoTile(label: 'Height', value: '${profile.height} cm'),
-        _InfoTile(label: 'Weight', value: '${profile.weight} kg'),
+        _InfoTile(label: context.tr.preferredFoot, value: profile.preferredFoot.name.toUpperCase()),
+        _InfoTile(label: context.tr.height, value: '${profile.height} cm'),
+        _InfoTile(label: context.tr.weight, value: '${profile.weight} kg'),
         if (profile.bio != null && profile.bio!.isNotEmpty) ...[
           const SizedBox(height: 12),
-          const Text('Bio', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+          Text(context.tr.bio, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           Text(profile.bio!, style: const TextStyle(color: AppColors.textSecondary, height: 1.4)),
         ],
         if (certifications.isNotEmpty) ...[
           const SizedBox(height: 16),
-          const Text('Certifications', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+          Text(context.tr.certifications, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           ...certifications.map(
             (cert) => Padding(

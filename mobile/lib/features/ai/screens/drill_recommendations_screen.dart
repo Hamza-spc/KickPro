@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/ai/data/ai_repository.dart';
 import 'package:kickpro/shared/models/ai_models.dart';
@@ -34,10 +35,10 @@ class DrillRecommendationsScreen extends ConsumerWidget {
                   ),
                   const KickproChatbotLogo(size: 24),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Recommended Drills',
-                      style: TextStyle(
+                      ref.tr.recommendedDrills,
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -81,9 +82,9 @@ class DrillRecommendationsScreen extends ConsumerWidget {
                         ),
                       ),
                     if (data.recommendations.isEmpty)
-                      const Text(
-                        'No drill recommendations right now. Complete your skills profile first.',
-                        style: TextStyle(color: AppColors.textSecondary),
+                      Text(
+                        ref.tr.noDrillRecommendations,
+                        style: const TextStyle(color: AppColors.textSecondary),
                       )
                     else
                       ...data.recommendations.map(

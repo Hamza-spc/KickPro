@@ -17,6 +17,7 @@ public class MatchResponse {
     private Long stadiumId;
     private String stadiumName;
     private String stadiumLocation;
+    private String stadiumCoverPhotoUrl;
     private Long organizerId;
     private String organizerName;
     private LocalDateTime dateTime;

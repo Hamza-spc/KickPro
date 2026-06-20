@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/videos/data/post_repository.dart';
@@ -75,7 +76,7 @@ class _CommentsSheetState extends ConsumerState<_CommentsSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Comments', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+          Text(context.tr.comments, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           Flexible(
             child: FutureBuilder<List<PostComment>>(
@@ -89,7 +90,7 @@ class _CommentsSheetState extends ConsumerState<_CommentsSheet> {
                 }
                 final comments = snapshot.data ?? [];
                 if (comments.isEmpty) {
-                  return const Text('No comments yet', style: TextStyle(color: AppColors.textSecondary));
+                  return Text(context.tr.noCommentsYet, style: const TextStyle(color: AppColors.textSecondary));
                 }
                 return ListView.separated(
                   shrinkWrap: true,
@@ -119,8 +120,8 @@ class _CommentsSheetState extends ConsumerState<_CommentsSheet> {
               Expanded(
                 child: KickproTextField(
                   controller: _textController,
-                  label: 'Comment',
-                  hint: 'Add a comment...',
+                  label: context.tr.commentLabel,
+                  hint: context.tr.addCommentHint,
                 ),
               ),
               const SizedBox(width: 8),

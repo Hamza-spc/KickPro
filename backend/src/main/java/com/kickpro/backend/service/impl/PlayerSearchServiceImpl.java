@@ -7,8 +7,10 @@ import com.kickpro.backend.entity.PreferredFoot;
 import com.kickpro.backend.entity.Skills;
 import com.kickpro.backend.entity.SubmissionStatus;
 import com.kickpro.backend.entity.DrillSubmission;
+import com.kickpro.backend.entity.ParticipantStatus;
 import com.kickpro.backend.repository.CertificationRepository;
 import com.kickpro.backend.repository.DrillSubmissionRepository;
+import com.kickpro.backend.repository.MatchParticipantRepository;
 import com.kickpro.backend.repository.PlayerProfileRepository;
 import com.kickpro.backend.repository.PlayerProfileSpecifications;
 import com.kickpro.backend.repository.SkillsRepository;
@@ -32,6 +34,7 @@ public class PlayerSearchServiceImpl implements PlayerSearchService {
     private final SkillsRepository skillsRepository;
     private final CertificationRepository certificationRepository;
     private final DrillSubmissionRepository drillSubmissionRepository;
+    private final MatchParticipantRepository matchParticipantRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -86,49 +89,104 @@ public class PlayerSearchServiceImpl implements PlayerSearchService {
         Map<Long, Long> certificationCounts = profileIds.stream()
                 .collect(Collectors.toMap(id -> id, certificationRepository::countByPlayerId));
 
+        Map<Long, Long> approvedMatchCounts = profileIds.stream()
+                .collect(Collectors.toMap(
+                        id -> id,
+                        id -> matchParticipantRepository.countByPlayerIdAndStatus(id, ParticipantStatus.APPROVED)
+                ));
+
         Map<Long, List<DrillSubmission>> drillSubmissionsByProfile = profileIds.stream()
                 .collect(Collectors.toMap(id -> id, drillSubmissionRepository::findByPlayerId));
 
-        return profiles.map(profile -> {
-            List<DrillSubmission> approvedDrills = drillSubmissionsByProfile
-                    .getOrDefault(profile.getId(), List.of()).stream()
-                    .filter(submission -> submission.getStatus() == SubmissionStatus.APPROVED)
-                    .toList();
+        return profiles.map(profile -> mapProfile(
+                profile,
+                skillsByProfileId,
+                certificationCounts,
+                approvedMatchCounts,
+                drillSubmissionsByProfile
+        ));
+    }
 
-            Double averageDrillScore = approvedDrills.isEmpty()
-                    ? null
-                    : approvedDrills.stream()
-                            .mapToInt(DrillSubmission::getScore)
-                            .average()
-                            .orElse(0.0);
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlayerSearchResultResponse> toSearchResults(List<PlayerProfile> profiles) {
+        if (profiles.isEmpty()) {
+            return List.of();
+        }
+        List<Long> profileIds = profiles.stream().map(PlayerProfile::getId).toList();
 
-            Skills skills = skillsByProfileId.get(profile.getId());
-            PlayerSearchResultResponse.SkillsSummary skillsSummary = skills == null
-                    ? null
-                    : PlayerSearchResultResponse.SkillsSummary.builder()
-                            .dribbling(skills.getDribbling())
-                            .shooting(skills.getShooting())
-                            .passing(skills.getPassing())
-                            .speed(skills.getSpeed())
-                            .heading(skills.getHeading())
-                            .stamina(skills.getStamina())
-                            .build();
+        Map<Long, Skills> skillsByProfileId = skillsRepository.findByPlayerProfileIdIn(profileIds).stream()
+                .collect(Collectors.toMap(skills -> skills.getPlayerProfile().getId(), skills -> skills));
 
-            return PlayerSearchResultResponse.builder()
-                    .profileId(profile.getId())
-                    .fullName(profile.getFullName())
-                    .city(profile.getCity())
-                    .position(profile.getPosition())
-                    .preferredFoot(profile.getPreferredFoot())
-                    .dateOfBirth(profile.getDateOfBirth())
-                    .profilePhotoUrl(profile.getProfilePhotoUrl())
-                    .credibilityScore(profile.getCredibilityScore())
-                    .certificationCount(certificationCounts.getOrDefault(profile.getId(), 0L))
-                    .approvedDrillCount(approvedDrills.size())
-                    .averageDrillScore(averageDrillScore)
-                    .skills(skillsSummary)
-                    .build();
-        });
+        Map<Long, Long> certificationCounts = profileIds.stream()
+                .collect(Collectors.toMap(id -> id, certificationRepository::countByPlayerId));
+
+        Map<Long, Long> approvedMatchCounts = profileIds.stream()
+                .collect(Collectors.toMap(
+                        id -> id,
+                        id -> matchParticipantRepository.countByPlayerIdAndStatus(id, ParticipantStatus.APPROVED)
+                ));
+
+        Map<Long, List<DrillSubmission>> drillSubmissionsByProfile = profileIds.stream()
+                .collect(Collectors.toMap(id -> id, drillSubmissionRepository::findByPlayerId));
+
+        return profiles.stream()
+                .map(profile -> mapProfile(
+                        profile,
+                        skillsByProfileId,
+                        certificationCounts,
+                        approvedMatchCounts,
+                        drillSubmissionsByProfile
+                ))
+                .toList();
+    }
+
+    private PlayerSearchResultResponse mapProfile(
+            PlayerProfile profile,
+            Map<Long, Skills> skillsByProfileId,
+            Map<Long, Long> certificationCounts,
+            Map<Long, Long> approvedMatchCounts,
+            Map<Long, List<DrillSubmission>> drillSubmissionsByProfile
+    ) {
+        List<DrillSubmission> approvedDrills = drillSubmissionsByProfile
+                .getOrDefault(profile.getId(), List.of()).stream()
+                .filter(submission -> submission.getStatus() == SubmissionStatus.APPROVED)
+                .toList();
+
+        Double averageDrillScore = approvedDrills.isEmpty()
+                ? null
+                : approvedDrills.stream()
+                        .mapToInt(DrillSubmission::getScore)
+                        .average()
+                        .orElse(0.0);
+
+        Skills skills = skillsByProfileId.get(profile.getId());
+        PlayerSearchResultResponse.SkillsSummary skillsSummary = skills == null
+                ? null
+                : PlayerSearchResultResponse.SkillsSummary.builder()
+                        .dribbling(skills.getDribbling())
+                        .shooting(skills.getShooting())
+                        .passing(skills.getPassing())
+                        .speed(skills.getSpeed())
+                        .heading(skills.getHeading())
+                        .stamina(skills.getStamina())
+                        .build();
+
+        return PlayerSearchResultResponse.builder()
+                .profileId(profile.getId())
+                .fullName(profile.getFullName())
+                .city(profile.getCity())
+                .position(profile.getPosition())
+                .preferredFoot(profile.getPreferredFoot())
+                .dateOfBirth(profile.getDateOfBirth())
+                .profilePhotoUrl(profile.getProfilePhotoUrl())
+                .credibilityScore(profile.getCredibilityScore())
+                .certificationCount(certificationCounts.getOrDefault(profile.getId(), 0L))
+                .approvedDrillCount(approvedDrills.size())
+                .approvedMatchCount(approvedMatchCounts.getOrDefault(profile.getId(), 0L))
+                .averageDrillScore(averageDrillScore)
+                .skills(skillsSummary)
+                .build();
     }
 
     @Override

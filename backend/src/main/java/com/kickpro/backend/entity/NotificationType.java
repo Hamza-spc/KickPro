@@ -1,0 +1,16 @@
+package com.kickpro.backend.entity;
+
+public enum NotificationType {
+    MATCH_BOOKED,
+    MATCH_JOIN_REQUEST,
+    MATCH_JOIN_APPROVED,
+    DRILL_APPROVED,
+    DRILL_REJECTED,
+    ANNOUNCEMENT,
+    CHALLENGE,
+    DIRECT_MESSAGE,
+    SQUAD_JOIN_REQUEST,
+    SQUAD_JOIN_APPROVED,
+    SQUAD_JOIN_REJECTED,
+    GENERAL
+}

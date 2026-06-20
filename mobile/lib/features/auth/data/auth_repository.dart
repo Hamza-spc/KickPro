@@ -26,6 +26,7 @@ class AuthRepository {
     required String email,
     required String password,
     required UserRole role,
+    String? referralCode,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.register,
@@ -33,6 +34,8 @@ class AuthRepository {
         'email': email.trim(),
         'password': password,
         'role': role.apiValue,
+        if (referralCode != null && referralCode.trim().isNotEmpty)
+          'referralCode': referralCode.trim(),
       },
     );
     final parsed = ApiResponse.fromJson(

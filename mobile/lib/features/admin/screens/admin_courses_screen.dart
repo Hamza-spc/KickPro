@@ -1,8 +1,10 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
 import 'package:kickpro/features/admin/models/admin_models.dart';
@@ -26,17 +28,21 @@ class AdminCoursesScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
             child: Row(
               children: [
-                const Expanded(
-                  child: Text('Courses', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                Expanded(
+                  child: Text(ref.tr.courses, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/admin/create-course'),
+                  child: Text(ref.tr.createCourseManually),
                 ),
                 TextButton(
                   onPressed: () => context.push('/admin/generate-course'),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      KickproChatbotLogo(size: 18),
-                      SizedBox(width: 6),
-                      Text('AI + Create'),
+                      const KickproChatbotLogo(size: 18),
+                      const SizedBox(width: 6),
+                      Text(ref.tr.aiPlusCreate),
                     ],
                   ),
                 ),
@@ -61,6 +67,58 @@ class AdminCoursesScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+Future<void> _pickAndUploadMedia(
+  BuildContext context,
+  WidgetRef ref,
+  int courseId,
+  int lessonId,
+) async {
+  final choice = await showModalBottomSheet<String>(
+    context: context,
+    backgroundColor: AppColors.surface,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.perm_media_outlined, color: AppColors.accent),
+            title: Text(context.tr.chooseImageOrVideo),
+            onTap: () => Navigator.pop(ctx, 'media'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined, color: AppColors.accent),
+            title: Text(context.tr.chooseDocument),
+            onTap: () => Navigator.pop(ctx, 'document'),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (choice == null || !context.mounted) return;
+
+  String? filePath;
+  if (choice == 'media') {
+    final picked = await ImagePicker().pickMedia();
+    filePath = picked?.path;
+  } else {
+    final picked = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
+    );
+    filePath = picked?.files.single.path;
+  }
+
+  if (filePath == null || !context.mounted) return;
+
+  try {
+    await ref.read(adminRepositoryProvider).uploadLessonMedia(courseId, lessonId, filePath);
+    ref.invalidate(adminCoursesProvider);
+    if (context.mounted) showKickproToast(context, ref.tr.lessonMediaUploaded);
+  } catch (e) {
+    if (context.mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
   }
 }
 
@@ -90,23 +148,12 @@ class _CourseCard extends ConsumerWidget {
               dense: true,
               title: Text('${lesson.orderIndex}. ${lesson.title}', style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
               subtitle: Text(
-                lesson.mediaUrl == null ? 'No media attached' : '${lesson.mediaType ?? 'MEDIA'} attached',
+                lesson.mediaUrl == null ? ref.tr.noMediaAttached : '${lesson.mediaType ?? 'MEDIA'} attached',
                 style: const TextStyle(color: AppColors.textHint, fontSize: 11),
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.upload_file, size: 20, color: AppColors.accent),
-                onPressed: () async {
-                  final picker = ImagePicker();
-                  final file = await picker.pickMedia();
-                  if (file == null) return;
-                  try {
-                    await ref.read(adminRepositoryProvider).uploadLessonMedia(course.id, lesson.id, file.path);
-                    ref.invalidate(adminCoursesProvider);
-                    if (context.mounted) showKickproToast(context, 'Lesson media uploaded');
-                  } catch (e) {
-                    if (context.mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
-                  }
-                },
+                onPressed: () => _pickAndUploadMedia(context, ref, course.id, lesson.id),
               ),
             ),
           ),
@@ -121,7 +168,7 @@ class _CourseCard extends ConsumerWidget {
                   if (context.mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
                 }
               },
-              child: const Text('Delete course', style: TextStyle(color: AppColors.error)),
+              child: Text(ref.tr.deleteCourse, style: const TextStyle(color: AppColors.error)),
             ),
           ),
         ],

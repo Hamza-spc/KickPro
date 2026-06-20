@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -35,9 +36,9 @@ class _AdminStadiumMapPickerState extends State<AdminStadiumMapPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Map location', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+        Text(context.tr.mapLocation, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
-        const Text('Tap the map to drop a pin', style: TextStyle(color: AppColors.textHint, fontSize: 12)),
+        Text(context.tr.tapMapToPin, style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
         const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(12),

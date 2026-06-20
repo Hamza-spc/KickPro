@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
 import 'package:kickpro/features/matches/screens/book_match_flow.dart';
+import 'package:kickpro/features/matches/services/match_reminder_service.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
@@ -38,32 +40,22 @@ class MatchBookingScreen extends ConsumerStatefulWidget {
 
 class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
   int _tabIndex = 0;
-  String? _selectedCity;
-  bool _cityInitialized = false;
+  String? _selectedCity = kMatchCities.first;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDefaultCity());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _applyProfileCity());
   }
 
-  Future<void> _loadDefaultCity() async {
-    if (_cityInitialized) return;
+  Future<void> _applyProfileCity() async {
     try {
       final profile = await ref.read(profileRepositoryProvider).getMyProfile();
       if (!mounted) return;
-      setState(() {
-        _selectedCity = kMatchCities.contains(profile.city) ? profile.city : kMatchCities.first;
-        _cityInitialized = true;
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _selectedCity = kMatchCities.first;
-          _cityInitialized = true;
-        });
+      if (kMatchCities.contains(profile.city)) {
+        setState(() => _selectedCity = profile.city);
       }
-    }
+    } catch (_) {}
   }
 
   Future<void> _refresh() async {
@@ -75,17 +67,30 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
     await Navigator.push<void>(
       context,
       MaterialPageRoute(
-        builder: (_) => BookMatchFlowScreen(onBooked: _refresh),
+        builder: (_) => BookMatchFlowScreen(
+          initialCity: _selectedCity,
+          onBooked: _refresh,
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(myMatchesProvider, (previous, next) {
+      next.whenData((matches) async {
+        try {
+          final profile = await ref.read(profileRepositoryProvider).getMyProfile();
+          await ref.read(matchReminderServiceProvider).syncApprovedMatches(
+                matches: matches,
+                myProfileId: profile.id,
+              );
+        } catch (_) {}
+      });
+    });
+
     final matchesAsync = _tabIndex == 0
-        ? (_cityInitialized
-            ? ref.watch(openMatchesProvider(_selectedCity))
-            : const AsyncLoading<List<FootballMatch>>())
+        ? ref.watch(openMatchesProvider(_selectedCity))
         : ref.watch(myMatchesProvider);
 
     return Scaffold(
@@ -93,23 +98,34 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
         onPressed: _openBookSheet,
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Book Match', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        label: Text(ref.tr.bookMatch, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
       ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refresh,
           child: CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 24, 24, 8),
-                  child: Text(
-                    'Matches',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          ref.tr.matches,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => context.push('/announcements'),
+                        icon: const Icon(Icons.campaign_outlined, color: AppColors.accent),
+                        tooltip: ref.tr.announcements,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -119,13 +135,13 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
                   child: Row(
                     children: [
                       _TabChip(
-                        label: 'Open',
+                        label: ref.tr.open,
                         selected: _tabIndex == 0,
                         onTap: () => setState(() => _tabIndex = 0),
                       ),
                       const SizedBox(width: 8),
                       _TabChip(
-                        label: 'My Matches',
+                        label: ref.tr.myMatches,
                         selected: _tabIndex == 1,
                         onTap: () => setState(() => _tabIndex = 1),
                       ),
@@ -133,7 +149,7 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
                   ),
                 ),
               ),
-              if (_tabIndex == 0 && _cityInitialized) ...[
+              if (_tabIndex == 0) ...[
                 SliverToBoxAdapter(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -169,7 +185,7 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
                       children: [
                         Text(error.toString(), style: const TextStyle(color: AppColors.error)),
                         const SizedBox(height: 12),
-                        KickproButton(label: 'Retry', onPressed: _refresh),
+                        KickproButton(label: ref.tr.retry, onPressed: _refresh),
                       ],
                     ),
                   ),
@@ -189,8 +205,8 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
                             const SizedBox(height: 12),
                             Text(
                               _tabIndex == 0
-                                  ? 'No open matches nearby yet.\nBe the first to book one!'
-                                  : 'You have no matches yet.\nTap Book Match to create one.',
+                                  ? ref.tr.noOpenMatches
+                                  : ref.tr.noMyMatches,
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: AppColors.textSecondary),
                             ),
@@ -265,56 +281,124 @@ class _MatchCard extends StatelessWidget {
     final dateLabel =
         '${date.day}/${date.month}/${date.year} · ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border, width: 0.5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    match.stadiumName,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+    final cover = match.stadiumCoverPhotoUrl;
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border, width: 0.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 120,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (cover != null && cover.isNotEmpty)
+                      Image.network(cover, fit: BoxFit.cover)
+                    else
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF1A2744), Color(0xFF0D2137)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.stadium_outlined, color: AppColors.textHint, size: 34),
+                        ),
+                      ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withValues(alpha: 0.0),
+                            Colors.black.withValues(alpha: 0.55),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      top: 12,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              match.stadiumName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          _StatusBadge(status: match.status),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      bottom: 10,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.schedule, size: 14, color: Colors.white70),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              dateLabel,
+                              style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          _AvatarStack(count: match.approvedCount, max: match.maxPlayers, compact: true),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                _StatusBadge(status: match.status),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(match.stadiumLocation, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-            const SizedBox(height: 6),
-            Text(
-              'Ages ${match.minAge}–${match.maxAge} · ${match.gender.label}',
-              style: const TextStyle(color: AppColors.textHint, fontSize: 12),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(Icons.schedule, size: 14, color: AppColors.accent),
-                const SizedBox(width: 4),
-                Text(dateLabel, style: const TextStyle(color: AppColors.accent, fontSize: 12)),
-                const Spacer(),
-                _AvatarStack(count: match.approvedCount, max: match.maxPlayers),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Organizer: ${match.organizerName}',
-              style: const TextStyle(color: AppColors.textHint, fontSize: 12),
-            ),
-          ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      match.stadiumLocation,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${context.tr.agesRange(match.minAge, match.maxAge)} · ${context.tr.matchGenderLabel(match.gender)}',
+                      style: const TextStyle(color: AppColors.textHint, fontSize: 12),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      context.tr.organizerName(match.organizerName),
+                      style: const TextStyle(color: AppColors.textHint, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -328,11 +412,12 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
     final (label, color, bg) = switch (status) {
-      MatchStatus.open => ('OPEN', AppColors.accent, const Color(0xFF1E3A5F)),
-      MatchStatus.full => ('FULL', AppColors.gold, const Color(0xFF2D1F00)),
-      MatchStatus.completed => ('DONE', AppColors.success, const Color(0xFF052E16)),
-      MatchStatus.cancelled => ('CANCELLED', AppColors.error, const Color(0xFF2D0707)),
+      MatchStatus.open => (tr.statusOpen, AppColors.accent, const Color(0xFF1E3A5F)),
+      MatchStatus.full => (tr.statusFull, AppColors.gold, const Color(0xFF2D1F00)),
+      MatchStatus.completed => (tr.statusDone, AppColors.success, const Color(0xFF052E16)),
+      MatchStatus.cancelled => (tr.statusCancelled, AppColors.error, const Color(0xFF2D0707)),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -343,30 +428,49 @@ class _StatusBadge extends StatelessWidget {
 }
 
 class _AvatarStack extends StatelessWidget {
-  const _AvatarStack({required this.count, required this.max});
+  const _AvatarStack({required this.count, required this.max, this.compact = false});
 
   final int count;
   final int max;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ...List.generate(count.clamp(0, 3), (i) {
-          return Transform.translate(
-            offset: Offset(-8.0 * i, 0),
-            child: CircleAvatar(
-              radius: 12,
-              backgroundColor: AppColors.primary,
+        if (!compact)
+          ...List.generate(count.clamp(0, 3), (i) {
+            return Transform.translate(
+              offset: Offset(-8.0 * i, 0),
+              child: CircleAvatar(
+                radius: 12,
+                backgroundColor: AppColors.primary,
+                child: Text(
+                  '${i + 1}',
+                  style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+              ),
+            );
+          }),
+        if (!compact) const SizedBox(width: 4),
+        if (compact)
+          Transform.translate(
+            offset: const Offset(0, 0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              ),
               child: Text(
-                '${i + 1}',
-                style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700),
+                '$count/$max',
+                style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700),
               ),
             ),
-          );
-        }),
-        const SizedBox(width: 4),
-        Text('$count/$max', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          ),
+        if (!compact)
+          Text('$count/$max', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
       ],
     );
   }

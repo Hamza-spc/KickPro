@@ -21,6 +21,7 @@ public class PlayerSearchResultResponse {
     private Double credibilityScore;
     private long certificationCount;
     private long approvedDrillCount;
+    private long approvedMatchCount;
     private Double averageDrillScore;
     private SkillsSummary skills;
 

@@ -9,6 +9,7 @@ import com.kickpro.backend.exception.BadRequestException;
 import com.kickpro.backend.exception.UnauthorizedException;
 import com.kickpro.backend.repository.UserRepository;
 import com.kickpro.backend.service.AuthService;
+import com.kickpro.backend.service.ReferralService;
 import com.kickpro.backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final ReferralService referralService;
 
     @Override
     @Transactional
@@ -43,6 +45,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
+
+        if (request.getRole() == Role.PLAYER && request.getReferralCode() != null) {
+            referralService.applyReferralOnRegister(user.getId(), request.getReferralCode());
+        }
 
         return buildAuthResponse(user);
     }

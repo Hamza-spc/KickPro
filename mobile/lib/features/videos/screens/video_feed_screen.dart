@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kickpro/features/discovery/widgets/discovery_card.dart';
+import 'package:kickpro/features/notifications/data/notification_repository.dart';
 import 'package:kickpro/features/videos/data/post_repository.dart';
 import 'package:kickpro/features/videos/screens/comments_sheet.dart';
 import 'package:kickpro/features/videos/widgets/post_video_player.dart';
@@ -19,6 +23,7 @@ class VideoFeedScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final feedAsync = ref.watch(postFeedProvider);
+    final unreadAsync = ref.watch(unreadCountProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -26,19 +31,51 @@ class VideoFeedScreen extends ConsumerWidget {
           onRefresh: () async => ref.invalidate(postFeedProvider),
           child: CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 24, 24, 8),
-                  child: Text(
-                    'Feed',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          ref.tr.feed,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Stack(
+                        children: [
+                          IconButton(
+                            onPressed: () => context.push('/notifications'),
+                            icon: const Icon(Icons.notifications_outlined, color: AppColors.accent),
+                          ),
+                          unreadAsync.maybeWhen(
+                            data: (count) => count > 0
+                                ? Positioned(
+                                    right: 8,
+                                    top: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                                      child: Text(
+                                        count > 9 ? '9+' : '$count',
+                                        style: const TextStyle(color: Colors.white, fontSize: 9),
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                            orElse: () => const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
+              const SliverToBoxAdapter(child: DiscoveryCard()),
               feedAsync.when(
                 loading: () => const SliverToBoxAdapter(
                   child: Padding(
@@ -54,12 +91,12 @@ class VideoFeedScreen extends ConsumerWidget {
                 ),
                 data: (posts) {
                   if (posts.isEmpty) {
-                    return const SliverToBoxAdapter(
+                    return SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(24),
                         child: Text(
-                          'No posts yet. Tap + to share your first update.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          ref.tr.noPostsYet,
+                          style: const TextStyle(color: AppColors.textSecondary),
                         ),
                       ),
                     );
@@ -146,6 +183,33 @@ class _PostCardState extends ConsumerState<PostCard> {
     await SharePlus.instance.share(ShareParams(text: '${_post.shareText}\n$url'));
   }
 
+  Future<void> _deletePost() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(ref.tr.delete, style: const TextStyle(color: AppColors.textPrimary)),
+        content: Text(ref.tr.confirmDeletePost, style: const TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(ref.tr.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(ref.tr.delete, style: const TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await ref.read(postRepositoryProvider).deletePost(_post.id);
+      ref.invalidate(postFeedProvider);
+      if (mounted) showKickproToast(context, ref.tr.delete);
+    } catch (e) {
+      if (mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
+    }
+  }
+
   Future<void> _editPost() async {
     final controller = TextEditingController(text: _post.title);
     TargetSkill? skill = _post.skillTag;
@@ -154,20 +218,20 @@ class _PostCardState extends ConsumerState<PostCard> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Edit post', style: TextStyle(color: AppColors.textPrimary)),
+        title: Text(ref.tr.editPost, style: const TextStyle(color: AppColors.textPrimary)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              KickproTextField(controller: controller, label: 'Caption', maxLines: 3),
+              KickproTextField(controller: controller, label: ref.tr.caption, maxLines: 3),
               if (_post.postType != PostType.text) ...[
                 const SizedBox(height: 12),
                 DropdownButtonFormField<TargetSkill?>(
                   value: skill,
                   dropdownColor: AppColors.surface,
-                  decoration: const InputDecoration(labelText: 'Skill tag (optional)'),
+                  decoration: InputDecoration(labelText: ref.tr.skillTagOptional),
                   items: [
-                    const DropdownMenuItem<TargetSkill?>(value: null, child: Text('None')),
+                    DropdownMenuItem<TargetSkill?>(value: null, child: Text(ref.tr.none)),
                     ...TargetSkill.values.map(
                       (s) => DropdownMenuItem(value: s, child: Text(s.label)),
                     ),
@@ -179,8 +243,8 @@ class _PostCardState extends ConsumerState<PostCard> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(ref.tr.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(ref.tr.save)),
         ],
       ),
     );
@@ -250,13 +314,18 @@ class _PostCardState extends ConsumerState<PostCard> {
               if (!_post.ownPost)
                 TextButton(
                   onPressed: _toggleFollow,
-                  child: Text(_post.followingAuthor ? 'Following' : 'Follow'),
+                  child: Text(_post.followingAuthor ? ref.tr.following : ref.tr.follow),
                 ),
-              if (_post.ownPost)
+              if (_post.ownPost) ...[
                 IconButton(
                   onPressed: _editPost,
                   icon: const Icon(Icons.edit, size: 18, color: AppColors.textHint),
                 ),
+                IconButton(
+                  onPressed: _deletePost,
+                  icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
@@ -267,6 +336,24 @@ class _PostCardState extends ConsumerState<PostCard> {
               height: (MediaQuery.sizeOf(context).height * 0.75 - 220).clamp(160.0, 320.0),
               width: double.infinity,
               child: PostVideoPlayer(url: _post.cloudinaryUrl!),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () {
+                  final params = {
+                    'videoUrl': _post.cloudinaryUrl!,
+                    if (_post.skillTag != null) 'skillTag': _post.skillTag!.name,
+                  };
+                  context.push(Uri(
+                    path: '/ai/text/video-feedback',
+                    queryParameters: params,
+                  ).toString());
+                },
+                icon: const Icon(Icons.auto_awesome, size: 18, color: AppColors.accent),
+                label: Text(ref.tr.analyzeWithAi),
+              ),
             ),
           ],
           if (_post.postType == PostType.image && _post.cloudinaryUrl != null) ...[
@@ -312,7 +399,7 @@ class _PostCardState extends ConsumerState<PostCard> {
               TextButton.icon(
                 onPressed: _share,
                 icon: const Icon(Icons.share_outlined, size: 18),
-                label: const Text('Share'),
+                label: Text(ref.tr.share),
               ),
             ],
           ),

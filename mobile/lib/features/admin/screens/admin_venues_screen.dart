@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
 import 'package:kickpro/features/admin/widgets/admin_venue_form.dart';
@@ -22,8 +23,8 @@ class AdminVenuesScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
             child: Row(
               children: [
-                const Expanded(
-                  child: Text('Venues', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+                Expanded(
+                  child: Text(ref.tr.venues, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
                 ),
                 IconButton(
                   onPressed: () => showAdminVenueForm(context, ref),
@@ -86,7 +87,7 @@ class AdminVenuesScreen extends ConsumerWidget {
                                   children: [
                                     TextButton(
                                       onPressed: () => showAdminVenueForm(context, ref, venue: venue),
-                                      child: const Text('Edit'),
+                                      child: Text(ref.tr.edit),
                                     ),
                                     TextButton(
                                       onPressed: () async {
@@ -99,7 +100,7 @@ class AdminVenuesScreen extends ConsumerWidget {
                                           }
                                         }
                                       },
-                                      child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+                                      child: Text(ref.tr.delete, style: const TextStyle(color: AppColors.error)),
                                     ),
                                   ],
                                 ),

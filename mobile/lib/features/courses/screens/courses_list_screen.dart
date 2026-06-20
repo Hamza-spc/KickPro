@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/navigation_helpers.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/courses/data/course_repository.dart';
@@ -31,10 +32,10 @@ class CoursesListScreen extends ConsumerWidget {
                         onPressed: () => popCourseFlow(context),
                         icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Certification Courses',
-                          style: TextStyle(
+                          ref.tr.certificationCourses,
+                          style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
@@ -45,12 +46,12 @@ class CoursesListScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    'Complete lessons and pass the final quiz to earn badges that boost your credibility.',
-                    style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+                    ref.tr.courseDescription,
+                    style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
                   ),
                 ),
               ),
@@ -77,10 +78,10 @@ class CoursesListScreen extends ConsumerWidget {
                 ),
                 data: (courses) {
                   if (courses.isEmpty) {
-                    return const SliverFillRemaining(
+                    return SliverFillRemaining(
                       hasScrollBody: false,
                       child: Center(
-                        child: Text('No courses available yet', style: TextStyle(color: AppColors.textHint)),
+                        child: Text(ref.tr.noCoursesYet, style: const TextStyle(color: AppColors.textHint)),
                       ),
                     );
                   }
@@ -155,12 +156,12 @@ class _CourseCard extends StatelessWidget {
                         color: const Color(0xFF2D1F00),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.verified, size: 14, color: AppColors.gold),
-                          SizedBox(width: 4),
-                          Text('Certified', style: TextStyle(color: AppColors.gold, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const Icon(Icons.verified, size: 14, color: AppColors.gold),
+                          const SizedBox(width: 4),
+                          Text(context.tr.certified, style: const TextStyle(color: AppColors.gold, fontSize: 11, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -178,10 +179,10 @@ class _CourseCard extends StatelessWidget {
                 children: [
                   _MetaChip(label: course.level.label),
                   const SizedBox(width: 8),
-                  _MetaChip(label: '${course.lessonCount} lessons'),
+                  _MetaChip(label: context.tr.nLessons(course.lessonCount)),
                   if (course.lessonCount == 0) ...[
                     const SizedBox(width: 8),
-                    const _MetaChip(label: 'Coming soon'),
+                    _MetaChip(label: context.tr.comingSoon),
                   ],
                 ],
               ),

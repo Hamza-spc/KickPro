@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/courses/models/lesson_view_args.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
@@ -63,7 +64,7 @@ class LessonDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            'Lesson ${lesson.orderIndex}',
+                            context.tr.lessonN(lesson.orderIndex),
                             style: const TextStyle(
                               color: AppColors.accent,
                               fontSize: 11,
@@ -79,9 +80,9 @@ class LessonDetailScreen extends StatelessWidget {
                               color: const Color(0xFF2D1F00),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Text(
-                              'Final quiz lesson',
-                              style: TextStyle(
+                            child: Text(
+                              context.tr.finalQuizLesson,
+                              style: const TextStyle(
                                 color: AppColors.gold,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
@@ -108,7 +109,7 @@ class LessonDetailScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: KickproButton(
-                  label: 'Take Final Quiz',
+                  label: context.tr.takeFinalQuiz,
                   onPressed: () => context.push(
                     '/courses/${args.courseId}/lessons/${lesson.id}/quiz',
                   ),

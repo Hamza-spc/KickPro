@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.kickpro.backend.entity.PlayerProfile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface LeaderboardRepository extends Repository<PlayerProfile, Long> {
@@ -15,31 +16,55 @@ public interface LeaderboardRepository extends Repository<PlayerProfile, Long> {
             FROM match_participants mp
             JOIN player_profiles pp ON mp.player_id = pp.id
             WHERE mp.status = 'APPROVED'
+            AND (:city IS NULL OR pp.city = :city)
+            AND (:position IS NULL OR pp.position = :position)
+            AND (:dobCutoff IS NULL OR pp.date_of_birth > :dobCutoff)
             GROUP BY pp.id, pp.full_name, pp.profile_photo_url, pp.city
             ORDER BY metric DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Object[]> findTopByMatchCount(@Param("limit") int limit);
+    List<Object[]> findTopByMatchCount(
+            @Param("limit") int limit,
+            @Param("city") String city,
+            @Param("position") String position,
+            @Param("dobCutoff") LocalDate dobCutoff
+    );
 
     @Query(value = """
             SELECT pp.id, pp.full_name, pp.profile_photo_url, pp.city, COUNT(b.id) AS metric
             FROM badges b
             JOIN player_profiles pp ON b.player_id = pp.id
+            WHERE (:city IS NULL OR pp.city = :city)
+            AND (:position IS NULL OR pp.position = :position)
+            AND (:dobCutoff IS NULL OR pp.date_of_birth > :dobCutoff)
             GROUP BY pp.id, pp.full_name, pp.profile_photo_url, pp.city
             ORDER BY metric DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Object[]> findTopByBadgeCount(@Param("limit") int limit);
+    List<Object[]> findTopByBadgeCount(
+            @Param("limit") int limit,
+            @Param("city") String city,
+            @Param("position") String position,
+            @Param("dobCutoff") LocalDate dobCutoff
+    );
 
     @Query(value = """
             SELECT pp.id, pp.full_name, pp.profile_photo_url, pp.city,
                    AVG((pr.performance_score + pr.punctuality_score + pr.teamwork_score + pr.behavior_score) / 4.0) AS metric
             FROM player_ratings pr
             JOIN player_profiles pp ON pr.rated_player_id = pp.id
+            WHERE (:city IS NULL OR pp.city = :city)
+            AND (:position IS NULL OR pp.position = :position)
+            AND (:dobCutoff IS NULL OR pp.date_of_birth > :dobCutoff)
             GROUP BY pp.id, pp.full_name, pp.profile_photo_url, pp.city
             HAVING COUNT(pr.id) >= 1
             ORDER BY metric DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Object[]> findTopByAverageRating(@Param("limit") int limit);
+    List<Object[]> findTopByAverageRating(
+            @Param("limit") int limit,
+            @Param("city") String city,
+            @Param("position") String position,
+            @Param("dobCutoff") LocalDate dobCutoff
+    );
 }

@@ -1,5 +1,6 @@
 package com.kickpro.backend.service;
 
+import com.kickpro.backend.dto.request.PlayerInjuryRequest;
 import com.kickpro.backend.dto.request.PlayerProfileRequest;
 import com.kickpro.backend.dto.response.PlayerProfileResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,4 +16,6 @@ public interface PlayerProfileService {
     PlayerProfileResponse uploadProfilePhoto(Long userId, MultipartFile file);
 
     PlayerProfileResponse deleteProfilePhoto(Long userId);
+
+    PlayerProfileResponse updateInjury(Long userId, PlayerInjuryRequest request);
 }

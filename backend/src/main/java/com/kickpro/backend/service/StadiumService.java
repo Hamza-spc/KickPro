@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface StadiumService {
 
-    List<StadiumResponse> getAllStadiums(String city);
+    List<StadiumResponse> getAllStadiums(String city, String name);
 
     StadiumResponse getStadiumById(Long stadiumId);
 

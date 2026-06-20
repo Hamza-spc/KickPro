@@ -5,6 +5,7 @@ import com.kickpro.backend.dto.ApiResponse;
 import com.kickpro.backend.dto.request.GenerateCourseRequest;
 import com.kickpro.backend.dto.request.RecoveryPlanRequest;
 import com.kickpro.backend.dto.request.ScoutAssistRequest;
+import com.kickpro.backend.dto.request.VideoFeedbackRequest;
 import com.kickpro.backend.dto.response.AiTextResponse;
 import com.kickpro.backend.dto.response.DrillRecommendationResponse;
 import com.kickpro.backend.dto.response.GeneratedCourseResponse;
@@ -77,5 +78,14 @@ public class AiController {
     ) {
         GeneratedCourseResponse response = aiService.generateCourse(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Course content generated"));
+    }
+
+    @PostMapping("/video-feedback")
+    @PreAuthorize("hasAnyRole('PLAYER', 'SCOUT', 'AGENT', 'ADMIN')")
+    public ResponseEntity<ApiResponse<AiTextResponse>> videoFeedback(
+            @Valid @RequestBody VideoFeedbackRequest request
+    ) {
+        AiTextResponse response = aiService.generateVideoFeedback(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Video scouting report generated"));
     }
 }

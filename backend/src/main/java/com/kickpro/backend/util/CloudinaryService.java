@@ -69,4 +69,16 @@ public class CloudinaryService {
         );
         return result.get("secure_url").toString();
     }
+
+    public String uploadRaw(MultipartFile file, String folder, String publicId) throws IOException {
+        Map<?, ?> result = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", folder,
+                        "public_id", publicId,
+                        "resource_type", "raw"
+                )
+        );
+        return result.get("secure_url").toString();
+    }
 }

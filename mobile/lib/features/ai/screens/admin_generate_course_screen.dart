@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
+import 'package:kickpro/features/admin/data/admin_repository.dart';
+import 'package:kickpro/features/admin/models/admin_course_payload.dart';
 import 'package:kickpro/features/ai/data/ai_repository.dart';
 import 'package:kickpro/shared/models/ai_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
@@ -22,6 +25,7 @@ class _AdminGenerateCourseScreenState extends ConsumerState<AdminGenerateCourseS
   final _descriptionController = TextEditingController();
 
   bool _loading = false;
+  bool _publishing = false;
   GeneratedCourseResponse? _result;
 
   @override
@@ -52,6 +56,27 @@ class _AdminGenerateCourseScreenState extends ConsumerState<AdminGenerateCourseS
     }
   }
 
+  Future<void> _publish() async {
+    final course = _result;
+    if (course == null) return;
+
+    setState(() => _publishing = true);
+    try {
+      await ref.read(adminRepositoryProvider).createCourse(
+            createCoursePayloadFromGenerated(course),
+          );
+      ref.invalidate(adminCoursesProvider);
+      if (mounted) {
+        showKickproToast(context, ref.tr.coursePublished);
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
+    } finally {
+      if (mounted) setState(() => _publishing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,10 +92,10 @@ class _AdminGenerateCourseScreenState extends ConsumerState<AdminGenerateCourseS
                 ),
                 const KickproChatbotLogo(size: 24),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Generate Course',
-                    style: TextStyle(
+                    ref.tr.generateCourseTitle,
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -80,9 +105,9 @@ class _AdminGenerateCourseScreenState extends ConsumerState<AdminGenerateCourseS
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'AI-generated course content preview. Publish via admin API when ready.',
-              style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+            Text(
+              ref.tr.generateCourseSubtitle,
+              style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 24),
             Form(
@@ -92,29 +117,35 @@ class _AdminGenerateCourseScreenState extends ConsumerState<AdminGenerateCourseS
                   TextFormField(
                     controller: _titleController,
                     style: const TextStyle(color: AppColors.textPrimary),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Title required' : null,
-                    decoration: _decoration('Course title'),
+                    validator: (v) => v == null || v.trim().isEmpty ? ref.tr.titleRequired : null,
+                    decoration: _decoration(ref.tr.courseTitle),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _descriptionController,
                     maxLines: 3,
                     style: const TextStyle(color: AppColors.textPrimary),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Description required' : null,
-                    decoration: _decoration('Brief description'),
+                    validator: (v) => v == null || v.trim().isEmpty ? ref.tr.descriptionRequired : null,
+                    decoration: _decoration(ref.tr.briefDescription),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
             KickproButton(
-              label: 'Generate with AI',
+              label: ref.tr.generateWithAi,
               isLoading: _loading,
               onPressed: _submit,
             ),
             if (_result != null) ...[
               const SizedBox(height: 24),
               _CoursePreview(course: _result!),
+              const SizedBox(height: 16),
+              KickproButton(
+                label: ref.tr.publishCourse,
+                isLoading: _publishing,
+                onPressed: _publishing ? null : _publish,
+              ),
             ],
           ],
         ),
@@ -177,7 +208,7 @@ class _CoursePreview extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Lesson ${lesson.orderIndex}: ${lesson.title}',
+                    '${context.tr.lessonN(lesson.orderIndex)}: ${lesson.title}',
                     style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
@@ -189,7 +220,7 @@ class _CoursePreview extends StatelessWidget {
                   ),
                   if (lesson.quiz != null)
                     Text(
-                      '${lesson.quiz!.questions.length} quiz questions',
+                      context.tr.nQuizQuestions(lesson.quiz!.questions.length),
                       style: const TextStyle(color: AppColors.textHint, fontSize: 12),
                     ),
                 ],

@@ -70,6 +70,18 @@ class AiRepository {
     return _parse(response, GeneratedCourseResponse.fromJson);
   }
 
+  Future<AiTextResponse> videoFeedback({required String videoUrl, String? skillTag}) async {
+    final response = await _dio.post(
+      ApiEndpoints.aiVideoFeedback,
+      data: {
+        'videoUrl': videoUrl,
+        if (skillTag != null && skillTag.isNotEmpty) 'skillTag': skillTag,
+      },
+      options: Options(receiveTimeout: _aiTimeout, sendTimeout: _aiTimeout),
+    );
+    return _parse(response, AiTextResponse.fromJson);
+  }
+
   T _parse<T>(
     Response<dynamic> response,
     T Function(Map<String, dynamic> json) fromJson,

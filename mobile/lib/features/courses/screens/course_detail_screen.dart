@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/navigation_helpers.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/courses/data/course_repository.dart';
@@ -23,12 +24,12 @@ class CourseDetailScreen extends ConsumerWidget {
       body: SafeArea(
         child: courseAsync.when(
           loading: () => _CourseScaffold(
-            title: 'Loading...',
+            title: ref.tr.loading,
             onBack: () => popCourseFlow(context),
             body: const Center(child: ShimmerBox(height: 240, width: double.infinity)),
           ),
           error: (error, _) => _CourseScaffold(
-            title: 'Course',
+            title: ref.tr.course,
             onBack: () => popCourseFlow(context),
             body: Center(
               child: Padding(
@@ -141,14 +142,14 @@ class _CourseDetailBody extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
-                              Icon(Icons.emoji_events, color: AppColors.success),
-                              SizedBox(width: 8),
+                              const Icon(Icons.emoji_events, color: AppColors.success),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'You earned this certification!',
-                                  style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w600),
+                                  context.tr.youEarnedCert,
+                                  style: const TextStyle(color: AppColors.success, fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],
@@ -159,14 +160,14 @@ class _CourseDetailBody extends StatelessWidget {
                         style: const TextStyle(color: AppColors.textSecondary, height: 1.5),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Lessons',
-                        style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                      Text(
+                        context.tr.lessons,
+                        style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Tap a lesson to read the full content.',
-                        style: TextStyle(color: AppColors.textHint, fontSize: 12),
+                      Text(
+                        context.tr.tapLessonToRead,
+                        style: const TextStyle(color: AppColors.textHint, fontSize: 12),
                       ),
                       if (!hasContent) ...[
                         const SizedBox(height: 12),
@@ -178,9 +179,9 @@ class _CourseDetailBody extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.border, width: 0.5),
                           ),
-                          child: const Text(
-                            'This course has no lessons yet. An admin needs to add content before you can take the quiz.',
-                            style: TextStyle(color: AppColors.textSecondary, height: 1.45),
+                          child: Text(
+                            context.tr.noLessonsYet,
+                            style: const TextStyle(color: AppColors.textSecondary, height: 1.45),
                           ),
                         ),
                       ],
@@ -211,7 +212,7 @@ class _CourseDetailBody extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: KickproButton(
-              label: 'Take Final Quiz',
+              label: context.tr.takeFinalQuiz,
               onPressed: () => context.push('/courses/${course.id}/lessons/${finalLesson.id}/quiz'),
             ),
           ),
@@ -292,9 +293,9 @@ class _LessonCard extends StatelessWidget {
                         color: const Color(0xFF2D1F00),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Quiz',
-                        style: TextStyle(color: AppColors.gold, fontSize: 10, fontWeight: FontWeight.w600),
+                      child: Text(
+                        context.tr.quiz,
+                        style: const TextStyle(color: AppColors.gold, fontSize: 10, fontWeight: FontWeight.w600),
                       ),
                     ),
                   const SizedBox(width: 4),
@@ -307,9 +308,9 @@ class _LessonCard extends StatelessWidget {
                 style: const TextStyle(color: AppColors.textSecondary, height: 1.45, fontSize: 13),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Tap to read full lesson',
-                style: TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w600),
+              Text(
+                context.tr.tapToReadLesson,
+                style: const TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w600),
               ),
             ],
           ),

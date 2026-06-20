@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
@@ -56,7 +57,7 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
 
   Future<void> _submit() async {
     if (_selectedPlayerId == null) {
-      showKickproToast(context, 'Select a player to rate', isError: true);
+      showKickproToast(context, ref.tr.selectPlayerToRate, isError: true);
       return;
     }
     setState(() => _submitting = true);
@@ -70,7 +71,7 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
             behaviorScore: _behavior,
           );
       ref.invalidate(matchRatingsProvider(widget.matchId));
-      if (mounted) showKickproToast(context, 'Rating submitted');
+      if (mounted) showKickproToast(context, ref.tr.ratingSubmitted);
       setState(() {
         _selectedPlayerId = null;
         _performance = 3;
@@ -94,7 +95,7 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
-        title: const Text('Rate Players'),
+        title: Text(ref.tr.ratePlayersTitle),
       ),
       body: _loading
           ? const Center(child: ShimmerBox(height: 200, width: double.infinity))
@@ -115,14 +116,14 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
                     return ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        const Text(
-                          'How did your teammates perform?',
-                          style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+                        Text(
+                          ref.tr.howDidPerform,
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Rate on performance, punctuality, teamwork, and behavior (1–5).',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        Text(
+                          ref.tr.rateInstructions,
+                          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         ),
                         const SizedBox(height: 16),
                         ...rateable.map((p) {
@@ -176,27 +177,27 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
                         if (_selectedPlayerId != null) ...[
                           const SizedBox(height: 16),
                           _RatingSlider(
-                            label: 'Performance',
+                            label: ref.tr.performance,
                             value: _performance,
                             onChanged: (v) => setState(() => _performance = v),
                           ),
                           _RatingSlider(
-                            label: 'Punctuality',
+                            label: ref.tr.punctuality,
                             value: _punctuality,
                             onChanged: (v) => setState(() => _punctuality = v),
                           ),
                           _RatingSlider(
-                            label: 'Teamwork',
+                            label: ref.tr.teamwork,
                             value: _teamwork,
                             onChanged: (v) => setState(() => _teamwork = v),
                           ),
                           _RatingSlider(
-                            label: 'Behavior',
+                            label: ref.tr.behavior,
                             value: _behavior,
                             onChanged: (v) => setState(() => _behavior = v),
                           ),
                           const SizedBox(height: 16),
-                          KickproButton(label: 'Submit Rating', isLoading: _submitting, onPressed: _submit),
+                          KickproButton(label: ref.tr.submitRating, isLoading: _submitting, onPressed: _submit),
                         ],
                         const SizedBox(height: 24),
                         ratingsAsync.when(
@@ -207,8 +208,8 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Submitted ratings',
-                                    style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                                Text(ref.tr.submittedRatings,
+                                    style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 8),
                                 ...ratings.map((r) => Container(
                                       margin: const EdgeInsets.only(bottom: 8),

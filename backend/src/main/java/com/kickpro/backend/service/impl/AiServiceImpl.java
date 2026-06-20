@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kickpro.backend.dto.request.GenerateCourseRequest;
 import com.kickpro.backend.dto.request.RecoveryPlanRequest;
 import com.kickpro.backend.dto.request.ScoutAssistRequest;
+import com.kickpro.backend.dto.request.VideoFeedbackRequest;
 import com.kickpro.backend.dto.response.AiTextResponse;
 import com.kickpro.backend.dto.response.DrillRecommendationResponse;
 import com.kickpro.backend.dto.response.GeneratedCourseResponse;
@@ -12,8 +13,10 @@ import com.kickpro.backend.dto.response.PlayerSearchResultResponse;
 import com.kickpro.backend.dto.response.ScoutAssistResponse;
 import com.kickpro.backend.entity.Drill;
 import com.kickpro.backend.entity.DrillSubmission;
+import com.kickpro.backend.entity.ParticipantStatus;
 import com.kickpro.backend.entity.PlayerProfile;
 import com.kickpro.backend.entity.PlayerRating;
+import com.kickpro.backend.entity.Video;
 import com.kickpro.backend.entity.Skills;
 import com.kickpro.backend.entity.SubmissionStatus;
 import com.kickpro.backend.exception.BadRequestException;
@@ -22,10 +25,14 @@ import com.kickpro.backend.exception.TooManyRequestsException;
 import com.kickpro.backend.repository.CertificationRepository;
 import com.kickpro.backend.repository.DrillRepository;
 import com.kickpro.backend.repository.DrillSubmissionRepository;
+import com.kickpro.backend.repository.MatchParticipantRepository;
 import com.kickpro.backend.repository.PlayerProfileRepository;
 import com.kickpro.backend.repository.PlayerRatingRepository;
+import com.kickpro.backend.repository.ReferralRepository;
 import com.kickpro.backend.repository.SkillsRepository;
+import com.kickpro.backend.repository.VideoRepository;
 import com.kickpro.backend.service.AiService;
+import com.kickpro.backend.service.CredibilityService;
 import com.kickpro.backend.service.PlayerSearchService;
 import com.kickpro.backend.util.AiJsonHelper;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +67,10 @@ public class AiServiceImpl implements AiService {
     private final DrillSubmissionRepository drillSubmissionRepository;
     private final PlayerRatingRepository playerRatingRepository;
     private final CertificationRepository certificationRepository;
+    private final CredibilityService credibilityService;
+    private final MatchParticipantRepository matchParticipantRepository;
+    private final ReferralRepository referralRepository;
+    private final VideoRepository videoRepository;
 
     @Value("${spring.ai.google.genai.api-key:}")
     private String geminiApiKey;
@@ -110,18 +121,28 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public AiTextResponse explainScore(Long userId) {
         assertApiKeyConfigured();
         PlayerProfile profile = loadPlayerProfile(userId);
+        double score = credibilityService.recalculateForUser(userId);
         Map<String, Object> stats = buildPlayerStats(profile);
-        double score = profile.getCredibilityScore() == null ? 0.0 : profile.getCredibilityScore();
+        stats.put("credibilityScore", score);
+        stats.put("scoreBreakdown", credibilityService.buildScoreBreakdown(profile.getId()));
+        stats.put("scoreTier", credibilityService.scoreTierLabel(score));
+        stats.put("approvedMatchCount", matchParticipantRepository.countByPlayerIdAndStatus(
+                profile.getId(), ParticipantStatus.APPROVED));
+        stats.put("referralCount", referralRepository.countByReferrerId(userId));
+        stats.put("ratedVideoCount", videoRepository.findByPlayerIdOrderByUploadedAtDesc(profile.getId()).stream()
+                .filter(video -> video.getAverageRating() != null && video.getAverageRating() > 0)
+                .count());
 
         String prompt = """
                 Explain this player's KickPro credibility score in plain English (3-5 short paragraphs).
                 Write directly to the player using "you". Do NOT use JSON.
 
                 The player's credibility score is exactly %.1f out of 100. You MUST reference this number in your opening sentence.
+                The required tone tier for this score is: %s. Your opening sentence MUST reflect this tier.
 
                 Score calibration — use this tone strictly:
                 - 0–30: needs significant improvement, just getting started. Never praise the score itself.
@@ -132,13 +153,13 @@ public class AiServiceImpl implements AiService {
 
                 Rules:
                 - NEVER call a score below 51 "impressive", "great", "strong", or "excellent".
-                - Be honest and calibrated to the actual score above.
-                - Identify the player's weakest areas from the stats (low skills, few drills, no certifications, low match ratings, etc.).
+                - Be honest and calibrated to the actual score above and the scoreBreakdown points (each out of its max: drillPerformance 25, drillConsistency 10, matchRatings 35, certifications 15, matchParticipation 10, videoRatings 5, referrals 25).
+                - Identify the player's weakest areas from scoreBreakdown and stats (low component points, few drills, no certifications, low match ratings, etc.).
                 - Give 2-3 specific, actionable steps tied to those weak areas.
 
                 Player stats JSON:
                 %s
-                """.formatted(score, toJson(stats));
+                """.formatted(score, credibilityService.scoreTierLabel(score), toJson(stats));
 
         return AiTextResponse.builder().content(callText(prompt)).build();
     }
@@ -332,6 +353,34 @@ public class AiServiceImpl implements AiService {
                 objectMapper, callJson(prompt), GeneratedCourseJson.class);
 
         return mapGeneratedCourse(parsed);
+    }
+
+    @Override
+    public AiTextResponse generateVideoFeedback(VideoFeedbackRequest request) {
+        assertApiKeyConfigured();
+
+        String skill = request.getSkillTag() != null && !request.getSkillTag().isBlank()
+                ? request.getSkillTag().trim()
+                : "general football skills";
+
+        String prompt = """
+                You are a professional football scout analyzing a player video.
+                The video URL is: %s
+                Focus skill area: %s
+
+                You cannot watch the video directly, but provide a structured scouting report template
+                a scout would use when reviewing footage for this skill area. Include:
+                1. Technical observations to look for
+                2. Tactical awareness indicators
+                3. Physical attributes visible in video
+                4. Strengths to highlight
+                5. Areas for improvement
+                6. Overall scouting recommendation (watch again / invite to trial / not ready)
+
+                Write in clear sections for a scout audience. Do NOT use JSON.
+                """.formatted(request.getVideoUrl().trim(), skill);
+
+        return AiTextResponse.builder().content(callText(prompt)).build();
     }
 
     private String callText(String userPrompt) {

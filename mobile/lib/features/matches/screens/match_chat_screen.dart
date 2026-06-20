@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kickpro/core/auth/auth_storage.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/player_profile_navigation.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
@@ -69,7 +70,7 @@ class _MatchChatScreenState extends ConsumerState<MatchChatScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
-        title: const Text('Match Chat'),
+        title: Text(ref.tr.matchChat),
       ),
       body: Column(
         children: [
@@ -81,11 +82,11 @@ class _MatchChatScreenState extends ConsumerState<MatchChatScreen> {
               ),
               data: (messages) {
                 if (messages.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
-                      'No messages yet.\nSay hi to your teammates!',
+                      ref.tr.noChatMessages,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                   );
                 }
@@ -148,7 +149,7 @@ class _MatchChatScreenState extends ConsumerState<MatchChatScreen> {
                       textInputAction: TextInputAction.send,
                       onSubmitted: _sending ? null : (_) => _send(),
                       decoration: InputDecoration(
-                        hintText: 'Message your team...',
+                        hintText: ref.tr.messageTeamHint,
                         filled: true,
                         fillColor: AppColors.surface,
                         border: OutlineInputBorder(

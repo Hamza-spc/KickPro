@@ -18,4 +18,6 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
     Optional<MatchParticipant> findByMatchIdAndPlayerId(Long matchId, Long playerId);
 
     long countByPlayerIdAndStatus(Long playerId, ParticipantStatus status);
+
+    List<MatchParticipant> findByPlayerIdOrderByJoinedAtDesc(Long playerId);
 }

@@ -92,6 +92,11 @@ class AdminRepository {
     await _dio.delete(ApiEndpoints.adminCourse(id));
   }
 
+  Future<AdminCourseDetail> createCourse(Map<String, dynamic> body) async {
+    final response = await _dio.post(ApiEndpoints.adminCourses, data: body);
+    return _parseData(response, AdminCourseDetail.fromJson);
+  }
+
   Future<void> uploadLessonMedia(int courseId, int lessonId, String filePath) async {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(filePath),

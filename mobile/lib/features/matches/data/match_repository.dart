@@ -15,10 +15,13 @@ class MatchRepository {
 
   final Dio _dio;
 
-  Future<List<Stadium>> getStadiums({String? city}) async {
+  Future<List<Stadium>> getStadiums({String? city, String? name}) async {
+    final params = <String, String>{};
+    if (city != null && city.isNotEmpty) params['city'] = city;
+    if (name != null && name.isNotEmpty) params['name'] = name;
     final response = await _dio.get(
       ApiEndpoints.stadiums,
-      queryParameters: city != null && city.isNotEmpty ? {'city': city} : null,
+      queryParameters: params.isEmpty ? null : params,
     );
     return _parseList(response, Stadium.fromJson);
   }

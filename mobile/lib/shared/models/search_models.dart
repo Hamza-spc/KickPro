@@ -39,6 +39,7 @@ class PlayerSearchResult {
   final double credibilityScore;
   final int certificationCount;
   final int approvedDrillCount;
+  final int approvedMatchCount;
   final double? averageDrillScore;
   final PlayerSkillsSummary? skills;
 
@@ -53,6 +54,7 @@ class PlayerSearchResult {
     required this.credibilityScore,
     required this.certificationCount,
     required this.approvedDrillCount,
+    required this.approvedMatchCount,
     required this.averageDrillScore,
     required this.skills,
   });
@@ -79,6 +81,7 @@ class PlayerSearchResult {
       credibilityScore: (json['credibilityScore'] as num).toDouble(),
       certificationCount: (json['certificationCount'] as num).toInt(),
       approvedDrillCount: (json['approvedDrillCount'] as num).toInt(),
+      approvedMatchCount: (json['approvedMatchCount'] as num?)?.toInt() ?? 0,
       averageDrillScore: json['averageDrillScore'] == null
           ? null
           : (json['averageDrillScore'] as num).toDouble(),

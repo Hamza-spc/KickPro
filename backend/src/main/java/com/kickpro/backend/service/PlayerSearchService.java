@@ -1,6 +1,7 @@
 package com.kickpro.backend.service;
 
 import com.kickpro.backend.dto.response.PlayerSearchResultResponse;
+import com.kickpro.backend.entity.PlayerProfile;
 import com.kickpro.backend.entity.Position;
 import com.kickpro.backend.entity.PreferredFoot;
 import org.springframework.data.domain.Page;
@@ -31,4 +32,6 @@ public interface PlayerSearchService {
     );
 
     List<String> getDistinctCities();
+
+    List<PlayerSearchResultResponse> toSearchResults(List<PlayerProfile> profiles);
 }

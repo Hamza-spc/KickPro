@@ -1,5 +1,6 @@
 package com.kickpro.backend.service.impl;
 
+import com.kickpro.backend.dto.request.PlayerInjuryRequest;
 import com.kickpro.backend.dto.request.PlayerProfileRequest;
 import com.kickpro.backend.dto.response.PlayerProfileResponse;
 import com.kickpro.backend.entity.PlayerProfile;
@@ -8,9 +9,12 @@ import com.kickpro.backend.exception.BadRequestException;
 import com.kickpro.backend.exception.ResourceNotFoundException;
 import com.kickpro.backend.repository.PlayerFollowRepository;
 import com.kickpro.backend.repository.PlayerProfileRepository;
+import com.kickpro.backend.repository.ReferralRepository;
 import com.kickpro.backend.repository.UserRepository;
+import com.kickpro.backend.service.CredibilityService;
 import com.kickpro.backend.service.PlayerProfileService;
 import com.kickpro.backend.util.CloudinaryService;
+import com.kickpro.backend.util.ReferralCodeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +28,10 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
 
     private final PlayerProfileRepository playerProfileRepository;
     private final PlayerFollowRepository playerFollowRepository;
+    private final ReferralRepository referralRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final CredibilityService credibilityService;
 
     @Override
     @Transactional
@@ -46,7 +52,9 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
             profile.setCredibilityScore(0.0);
         }
 
-        return toResponse(playerProfileRepository.save(profile), userId);
+        PlayerProfile saved = playerProfileRepository.save(profile);
+        ensureReferralCode(saved);
+        return toResponse(saved, userId);
     }
 
     private void validateCompleteProfileRequest(PlayerProfileRequest request) {
@@ -101,18 +109,23 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public PlayerProfileResponse getMyProfile(Long userId) {
         PlayerProfile profile = playerProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Player profile not found"));
+        ensureReferralCode(profile);
+        double score = credibilityService.recalculateForUser(userId);
+        profile.setCredibilityScore(score);
         return toResponse(profile, userId);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public PlayerProfileResponse getProfileById(Long profileId, Long viewerUserId) {
         PlayerProfile profile = playerProfileRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Player profile not found"));
+        double score = credibilityService.recalculateForPlayer(profileId);
+        profile.setCredibilityScore(score);
         return toResponse(profile, viewerUserId);
     }
 
@@ -155,6 +168,42 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
         return toResponse(playerProfileRepository.save(profile), userId);
     }
 
+    @Override
+    @Transactional
+    public PlayerProfileResponse updateInjury(Long userId, PlayerInjuryRequest request) {
+        PlayerProfile profile = playerProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Create your profile before updating injury status"));
+
+        profile.setInjured(Boolean.TRUE.equals(request.getInjured()));
+        if (Boolean.TRUE.equals(request.getInjured())) {
+            profile.setInjuryType(blankToNull(request.getInjuryType()));
+            profile.setInjuryBodyPart(blankToNull(request.getInjuryBodyPart()));
+            profile.setInjurySeverity(blankToNull(request.getInjurySeverity()));
+        } else {
+            profile.setInjuryType(null);
+            profile.setInjuryBodyPart(null);
+            profile.setInjurySeverity(null);
+        }
+
+        return toResponse(playerProfileRepository.save(profile), userId);
+    }
+
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private void ensureReferralCode(PlayerProfile profile) {
+        if (profile.getReferralCode() != null && !profile.getReferralCode().isBlank()) {
+            return;
+        }
+        String code;
+        do {
+            code = ReferralCodeUtil.generate();
+        } while (playerProfileRepository.findByReferralCodeIgnoreCase(code).isPresent());
+        profile.setReferralCode(code);
+        playerProfileRepository.save(profile);
+    }
+
     private PlayerProfileResponse toResponse(PlayerProfile profile, Long viewerUserId) {
         Long profileUserId = profile.getUser().getId();
         boolean ownProfile = viewerUserId != null && viewerUserId.equals(profileUserId);
@@ -174,10 +223,16 @@ public class PlayerProfileServiceImpl implements PlayerProfileService {
                 .weight(profile.getWeight())
                 .profilePhotoUrl(profile.getProfilePhotoUrl())
                 .credibilityScore(profile.getCredibilityScore())
+                .referralCode(profile.getReferralCode())
+                .referralCount(referralRepository.countByReferrerId(profileUserId))
                 .followersCount(playerFollowRepository.countByFollowingId(profile.getId()))
                 .followingCount(playerFollowRepository.countByFollowerId(profileUserId))
                 .following(following)
                 .ownProfile(ownProfile)
+                .injured(profile.getInjured())
+                .injuryType(profile.getInjuryType())
+                .injuryBodyPart(profile.getInjuryBodyPart())
+                .injurySeverity(profile.getInjurySeverity())
                 .createdAt(profile.getCreatedAt())
                 .updatedAt(profile.getUpdatedAt())
                 .build();

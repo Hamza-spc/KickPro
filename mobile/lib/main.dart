@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kickpro/core/l10n/locale_provider.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_theme.dart';
 import 'package:kickpro/features/auth/screens/login_screen.dart';
@@ -17,11 +18,14 @@ class KickproApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final session = ref.watch(sessionBootstrapProvider);
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
       title: 'KickPro',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
+      locale: locale,
+      supportedLocales: const [Locale('en'), Locale('fr')],
       routerConfig: router,
       builder: (context, child) {
         return session.when(

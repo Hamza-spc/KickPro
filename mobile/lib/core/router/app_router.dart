@@ -9,8 +9,10 @@ import 'package:kickpro/features/drills/screens/drill_submission_screen.dart';
 import 'package:kickpro/features/matches/screens/match_chat_screen.dart';
 import 'package:kickpro/features/matches/screens/match_detail_screen.dart';
 import 'package:kickpro/features/matches/screens/match_rating_screen.dart';
+import 'package:kickpro/features/admin/screens/admin_create_course_screen.dart';
 import 'package:kickpro/features/admin/screens/admin_shell.dart';
 import 'package:kickpro/features/leaderboard/screens/leaderboard_screen.dart';
+import 'package:kickpro/features/home/screens/agent_home_screen.dart';
 import 'package:kickpro/features/home/screens/player_home_screen.dart';
 import 'package:kickpro/features/home/screens/scout_home_screen.dart';
 import 'package:kickpro/features/courses/screens/lesson_detail_screen.dart';
@@ -28,6 +30,18 @@ import 'package:kickpro/features/ai/screens/ai_coach_screen.dart';
 import 'package:kickpro/features/ai/screens/ai_text_result_screen.dart';
 import 'package:kickpro/features/ai/screens/drill_recommendations_screen.dart';
 import 'package:kickpro/features/ai/screens/recovery_plan_screen.dart';
+import 'package:kickpro/features/announcements/screens/announcements_screen.dart';
+import 'package:kickpro/features/messages/screens/messages_tab.dart';
+import 'package:kickpro/features/notifications/screens/notifications_screen.dart';
+import 'package:kickpro/features/challenges/screens/challenges_screen.dart';
+import 'package:kickpro/features/search/screens/compare_players_screen.dart';
+import 'package:kickpro/features/search/screens/bookmarks_split_compare_screen.dart';
+import 'package:kickpro/shared/models/search_models.dart';
+import 'package:kickpro/features/scout_notes/screens/player_notes_screen.dart';
+import 'package:kickpro/features/clubs/screens/club_detail_screen.dart';
+import 'package:kickpro/features/clubs/screens/clubs_list_screen.dart';
+import 'package:kickpro/features/squads/screens/join_squads_screen.dart';
+import 'package:kickpro/features/squads/screens/squads_screen.dart';
 import 'package:kickpro/shared/models/ai_models.dart';
 import 'package:kickpro/shared/models/drill_models.dart';
 import 'package:kickpro/shared/models/user_role.dart';
@@ -70,6 +84,68 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/leaderboard', builder: (_, _) => const LeaderboardScreen()),
+      GoRoute(path: '/announcements', builder: (_, _) => const AnnouncementsScreen()),
+      GoRoute(path: '/notifications', builder: (_, _) => const NotificationsScreen()),
+      GoRoute(
+        path: '/messages/chat/:userId',
+        builder: (context, state) {
+          final userId = int.tryParse(state.pathParameters['userId'] ?? '');
+          if (userId == null) {
+            return const Scaffold(
+              body: Center(child: Text('Conversation not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return MessagesChatScreen(
+            otherUserId: userId,
+            otherUserLabel: state.uri.queryParameters['label'],
+          );
+        },
+      ),
+      GoRoute(path: '/challenges', builder: (_, _) => const ChallengesScreen()),
+      GoRoute(path: '/notes', builder: (_, _) => const PlayerNotesScreen()),
+      GoRoute(
+        path: '/compare',
+        builder: (context, state) {
+          final a = int.tryParse(state.uri.queryParameters['a'] ?? '');
+          final b = int.tryParse(state.uri.queryParameters['b'] ?? '');
+          return ComparePlayersScreen(initialProfileA: a, initialProfileB: b);
+        },
+      ),
+      GoRoute(
+        path: '/bookmarks/compare',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is! List || extra.length != 2) {
+            return const Scaffold(
+              body: Center(child: Text('Compare not available', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          final left = extra[0];
+          final right = extra[1];
+          if (left is! PlayerSearchResult || right is! PlayerSearchResult) {
+            return const Scaffold(
+              body: Center(child: Text('Compare not available', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return BookmarksSplitCompareScreen(left: left, right: right);
+        },
+      ),
+      GoRoute(path: '/agent-home', builder: (_, _) => const AgentHomeScreen()),
+      GoRoute(path: '/squads', builder: (_, _) => const SquadsScreen()),
+      GoRoute(path: '/squads/join', builder: (_, _) => const JoinSquadsScreen()),
+      GoRoute(path: '/clubs', builder: (_, _) => const ClubsListScreen()),
+      GoRoute(
+        path: '/clubs/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) {
+            return const Scaffold(
+              body: Center(child: Text('Club not found', style: TextStyle(color: Colors.white70))),
+            );
+          }
+          return ClubDetailScreen(clubId: id);
+        },
+      ),
       GoRoute(path: '/home', builder: (_, _) => const PlayerHomeScreen()),
       GoRoute(path: '/scout-home', builder: (_, _) => const ScoutHomeScreen()),
       GoRoute(path: '/admin-home', builder: (_, _) => const AdminShell()),
@@ -171,6 +247,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           final action = switch (state.pathParameters['action']) {
             'meal-plan' => AiTextAction.mealPlan,
             'explain-score' => AiTextAction.explainScore,
+            'video-feedback' => AiTextAction.videoFeedback,
             _ => null,
           };
           if (action == null) {
@@ -178,12 +255,20 @@ final routerProvider = Provider<GoRouter>((ref) {
               body: Center(child: Text('AI action not found', style: TextStyle(color: Colors.white70))),
             );
           }
-          return AiTextResultScreen(action: action);
+          return AiTextResultScreen(
+            action: action,
+            videoUrl: state.uri.queryParameters['videoUrl'],
+            skillTag: state.uri.queryParameters['skillTag'],
+          );
         },
       ),
       GoRoute(
         path: '/admin/generate-course',
         builder: (_, _) => const AdminGenerateCourseScreen(),
+      ),
+      GoRoute(
+        path: '/admin/create-course',
+        builder: (_, _) => const AdminCreateCourseScreen(),
       ),
     ],
   );
@@ -196,6 +281,10 @@ Future<void> navigateAfterAuth(WidgetRef ref) async {
 
   if (role == UserRole.scout) {
     router.go('/scout-home');
+    return;
+  }
+  if (role == UserRole.agent) {
+    router.go('/agent-home');
     return;
   }
   if (role == UserRole.admin) {

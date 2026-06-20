@@ -27,9 +27,10 @@ public class StadiumController {
     @GetMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'SCOUT', 'AGENT', 'ADMIN')")
     public ResponseEntity<ApiResponse<List<StadiumResponse>>> getAllStadiums(
-            @RequestParam(required = false) String city
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String name
     ) {
-        List<StadiumResponse> stadiums = stadiumService.getAllStadiums(city);
+        List<StadiumResponse> stadiums = stadiumService.getAllStadiums(city, name);
         return ResponseEntity.ok(ApiResponse.success(stadiums, "Stadiums retrieved successfully"));
     }
 

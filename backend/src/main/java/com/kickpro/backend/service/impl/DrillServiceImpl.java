@@ -11,6 +11,7 @@ import com.kickpro.backend.entity.DrillLevel;
 import com.kickpro.backend.entity.DrillProgressStatus;
 import com.kickpro.backend.entity.PlayerProfile;
 import com.kickpro.backend.entity.SubmissionStatus;
+import com.kickpro.backend.entity.NotificationType;
 import com.kickpro.backend.entity.DrillSubmission;
 import com.kickpro.backend.event.DrillSubmittedEvent;
 import com.kickpro.backend.event.KafkaEventPublisher;
@@ -20,8 +21,9 @@ import com.kickpro.backend.repository.BadgeRepository;
 import com.kickpro.backend.repository.DrillRepository;
 import com.kickpro.backend.repository.DrillSubmissionRepository;
 import com.kickpro.backend.repository.PlayerProfileRepository;
-import com.kickpro.backend.service.DrillService;
 import com.kickpro.backend.service.CredibilityService;
+import com.kickpro.backend.service.DrillService;
+import com.kickpro.backend.service.NotificationService;
 import com.kickpro.backend.util.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ public class DrillServiceImpl implements DrillService {
     private final CloudinaryService cloudinaryService;
     private final KafkaEventPublisher kafkaEventPublisher;
     private final CredibilityService credibilityService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -195,6 +198,23 @@ public class DrillServiceImpl implements DrillService {
         DrillSubmission saved = drillSubmissionRepository.save(submission);
         if (saved.getStatus() == SubmissionStatus.APPROVED) {
             credibilityService.recalculateForPlayer(saved.getPlayer().getId());
+            notificationService.notifyUser(
+                    saved.getPlayer().getUser().getId(),
+                    "Drill approved",
+                    "Your drill \"" + saved.getDrill().getTitle() + "\" was approved",
+                    NotificationType.DRILL_APPROVED,
+                    "DRILL",
+                    saved.getDrill().getId()
+            );
+        } else {
+            notificationService.notifyUser(
+                    saved.getPlayer().getUser().getId(),
+                    "Drill rejected",
+                    "Your drill \"" + saved.getDrill().getTitle() + "\" was not approved",
+                    NotificationType.DRILL_REJECTED,
+                    "DRILL",
+                    saved.getDrill().getId()
+            );
         }
         return toSubmissionResponse(saved);
     }

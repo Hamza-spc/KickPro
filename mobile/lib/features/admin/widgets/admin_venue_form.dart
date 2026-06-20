@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
 import 'package:kickpro/features/admin/models/admin_models.dart';
@@ -95,11 +96,11 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
 
   Future<void> _submit() async {
     if (_nameCtrl.text.trim().isEmpty || _locationCtrl.text.trim().isEmpty) {
-      showKickproToast(context, 'Name and address are required', isError: true);
+      showKickproToast(context, ref.tr.nameAddressRequired, isError: true);
       return;
     }
     if (_selectedFormats.isEmpty) {
-      showKickproToast(context, 'Select at least one format', isError: true);
+      showKickproToast(context, ref.tr.selectOneFormat, isError: true);
       return;
     }
 
@@ -136,7 +137,7 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
 
       ref.invalidate(adminStadiumsProvider);
       if (mounted) {
-        showKickproToast(context, widget.venue == null ? 'Venue created' : 'Venue updated');
+        showKickproToast(context, widget.venue == null ? ref.tr.venueCreated : ref.tr.venueUpdated);
         Navigator.pop(context);
       }
     } catch (e) {
@@ -157,25 +158,25 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              widget.venue == null ? 'Create venue' : 'Edit venue',
+              widget.venue == null ? ref.tr.createVenue : ref.tr.editVenue,
               style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 18),
             ),
             const SizedBox(height: 12),
-            KickproTextField(controller: _nameCtrl, label: 'Name'),
+            KickproTextField(controller: _nameCtrl, label: ref.tr.name),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _city,
               dropdownColor: AppColors.surface,
-              decoration: const InputDecoration(labelText: 'City'),
+              decoration: InputDecoration(labelText: ref.tr.city),
               items: kMatchCities.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
               onChanged: (v) => setState(() => _city = v),
             ),
             const SizedBox(height: 12),
-            KickproTextField(controller: _locationCtrl, label: 'Address'),
-            KickproTextField(controller: _phoneCtrl, label: 'Phone number', keyboardType: TextInputType.phone),
-            KickproTextField(controller: _descCtrl, label: 'Description', maxLines: 2),
-            KickproTextField(controller: _priceCtrl, label: 'Price per hour (MAD)', keyboardType: TextInputType.number),
-            KickproTextField(controller: _pitchCountCtrl, label: 'Number of pitches', keyboardType: TextInputType.number),
+            KickproTextField(controller: _locationCtrl, label: ref.tr.address),
+            KickproTextField(controller: _phoneCtrl, label: ref.tr.phoneNumber, keyboardType: TextInputType.phone),
+            KickproTextField(controller: _descCtrl, label: ref.tr.description, maxLines: 2),
+            KickproTextField(controller: _priceCtrl, label: ref.tr.pricePerHourMad, keyboardType: TextInputType.number),
+            KickproTextField(controller: _pitchCountCtrl, label: ref.tr.numberOfPitches, keyboardType: TextInputType.number),
             const SizedBox(height: 12),
             AdminStadiumMapPicker(
               latitude: _latitude,
@@ -186,12 +187,12 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
               }),
             ),
             const SizedBox(height: 12),
-            KickproTextField(controller: _openCtrl, label: 'Open time (HH:mm)'),
-            KickproTextField(controller: _closeCtrl, label: 'Close time (HH:mm)'),
+            KickproTextField(controller: _openCtrl, label: ref.tr.openTime),
+            KickproTextField(controller: _closeCtrl, label: ref.tr.closeTime),
             DropdownButtonFormField<String>(
               initialValue: _grass,
               dropdownColor: AppColors.surface,
-              decoration: const InputDecoration(labelText: 'Grass type'),
+              decoration: InputDecoration(labelText: ref.tr.grassType),
               items: const [
                 DropdownMenuItem(value: 'NATURAL', child: Text('Natural')),
                 DropdownMenuItem(value: 'ARTIFICIAL', child: Text('Artificial')),
@@ -200,7 +201,7 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
               onChanged: (v) => setState(() => _grass = v ?? _grass),
             ),
             const SizedBox(height: 8),
-            const Text('Allowed formats', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+            Text(ref.tr.allowedFormats, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
             Wrap(
               spacing: 8,
               children: _allowedFormatOptions.map((format) {
@@ -219,7 +220,7 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
               }).toList(),
             ),
             const SizedBox(height: 8),
-            const Text('Pitch types', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            Text(ref.tr.pitchTypes, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             Wrap(
               spacing: 8,
               children: ['FIVE_V_FIVE', 'SEVEN_V_SEVEN', 'ELEVEN_V_ELEVEN'].map((type) {
@@ -238,7 +239,7 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
               }).toList(),
             ),
             const SizedBox(height: 12),
-            const Text('Photos', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+            Text(ref.tr.photos, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             GridView.builder(
               shrinkWrap: true,
@@ -295,7 +296,7 @@ class _AdminVenueFormSheetState extends ConsumerState<_AdminVenueFormSheet> {
             ),
             const SizedBox(height: 16),
             KickproButton(
-              label: widget.venue == null ? 'Create venue' : 'Save changes',
+              label: widget.venue == null ? ref.tr.createVenue : ref.tr.saveChanges,
               isLoading: _submitting,
               onPressed: _submit,
             ),

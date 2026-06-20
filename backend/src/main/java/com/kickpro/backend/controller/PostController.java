@@ -104,4 +104,12 @@ public class PostController {
         PostResponse response = postService.react(user.getUserId(), id, request);
         return ResponseEntity.ok(ApiResponse.success(response, "Reaction updated"));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('PLAYER')")
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long id) {
+        UserPrincipal user = SecurityUtils.getCurrentUser();
+        postService.deletePost(user.getUserId(), id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Post deleted successfully"));
+    }
 }

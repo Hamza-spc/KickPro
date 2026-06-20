@@ -27,6 +27,8 @@ public interface PostService {
 
     PostResponse react(Long userId, Long postId, ReactToPostRequest request);
 
+    void deletePost(Long userId, Long postId);
+
     void follow(Long userId, Long targetProfileId);
 
     void unfollow(Long userId, Long targetProfileId);

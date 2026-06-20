@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/skills_models.dart';
@@ -57,23 +58,23 @@ class _SkillsSetupScreenState extends ConsumerState<SkillsSetupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 24, 24, 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Rate your skills',
-                    style: TextStyle(
+                    ref.tr.rateSkills,
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Drag each slider from 1 to 10 stars',
-                    style: TextStyle(color: AppColors.textSecondary),
+                    ref.tr.dragSlider,
+                    style: const TextStyle(color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -82,19 +83,19 @@ class _SkillsSetupScreenState extends ConsumerState<SkillsSetupScreen> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 children: [
-                  SkillSlider(label: 'Dribbling', value: _dribbling, onChanged: (v) => setState(() => _dribbling = v)),
-                  SkillSlider(label: 'Shooting', value: _shooting, onChanged: (v) => setState(() => _shooting = v)),
-                  SkillSlider(label: 'Passing', value: _passing, onChanged: (v) => setState(() => _passing = v)),
-                  SkillSlider(label: 'Speed', value: _speed, onChanged: (v) => setState(() => _speed = v)),
-                  SkillSlider(label: 'Heading', value: _heading, onChanged: (v) => setState(() => _heading = v)),
-                  SkillSlider(label: 'Stamina', value: _stamina, onChanged: (v) => setState(() => _stamina = v)),
+                  SkillSlider(label: ref.tr.dribbling, value: _dribbling, onChanged: (v) => setState(() => _dribbling = v)),
+                  SkillSlider(label: ref.tr.shooting, value: _shooting, onChanged: (v) => setState(() => _shooting = v)),
+                  SkillSlider(label: ref.tr.passing, value: _passing, onChanged: (v) => setState(() => _passing = v)),
+                  SkillSlider(label: ref.tr.speed, value: _speed, onChanged: (v) => setState(() => _speed = v)),
+                  SkillSlider(label: ref.tr.heading, value: _heading, onChanged: (v) => setState(() => _heading = v)),
+                  SkillSlider(label: ref.tr.stamina, value: _stamina, onChanged: (v) => setState(() => _stamina = v)),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(24),
               child: KickproButton(
-                label: 'Save & View Profile',
+                label: ref.tr.saveAndView,
                 isLoading: _isLoading,
                 onPressed: _save,
               ),

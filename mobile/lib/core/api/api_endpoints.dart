@@ -19,6 +19,7 @@ abstract final class ApiEndpoints {
   static const playerProfile = '/api/v1/players/profile';
   static const playerProfileMe = '/api/v1/players/profile/me';
   static const playerProfilePhoto = '/api/v1/players/profile/photo';
+  static const playerProfileInjury = '/api/v1/players/profile/injury';
   static const playerSkills = '/api/v1/players/skills';
   static const playerSkillsMe = '/api/v1/players/skills/me';
 
@@ -67,7 +68,42 @@ abstract final class ApiEndpoints {
 
   static const scoutPlayerSearch = '/api/v1/scouts/players/search';
   static const scoutPlayerCities = '/api/v1/scouts/players/cities';
+  static const scoutBookmarks = '/api/v1/scouts/bookmarks';
+  static const scoutBookmarkIds = '/api/v1/scouts/bookmarks/ids';
+  static String scoutBookmark(int profileId) => '/api/v1/scouts/bookmarks/$profileId';
+  static String scoutNote(int profileId) => '/api/v1/scouts/notes/$profileId';
+  static const playerNotesMe = '/api/v1/players/notes/me';
+
+  static const announcements = '/api/v1/announcements';
+  static String announcement(int id) => '/api/v1/announcements/$id';
+  static String announcementImage(int id) => '/api/v1/announcements/$id/image';
+
+  static const notifications = '/api/v1/notifications';
+  static const notificationsUnreadCount = '/api/v1/notifications/unread-count';
+  static const notificationsReadAll = '/api/v1/notifications/read-all';
+  static const notificationsDeviceToken = '/api/v1/notifications/device-token';
   static String playerProfileById(int profileId) => '/api/v1/players/profile/$profileId';
+
+  static const squads = '/api/v1/squads';
+  static const squadsMine = '/api/v1/squads/mine';
+  static const squadsDiscover = '/api/v1/squads/discover';
+  static const squadsJoinRequestsIncoming = '/api/v1/squads/join-requests/incoming';
+  static String squad(int id) => '/api/v1/squads/$id';
+  static String squadJoinRequest(int squadId) => '/api/v1/squads/$squadId/join-requests';
+  static String squadJoinRequestApprove(int requestId) =>
+      '/api/v1/squads/join-requests/$requestId/approve';
+  static String squadJoinRequestReject(int requestId) =>
+      '/api/v1/squads/join-requests/$requestId/reject';
+  static String squadInvite(int squadId, int profileId) =>
+      '/api/v1/squads/$squadId/invite/$profileId';
+
+  static const clubs = '/api/v1/clubs';
+  static String club(int id) => '/api/v1/clubs/$id';
+
+  static const referralsMine = '/api/v1/referrals/mine';
+  static const referralsApply = '/api/v1/referrals/apply';
+
+  static const discovery = '/api/v1/discovery';
 
   static const aiScoutAssist = '/api/v1/ai/scout-assist';
   static const aiExplainScore = '/api/v1/ai/explain-score';
@@ -75,6 +111,21 @@ abstract final class ApiEndpoints {
   static const aiMealPlan = '/api/v1/ai/meal-plan';
   static const aiRecoveryPlan = '/api/v1/ai/recovery-plan';
   static const aiGenerateCourse = '/api/v1/ai/generate-course';
+  static const aiVideoFeedback = '/api/v1/ai/video-feedback';
+
+  static const challengesActive = '/api/v1/challenges/active';
+  static const challengesSubmissions = '/api/v1/challenges/submissions';
+  static const challengesSubmit = '/api/v1/challenges/submit';
+  static String challengeVote(int submissionId) => '/api/v1/challenges/vote/$submissionId';
+
+  static String scoutComparePlayers(int profileA, int profileB) =>
+      '/api/v1/scouts/players/compare?profileA=$profileA&profileB=$profileB';
+
+  static String playerTimeline(int profileId) => '/api/v1/players/profile/$profileId/timeline';
+
+  static const messagesConversations = '/api/v1/messages/conversations';
+  static String messagesWithUser(int userId) => '/api/v1/messages/with/$userId';
+  static const messagesSend = '/api/v1/messages/send';
 
   static const adminDashboard = '/api/v1/admin/dashboard';
   static const adminStadiums = '/api/v1/admin/stadiums';

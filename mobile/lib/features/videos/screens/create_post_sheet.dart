@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/videos/data/post_repository.dart';
 import 'package:kickpro/shared/models/post_models.dart';
@@ -43,7 +44,7 @@ class _CreatePostSheetState extends ConsumerState<_CreatePostSheet> {
   Future<void> _submit() async {
     final caption = _captionController.text.trim();
     if (caption.isEmpty) {
-      showKickproToast(context, 'Write something first', isError: true);
+      showKickproToast(context, context.tr.writeSomethingFirst, isError: true);
       return;
     }
 
@@ -72,7 +73,7 @@ class _CreatePostSheetState extends ConsumerState<_CreatePostSheet> {
       ref.invalidate(postFeedProvider);
       if (mounted) {
         Navigator.pop(context);
-        showKickproToast(context, 'Post shared');
+        showKickproToast(context, context.tr.postShared);
       }
     } catch (e) {
       if (mounted) showKickproToast(context, e.toString(), isError: true);
@@ -93,10 +94,10 @@ class _CreatePostSheetState extends ConsumerState<_CreatePostSheet> {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Create post',
-                  style: TextStyle(
+                  context.tr.createPost,
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -110,10 +111,10 @@ class _CreatePostSheetState extends ConsumerState<_CreatePostSheet> {
             ],
           ),
           SegmentedButton<PostType>(
-            segments: const [
-              ButtonSegment(value: PostType.text, label: Text('Text'), icon: Icon(Icons.text_fields)),
-              ButtonSegment(value: PostType.image, label: Text('Photo'), icon: Icon(Icons.image)),
-              ButtonSegment(value: PostType.video, label: Text('Video'), icon: Icon(Icons.videocam)),
+            segments: [
+              ButtonSegment(value: PostType.text, label: Text(context.tr.text), icon: const Icon(Icons.text_fields)),
+              ButtonSegment(value: PostType.image, label: Text(context.tr.photo), icon: const Icon(Icons.image)),
+              ButtonSegment(value: PostType.video, label: Text(context.tr.video), icon: const Icon(Icons.videocam)),
             ],
             selected: {_postType},
             onSelectionChanged: (value) => setState(() => _postType = value.first),
@@ -121,15 +122,15 @@ class _CreatePostSheetState extends ConsumerState<_CreatePostSheet> {
           const SizedBox(height: 16),
           KickproTextField(
             controller: _captionController,
-            label: 'Caption',
+            label: context.tr.caption,
             hint: _postType == PostType.text
-                ? 'Share a thought with the squad...'
-                : 'Describe your post...',
+                ? context.tr.captionHintText
+                : context.tr.captionHintMedia,
             maxLines: 4,
           ),
           if (_postType != PostType.text) ...[
             const SizedBox(height: 12),
-            const Text('Skill tag (optional)', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+            Text(context.tr.skillTagOptional, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -150,10 +151,10 @@ class _CreatePostSheetState extends ConsumerState<_CreatePostSheet> {
           const SizedBox(height: 20),
           KickproButton(
             label: _postType == PostType.text
-                ? 'Post'
+                ? context.tr.post
                 : _postType == PostType.image
-                    ? 'Pick photo & post'
-                    : 'Pick video & post',
+                    ? context.tr.pickPhotoPost
+                    : context.tr.pickVideoPost,
             isLoading: _loading,
             onPressed: _submit,
           ),

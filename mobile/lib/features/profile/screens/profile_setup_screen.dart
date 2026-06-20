@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
@@ -59,7 +60,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   Future<void> _save() async {
     if (_dateOfBirth == null) {
-      showKickproToast(context, 'Please select your date of birth', isError: true);
+      showKickproToast(context, ref.tr.selectDob, isError: true);
       return;
     }
 
@@ -93,7 +94,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final dobLabel = _dateOfBirth == null
-        ? 'Select date'
+        ? ref.tr.selectDate
         : DateFormat('dd MMM yyyy').format(_dateOfBirth!);
 
     return Scaffold(
@@ -103,37 +104,37 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Build your profile',
-                style: TextStyle(
+              Text(
+                ref.tr.buildProfile,
+                style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Tell scouts who you are on the pitch',
-                style: TextStyle(color: AppColors.textSecondary),
+              Text(
+                ref.tr.tellScouts,
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 24),
-              KickproTextField(controller: _nameController, label: 'Full name', hint: 'Youssef Benali'),
+              KickproTextField(controller: _nameController, label: ref.tr.fullName, hint: ref.tr.fullNameHint),
               const SizedBox(height: 16),
               GestureDetector(
                 onTap: _pickDate,
                 child: AbsorbPointer(
                   child: KickproTextField(
                     controller: TextEditingController(text: dobLabel),
-                    label: 'Date of birth',
-                    hint: 'Select date',
+                    label: ref.tr.dateOfBirth,
+                    hint: ref.tr.selectDate,
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              KickproTextField(controller: _cityController, label: 'City', hint: 'Casablanca'),
+              KickproTextField(controller: _cityController, label: ref.tr.city, hint: ref.tr.cityHint),
               const SizedBox(height: 16),
               _DropdownField<PlayerPosition>(
-                label: 'Position',
+                label: ref.tr.position,
                 value: _position,
                 items: PlayerPosition.values,
                 labelBuilder: (p) => p.label,
@@ -141,7 +142,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               ),
               const SizedBox(height: 16),
               _DropdownField<PreferredFoot>(
-                label: 'Preferred foot',
+                label: ref.tr.preferredFoot,
                 value: _foot,
                 items: PreferredFoot.values,
                 labelBuilder: (f) => f.name[0].toUpperCase() + f.name.substring(1),
@@ -153,7 +154,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   Expanded(
                     child: KickproTextField(
                       controller: _heightController,
-                      label: 'Height (cm)',
+                      label: ref.tr.heightCm,
                       keyboardType: TextInputType.number,
                     ),
                   ),
@@ -161,7 +162,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   Expanded(
                     child: KickproTextField(
                       controller: _weightController,
-                      label: 'Weight (kg)',
+                      label: ref.tr.weightKg,
                       keyboardType: TextInputType.number,
                     ),
                   ),
@@ -170,12 +171,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               const SizedBox(height: 16),
               KickproTextField(
                 controller: _bioController,
-                label: 'Bio (optional)',
-                hint: 'Fast winger from Casablanca...',
+                label: ref.tr.bioOptional,
+                hint: ref.tr.bioHint,
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
-              KickproButton(label: 'Continue to Skills', isLoading: _isLoading, onPressed: _save),
+              KickproButton(label: ref.tr.continueToSkills, isLoading: _isLoading, onPressed: _save),
             ],
           ),
         ),

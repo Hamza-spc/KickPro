@@ -70,6 +70,19 @@ public class PlayerProfile {
     @Column(nullable = false)
     private Double credibilityScore = 0.0;
 
+    @Column(unique = true)
+    private String referralCode;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean injured = false;
+
+    private String injuryType;
+
+    private String injuryBodyPart;
+
+    private String injurySeverity;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

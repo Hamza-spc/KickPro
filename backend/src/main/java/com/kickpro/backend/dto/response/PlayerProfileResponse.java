@@ -24,10 +24,16 @@ public class PlayerProfileResponse {
     private Integer weight;
     private String profilePhotoUrl;
     private Double credibilityScore;
+    private String referralCode;
+    private long referralCount;
     private long followersCount;
     private long followingCount;
     private boolean following;
     private boolean ownProfile;
+    private Boolean injured;
+    private String injuryType;
+    private String injuryBodyPart;
+    private String injurySeverity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

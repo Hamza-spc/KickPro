@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/ai/data/ai_repository.dart';
 import 'package:kickpro/shared/models/ai_models.dart';
@@ -72,10 +73,10 @@ class _RecoveryPlanScreenState extends ConsumerState<RecoveryPlanScreen> {
                 ),
                 const KickproChatbotLogo(size: 24),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Recovery Plan',
-                    style: TextStyle(
+                    ref.tr.recoveryPlanTitle,
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -85,9 +86,9 @@ class _RecoveryPlanScreenState extends ConsumerState<RecoveryPlanScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Describe your injury for football-specific recovery guidance.',
-              style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+            Text(
+              ref.tr.recoveryPlanSubtitle,
+              style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 24),
             Form(
@@ -96,27 +97,27 @@ class _RecoveryPlanScreenState extends ConsumerState<RecoveryPlanScreen> {
                 children: [
                   _Field(
                     controller: _injuryController,
-                    label: 'Injury type',
-                    hint: 'e.g. muscle strain, sprain',
+                    label: ref.tr.injuryType,
+                    hint: ref.tr.injuryTypeHint,
                   ),
                   const SizedBox(height: 12),
                   _Field(
                     controller: _bodyPartController,
-                    label: 'Body part',
-                    hint: 'e.g. hamstring, ankle',
+                    label: ref.tr.bodyPart,
+                    hint: ref.tr.bodyPartHint,
                   ),
                   const SizedBox(height: 12),
                   _Field(
                     controller: _severityController,
-                    label: 'Severity',
-                    hint: 'mild, moderate, or severe',
+                    label: ref.tr.severity,
+                    hint: ref.tr.severityHint,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
             KickproButton(
-              label: 'Generate Plan',
+              label: ref.tr.generatePlan,
               isLoading: _loading,
               onPressed: _submit,
             ),
@@ -159,7 +160,7 @@ class _Field extends StatelessWidget {
     return TextFormField(
       controller: controller,
       style: const TextStyle(color: AppColors.textPrimary),
-      validator: (value) => value == null || value.trim().isEmpty ? 'Required' : null,
+      validator: (value) => value == null || value.trim().isEmpty ? context.tr.required : null,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 
@@ -21,10 +22,10 @@ class AiCoachScreen extends StatelessWidget {
                 ),
                 const KickproChatbotLogo(size: 28),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'AI Coach',
-                    style: TextStyle(
+                    context.tr.aiCoachTitle,
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -34,26 +35,26 @@ class AiCoachScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Personalized football coaching powered by Gemini.',
-              style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+            Text(
+              context.tr.aiCoachSubtitle,
+              style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 24),
             _CoachCard(
-              title: 'Drill Recommendations',
-              subtitle: 'Drills tailored to your skill profile',
+              title: context.tr.drillRecommendations,
+              subtitle: context.tr.drillRecommendationsDesc,
               onTap: () => context.push('/ai/drill-recommendations'),
             ),
             const SizedBox(height: 12),
             _CoachCard(
-              title: 'Meal Plan',
-              subtitle: 'Football-specific nutrition for your position',
+              title: context.tr.mealPlan,
+              subtitle: context.tr.mealPlanDesc,
               onTap: () => context.push('/ai/text/meal-plan'),
             ),
             const SizedBox(height: 12),
             _CoachCard(
-              title: 'Recovery Plan',
-              subtitle: 'Return-to-play guidance after an injury',
+              title: context.tr.recoveryPlan,
+              subtitle: context.tr.recoveryPlanDesc,
               onTap: () => context.push('/ai/recovery-plan'),
             ),
           ],

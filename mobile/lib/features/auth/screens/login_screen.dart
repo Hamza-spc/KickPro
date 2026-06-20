@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/auth/data/auth_repository.dart';
@@ -58,9 +59,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 32),
               const KickproLogo(height: 48),
               const SizedBox(height: 8),
-              const Text(
-                'Your digital football CV',
-                style: TextStyle(color: AppColors.textSecondary),
+              Text(
+                ref.tr.loginTagline,
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 40),
               Container(
@@ -74,15 +75,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     KickproTextField(
                       controller: _emailController,
-                      label: 'Email',
-                      hint: 'you@example.com',
+                      label: ref.tr.email,
+                      hint: ref.tr.emailHint,
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 16),
                     KickproTextField(
                       controller: _passwordController,
-                      label: 'Password',
-                      hint: '••••••••',
+                      label: ref.tr.password,
+                      hint: ref.tr.passwordHint,
                       obscureText: _obscurePassword,
                       suffix: IconButton(
                         icon: Icon(
@@ -94,7 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     KickproButton(
-                      label: 'Sign In',
+                      label: ref.tr.signIn,
                       isLoading: _isLoading,
                       onPressed: _login,
                     ),
@@ -104,16 +105,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () => context.push('/register'),
-                child: const Text(
-                  'New here? Create an account',
-                  style: TextStyle(color: AppColors.accent),
+                child: Text(
+                  ref.tr.newHereCreate,
+                  style: const TextStyle(color: AppColors.accent),
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Trusted by players and scouts across Morocco',
+              Text(
+                ref.tr.trustedBy,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textHint, fontSize: 12),
+                style: const TextStyle(color: AppColors.textHint, fontSize: 12),
               ),
             ],
           ),

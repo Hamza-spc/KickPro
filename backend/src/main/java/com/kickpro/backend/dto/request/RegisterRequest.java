@@ -22,4 +22,6 @@ public class RegisterRequest {
 
     @NotNull
     private Role role;
+
+    private String referralCode;
 }

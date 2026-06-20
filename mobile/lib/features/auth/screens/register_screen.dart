@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/auth/data/auth_repository.dart';
@@ -20,6 +21,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _referralController = TextEditingController();
   UserRole _role = UserRole.player;
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -28,6 +30,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _referralController.dispose();
     super.dispose();
   }
 
@@ -38,12 +41,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             email: _emailController.text,
             password: _passwordController.text,
             role: _role,
+            referralCode: _referralController.text,
           );
       if (!mounted) return;
       if (_role == UserRole.player) {
         await navigateAfterAuth(ref);
+      } else if (_role == UserRole.agent) {
+        showKickproToast(context, ref.tr.agentAccountCreated);
+        await navigateAfterAuth(ref);
       } else {
-        showKickproToast(context, 'Scout account created');
+        showKickproToast(context, ref.tr.scoutAccountCreated);
         await navigateAfterAuth(ref);
       }
     } catch (e) {
@@ -71,49 +78,55 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 8),
               const Center(child: KickproLogo(height: 40)),
               const SizedBox(height: 24),
-              const Text(
-                'Create account',
-                style: TextStyle(
+              Text(
+                ref.tr.createAccount,
+                style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Join KickPro as a player or scout',
-                style: TextStyle(color: AppColors.textSecondary),
+              Text(
+                ref.tr.joinKickpro,
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 24),
-              const Text('I am a', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+              Text(ref.tr.iAmA, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
               const SizedBox(height: 12),
               Row(
                 children: [
                   _RoleChip(
-                    label: 'Player',
+                    label: ref.tr.player,
                     selected: _role == UserRole.player,
                     onTap: () => setState(() => _role = UserRole.player),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   _RoleChip(
-                    label: 'Scout',
+                    label: ref.tr.scout,
                     selected: _role == UserRole.scout,
                     onTap: () => setState(() => _role = UserRole.scout),
+                  ),
+                  const SizedBox(width: 8),
+                  _RoleChip(
+                    label: ref.tr.agent,
+                    selected: _role == UserRole.agent,
+                    onTap: () => setState(() => _role = UserRole.agent),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
               KickproTextField(
                 controller: _emailController,
-                label: 'Email',
-                hint: 'you@example.com',
+                label: ref.tr.email,
+                hint: ref.tr.emailHint,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
               KickproTextField(
                 controller: _passwordController,
-                label: 'Password',
-                hint: 'Min. 8 characters',
+                label: ref.tr.password,
+                hint: ref.tr.passwordMinHint,
                 obscureText: _obscurePassword,
                 suffix: IconButton(
                   icon: Icon(
@@ -123,9 +136,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
+              if (_role == UserRole.player) ...[
+                const SizedBox(height: 16),
+                KickproTextField(
+                  controller: _referralController,
+                  label: ref.tr.referralCodeOptional,
+                  hint: ref.tr.referralCodeHint,
+                ),
+              ],
               const SizedBox(height: 24),
               KickproButton(
-                label: 'Create Account',
+                label: ref.tr.createAccount,
                 isLoading: _isLoading,
                 onPressed: _register,
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/drills/data/drill_repository.dart';
 import 'package:kickpro/shared/models/drill_models.dart';
@@ -46,10 +47,10 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
                   padding: const EdgeInsets.fromLTRB(24, 24, 16, 8),
                   child: Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Drill Progression',
-                          style: TextStyle(
+                          ref.tr.drillProgression,
+                          style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
@@ -59,9 +60,23 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
                       IconButton(
                         onPressed: () => context.push('/leaderboard'),
                         icon: const Icon(Icons.leaderboard_outlined, color: AppColors.accent),
-                        tooltip: 'Leaderboard',
+                        tooltip: ref.tr.leaderboard,
                       ),
                     ],
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: OutlinedButton(
+                    onPressed: () => context.push('/challenges'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.accent,
+                      side: const BorderSide(color: AppColors.gold),
+                      minimumSize: const Size.fromHeight(44),
+                    ),
+                    child: Text(ref.tr.weeklyChallenge),
                   ),
                 ),
               ),
@@ -75,12 +90,12 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
                       side: const BorderSide(color: AppColors.primary),
                       minimumSize: const Size.fromHeight(44),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        KickproChatbotLogo(size: 20),
-                        SizedBox(width: 8),
-                        Text('AI Coach'),
+                        const KickproChatbotLogo(size: 20),
+                        const SizedBox(width: 8),
+                        Text(ref.tr.aiCoach),
                       ],
                     ),
                   ),
@@ -183,10 +198,11 @@ class _DrillTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
     final (icon, color, label) = switch (item.status) {
-      DrillProgressStatus.completed => (Icons.check_circle, AppColors.success, 'Completed'),
-      DrillProgressStatus.current => (Icons.play_circle, AppColors.primary, 'Current'),
-      DrillProgressStatus.locked => (Icons.lock, AppColors.textHint, 'Locked'),
+      DrillProgressStatus.completed => (Icons.check_circle, AppColors.success, tr.completed),
+      DrillProgressStatus.current => (Icons.play_circle, AppColors.primary, tr.current),
+      DrillProgressStatus.locked => (Icons.lock, AppColors.textHint, tr.locked),
     };
 
     final canSubmit = item.status == DrillProgressStatus.current;
@@ -220,7 +236,7 @@ class _DrillTile extends StatelessWidget {
           const SizedBox(height: 8),
           Text(item.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
           const SizedBox(height: 8),
-          Text('Target: ${item.targetSkill.label}', style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
+          Text(context.tr.target(item.targetSkill.label), style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
           if (canSubmit) ...[
             const SizedBox(height: 12),
             SizedBox(
@@ -231,7 +247,7 @@ class _DrillTile extends StatelessWidget {
                   foregroundColor: AppColors.accent,
                   side: const BorderSide(color: AppColors.primary),
                 ),
-                child: const Text('Submit drill video'),
+                child: Text(context.tr.submitDrillVideo),
               ),
             ),
           ],

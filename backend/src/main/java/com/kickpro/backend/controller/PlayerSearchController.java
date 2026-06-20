@@ -1,9 +1,11 @@
 package com.kickpro.backend.controller;
 
 import com.kickpro.backend.dto.ApiResponse;
+import com.kickpro.backend.dto.response.PlayerComparisonResponse;
 import com.kickpro.backend.dto.response.PlayerSearchResultResponse;
 import com.kickpro.backend.entity.Position;
 import com.kickpro.backend.entity.PreferredFoot;
+import com.kickpro.backend.service.PlayerComparisonService;
 import com.kickpro.backend.service.PlayerSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,7 @@ import java.util.List;
 public class PlayerSearchController {
 
     private final PlayerSearchService playerSearchService;
+    private final PlayerComparisonService playerComparisonService;
 
     @GetMapping("/search")
     @PreAuthorize("hasAnyRole('SCOUT', 'AGENT', 'ADMIN')")
@@ -76,5 +79,15 @@ public class PlayerSearchController {
                 playerSearchService.getDistinctCities(),
                 "Cities retrieved successfully"
         ));
+    }
+
+    @GetMapping("/compare")
+    @PreAuthorize("hasAnyRole('SCOUT', 'AGENT', 'ADMIN')")
+    public ResponseEntity<ApiResponse<PlayerComparisonResponse>> comparePlayers(
+            @RequestParam Long profileA,
+            @RequestParam Long profileB
+    ) {
+        PlayerComparisonResponse comparison = playerComparisonService.comparePlayers(profileA, profileB);
+        return ResponseEntity.ok(ApiResponse.success(comparison, "Player comparison retrieved successfully"));
     }
 }

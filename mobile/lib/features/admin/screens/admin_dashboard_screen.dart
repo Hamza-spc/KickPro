@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kickpro/core/api/api_error.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/admin/data/admin_repository.dart';
 import 'package:kickpro/shared/widgets/kickpro_logo.dart';
@@ -20,9 +21,9 @@ class AdminDashboardScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            const Text(
-              'Admin Dashboard',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700),
+            Text(
+              ref.tr.adminDashboard,
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 16),
             statsAsync.when(
@@ -32,33 +33,33 @@ class AdminDashboardScreen extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _StatCard(label: 'Players', value: '${stats.totalPlayers}', icon: Icons.people)),
+                      Expanded(child: _StatCard(label: ref.tr.statPlayers, value: '${stats.totalPlayers}', icon: Icons.people)),
                       const SizedBox(width: 12),
-                      Expanded(child: _StatCard(label: 'Pending drills', value: '${stats.pendingDrillSubmissions}', icon: Icons.pending_actions)),
+                      Expanded(child: _StatCard(label: ref.tr.statPendingDrills, value: '${stats.pendingDrillSubmissions}', icon: Icons.pending_actions)),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _StatCard(label: 'Active matches', value: '${stats.activeMatches}', icon: Icons.sports_soccer)),
+                      Expanded(child: _StatCard(label: ref.tr.statActiveMatches, value: '${stats.activeMatches}', icon: Icons.sports_soccer)),
                       const SizedBox(width: 12),
-                      Expanded(child: _StatCard(label: 'Flagged posts', value: '${stats.flaggedPosts}', icon: Icons.flag)),
+                      Expanded(child: _StatCard(label: ref.tr.statFlaggedPosts, value: '${stats.flaggedPosts}', icon: Icons.flag)),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _StatCard(label: 'Total users', value: '${stats.totalUsers}', icon: Icons.group, fullWidth: true),
+                  _StatCard(label: ref.tr.statTotalUsers, value: '${stats.totalUsers}', icon: Icons.group, fullWidth: true),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            const Text('Quick actions', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+            Text(ref.tr.quickActions, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 10,
               runSpacing: 10,
               children: [
-                _QuickAction(label: 'Add venue', icon: Icons.add_location_alt, onTap: () {}),
-                _QuickAction(label: 'Review drills', icon: Icons.check_circle_outline, onTap: () {}),
+                _QuickAction(label: ref.tr.addVenue, icon: Icons.add_location_alt, onTap: () {}),
+                _QuickAction(label: ref.tr.reviewDrills, icon: Icons.check_circle_outline, onTap: () {}),
                 InkWell(
                   onTap: () => context.push('/admin/generate-course'),
                   borderRadius: BorderRadius.circular(12),
@@ -69,17 +70,17 @@ class AdminDashboardScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.border),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        KickproChatbotLogo(size: 18),
-                        SizedBox(width: 8),
-                        Text('Generate course', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                        const KickproChatbotLogo(size: 18),
+                        const SizedBox(width: 8),
+                        Text(ref.tr.generateCourse, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
                 ),
-                _QuickAction(label: 'Moderate posts', icon: Icons.shield_outlined, onTap: () {}),
+                _QuickAction(label: ref.tr.moderatePosts, icon: Icons.shield_outlined, onTap: () {}),
               ],
             ),
           ],
