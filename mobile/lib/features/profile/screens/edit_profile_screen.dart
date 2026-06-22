@@ -10,6 +10,7 @@ import 'package:kickpro/features/profile/screens/player_profile_screen.dart';
 import 'package:kickpro/features/profile/widgets/profile_photo_actions.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/skills_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_text_field.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
@@ -205,24 +206,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                     ),
                             child: Stack(
                               children: [
-                                CircleAvatar(
+                                KickproAvatar(
                                   radius: 40,
-                                  backgroundColor: AppColors.primary,
-                                  backgroundImage: profile.profilePhotoUrl != null
-                                      ? NetworkImage(profile.profilePhotoUrl!)
-                                      : null,
-                                  child: profile.profilePhotoUrl == null
-                                      ? Text(
-                                          profile.fullName.isNotEmpty
-                                              ? profile.fullName[0].toUpperCase()
-                                              : '?',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        )
-                                      : null,
+                                  photoUrl: profile.profilePhotoUrl,
+                                  name: profile.fullName,
+                                  fallbackFontSize: 24,
                                 ),
                                 if (_uploadingPhoto)
                                   const Positioned.fill(
@@ -270,7 +258,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           dropdownColor: AppColors.surface,
                           decoration: InputDecoration(labelText: ref.tr.position),
                           items: PlayerPosition.values
-                              .map((p) => DropdownMenuItem(value: p, child: Text(p.label)))
+                              .map((p) => DropdownMenuItem(value: p, child: Text(ref.tr.positionLabel(p))))
                               .toList(),
                           onChanged: (v) {
                             if (v != null) setState(() => _position = v);
@@ -284,7 +272,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           items: PreferredFoot.values
                               .map((f) => DropdownMenuItem(
                                     value: f,
-                                    child: Text(f.name[0].toUpperCase() + f.name.substring(1)),
+                                    child: Text(ref.tr.preferredFootLabel(f)),
                                   ))
                               .toList(),
                           onChanged: (v) {

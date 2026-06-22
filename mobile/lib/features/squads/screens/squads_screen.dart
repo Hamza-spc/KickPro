@@ -6,6 +6,7 @@ import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/squads/data/squad_repository.dart';
 import 'package:kickpro/shared/models/squad_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_text_field.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
@@ -209,36 +210,48 @@ class _JoinRequestCardState extends ConsumerState<_JoinRequestCard> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            widget.request.playerName,
-            style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+          KickproAvatar(
+            photoUrl: widget.request.playerPhotoUrl,
+            name: widget.request.playerName,
           ),
-          const SizedBox(height: 4),
-          Text(
-            '${widget.request.squadName} · ${widget.request.squadCity}',
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: KickproButton(
-                  label: ref.tr.approve,
-                  onPressed: _acting ? null : _approve,
-                  isLoading: _acting,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.request.playerName,
+                  style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: KickproButton(
-                  label: ref.tr.reject,
-                  onPressed: _acting ? null : _reject,
+                const SizedBox(height: 4),
+                Text(
+                  '${widget.request.squadName} · ${widget.request.squadCity}',
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: KickproButton(
+                        label: ref.tr.approve,
+                        onPressed: _acting ? null : _approve,
+                        isLoading: _acting,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: KickproButton(
+                        label: ref.tr.reject,
+                        onPressed: _acting ? null : _reject,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

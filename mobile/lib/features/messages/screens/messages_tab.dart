@@ -4,6 +4,7 @@ import 'package:kickpro/core/api/api_error.dart';
 import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/messages/data/message_repository.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/kickpro_empty_state.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
@@ -56,36 +57,38 @@ class _MessagesTabState extends ConsumerState<MessagesTab> {
 
     final conversationsAsync = ref.watch(conversationsProvider);
 
-    return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(conversationsProvider),
-      child: conversationsAsync.when(
-        loading: () => ListView(
-          children: const [
-            Padding(padding: EdgeInsets.all(16), child: ShimmerBox(height: 80, width: double.infinity)),
-          ],
-        ),
-        error: (e, _) => ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.error)),
-            ),
-          ],
-        ),
-        data: (conversations) {
-          if (conversations.isEmpty) {
-            return ListView(
-              children: [
-                KickproEmptyState(
-                  icon: Icons.mail_outline,
-                  message: ref.tr.noConversationsYet,
-                ),
-              ],
-            );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: conversations.length,
+    return SafeArea(
+      bottom: false,
+      child: RefreshIndicator(
+        onRefresh: () async => ref.invalidate(conversationsProvider),
+        child: conversationsAsync.when(
+          loading: () => ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            children: const [
+              ShimmerBox(height: 80, width: double.infinity),
+            ],
+          ),
+          error: (e, _) => ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            children: [
+              Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.error)),
+            ],
+          ),
+          data: (conversations) {
+            if (conversations.isEmpty) {
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                children: [
+                  KickproEmptyState(
+                    icon: Icons.mail_outline,
+                    message: ref.tr.noConversationsYet,
+                  ),
+                ],
+              );
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              itemCount: conversations.length,
             itemBuilder: (context, index) {
               final conversation = conversations[index];
               final title = conversation.otherUserName.isNotEmpty
@@ -96,12 +99,9 @@ class _MessagesTabState extends ConsumerState<MessagesTab> {
                   _selectedUserId = conversation.otherUserId;
                   _selectedUserLabel = title;
                 }),
-                leading: CircleAvatar(
-                  backgroundColor: AppColors.primary,
-                  child: Text(
-                    title.isNotEmpty ? title[0].toUpperCase() : '?',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                  ),
+                leading: KickproAvatar(
+                  photoUrl: conversation.otherUserPhotoUrl,
+                  name: title,
                 ),
                 title: Text(
                   title,
@@ -116,7 +116,8 @@ class _MessagesTabState extends ConsumerState<MessagesTab> {
               );
             },
           );
-        },
+          },
+        ),
       ),
     );
   }

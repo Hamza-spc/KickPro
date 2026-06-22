@@ -16,6 +16,7 @@ import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/user_role.dart';
 import 'package:kickpro/shared/models/squad_models.dart';
 import 'package:kickpro/shared/widgets/credibility_score_card.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
@@ -237,22 +238,11 @@ class _UserProfileContentState extends ConsumerState<_UserProfileContent> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                CircleAvatar(
+                KickproAvatar(
                   radius: 44,
-                  backgroundColor: AppColors.primary,
-                  backgroundImage: _profile.profilePhotoUrl != null
-                      ? NetworkImage(_profile.profilePhotoUrl!)
-                      : null,
-                  child: _profile.profilePhotoUrl == null
-                      ? Text(
-                          _profile.fullName.isNotEmpty ? _profile.fullName[0].toUpperCase() : '?',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                      : null,
+                  photoUrl: _profile.profilePhotoUrl,
+                  name: _profile.fullName,
+                  fallbackFontSize: 28,
                 ),
                 const SizedBox(height: 16),
                 Text(

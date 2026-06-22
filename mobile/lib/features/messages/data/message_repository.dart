@@ -21,6 +21,7 @@ class ConversationSummary {
     required this.otherUserId,
     required this.otherUserName,
     required this.otherUserEmail,
+    this.otherUserPhotoUrl,
     required this.lastMessage,
     required this.lastMessageAt,
     required this.lastMessageOwn,
@@ -29,6 +30,7 @@ class ConversationSummary {
   final int otherUserId;
   final String otherUserName;
   final String otherUserEmail;
+  final String? otherUserPhotoUrl;
   final String lastMessage;
   final DateTime lastMessageAt;
   final bool lastMessageOwn;
@@ -38,6 +40,7 @@ class ConversationSummary {
       otherUserId: (json['otherUserId'] as num).toInt(),
       otherUserName: json['otherUserName'] as String? ?? '',
       otherUserEmail: json['otherUserEmail'] as String? ?? '',
+      otherUserPhotoUrl: json['otherUserPhotoUrl'] as String?,
       lastMessage: json['lastMessage'] as String? ?? '',
       lastMessageAt: DateTime.parse(json['lastMessageAt'] as String),
       lastMessageOwn: json['lastMessageOwn'] as bool? ?? false,

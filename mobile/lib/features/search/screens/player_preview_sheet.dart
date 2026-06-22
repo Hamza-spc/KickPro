@@ -9,6 +9,7 @@ import 'package:kickpro/features/search/data/search_repository.dart';
 import 'package:kickpro/shared/models/course_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/widgets/credibility_score_card.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 final playerPreviewProvider = FutureProvider.autoDispose
@@ -60,18 +61,11 @@ class _PlayerPreviewContent extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           children: [
-            CircleAvatar(
+            KickproAvatar(
               radius: 28,
-              backgroundColor: AppColors.primary,
-              backgroundImage: profile.profilePhotoUrl != null
-                  ? NetworkImage(profile.profilePhotoUrl!)
-                  : null,
-              child: profile.profilePhotoUrl == null
-                  ? Text(
-                      profile.fullName.isNotEmpty ? profile.fullName[0].toUpperCase() : '?',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 22),
-                    )
-                  : null,
+              photoUrl: profile.profilePhotoUrl,
+              name: profile.fullName,
+              fallbackFontSize: 22,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -87,7 +81,7 @@ class _PlayerPreviewContent extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${profile.position.label} · ${profile.city}',
+                    '${context.tr.positionLabel(profile.position)} · ${profile.city}',
                     style: const TextStyle(color: AppColors.textSecondary),
                   ),
                 ],
@@ -98,7 +92,7 @@ class _PlayerPreviewContent extends StatelessWidget {
         const SizedBox(height: 16),
         CredibilityScoreCard(score: profile.credibilityScore, compact: true),
         const SizedBox(height: 16),
-        _InfoTile(label: context.tr.preferredFoot, value: profile.preferredFoot.name.toUpperCase()),
+        _InfoTile(label: context.tr.preferredFoot, value: context.tr.preferredFootLabel(profile.preferredFoot)),
         _InfoTile(label: context.tr.height, value: '${profile.height} cm'),
         _InfoTile(label: context.tr.weight, value: '${profile.weight} kg'),
         if (profile.bio != null && profile.bio!.isNotEmpty) ...[

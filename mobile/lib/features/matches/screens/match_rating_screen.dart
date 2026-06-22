@@ -6,6 +6,7 @@ import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/matches/data/match_repository.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
@@ -146,12 +147,9 @@ class _MatchRatingScreenState extends ConsumerState<MatchRatingScreen> {
                                   children: [
                                     GestureDetector(
                                       onTap: () => openPlayerProfile(context, p.playerId),
-                                      child: CircleAvatar(
-                                        backgroundColor: AppColors.primary,
-                                        child: Text(
-                                          p.playerName.isNotEmpty ? p.playerName[0].toUpperCase() : '?',
-                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                                        ),
+                                      child: KickproAvatar(
+                                        photoUrl: p.profilePhotoUrl,
+                                        name: p.playerName,
                                       ),
                                     ),
                                     const SizedBox(width: 12),

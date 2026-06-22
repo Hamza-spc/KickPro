@@ -14,6 +14,7 @@ import 'package:kickpro/shared/models/post_models.dart';
 import 'package:kickpro/shared/models/video_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_text_field.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -284,14 +285,10 @@ class _PostCardState extends ConsumerState<PostCard> {
                   borderRadius: BorderRadius.circular(12),
                   child: Row(
                     children: [
-                      CircleAvatar(
+                      KickproAvatar(
                         radius: 18,
-                        backgroundColor: AppColors.primary,
-                        backgroundImage:
-                            _post.playerPhotoUrl != null ? NetworkImage(_post.playerPhotoUrl!) : null,
-                        child: _post.playerPhotoUrl == null
-                            ? Text(_post.playerName.isNotEmpty ? _post.playerName[0] : '?')
-                            : null,
+                        photoUrl: _post.playerPhotoUrl,
+                        name: _post.playerName,
                       ),
                       const SizedBox(width: 10),
                       Expanded(

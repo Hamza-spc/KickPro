@@ -10,6 +10,7 @@ import 'package:kickpro/features/matches/services/match_reminder_service.dart';
 import 'package:kickpro/features/profile/data/profile_repository.dart';
 import 'package:kickpro/shared/models/match_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
@@ -313,12 +314,9 @@ class _ParticipantTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: AppColors.primary,
-            child: Text(
-              participant.playerName.isNotEmpty ? participant.playerName[0].toUpperCase() : '?',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-            ),
+          KickproAvatar(
+            photoUrl: participant.profilePhotoUrl,
+            name: participant.playerName,
           ),
           const SizedBox(width: 12),
           Expanded(

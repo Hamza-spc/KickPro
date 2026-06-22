@@ -14,6 +14,7 @@ import 'package:kickpro/shared/models/course_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/skills_models.dart';
 import 'package:kickpro/shared/widgets/credibility_score_card.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 import 'package:kickpro/shared/widgets/skill_bar.dart';
@@ -256,22 +257,11 @@ class _ProfileHero extends ConsumerWidget {
             onTap: uploadingPhoto ? null : onPhotoTap,
             child: Stack(
               children: [
-                CircleAvatar(
+                KickproAvatar(
                   radius: 44,
-                  backgroundColor: AppColors.primary,
-                  backgroundImage: profile.profilePhotoUrl != null
-                      ? NetworkImage(profile.profilePhotoUrl!)
-                      : null,
-                  child: profile.profilePhotoUrl == null
-                      ? Text(
-                          profile.fullName.isNotEmpty ? profile.fullName[0].toUpperCase() : '?',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                      : null,
+                  photoUrl: profile.profilePhotoUrl,
+                  name: profile.fullName,
+                  fallbackFontSize: 28,
                 ),
                 if (uploadingPhoto)
                   const Positioned.fill(

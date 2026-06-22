@@ -8,6 +8,7 @@ import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/leaderboard/data/leaderboard_repository.dart';
 import 'package:kickpro/features/leaderboard/models/leaderboard_models.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -118,7 +119,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                     (pos) => Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: _FilterChip(
-                        label: pos.label,
+                        label: ref.tr.positionLabel(pos),
                         selected: _position == pos,
                         onTap: () => setState(() => _position = pos),
                       ),
@@ -372,18 +373,12 @@ class _LeaderboardCard extends StatelessWidget {
                   ),
                 ),
               ),
-              CircleAvatar(
+              KickproAvatar(
                 radius: 22,
+                photoUrl: entry.profilePhotoUrl,
+                name: entry.playerName,
                 backgroundColor: AppColors.background,
-                backgroundImage: entry.profilePhotoUrl != null
-                    ? NetworkImage(entry.profilePhotoUrl!)
-                    : null,
-                child: entry.profilePhotoUrl == null
-                    ? Text(
-                        entry.playerName.isNotEmpty ? entry.playerName[0].toUpperCase() : '?',
-                        style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-                      )
-                    : null,
+                fallbackTextColor: AppColors.textPrimary,
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/search_models.dart';
 import 'package:kickpro/shared/widgets/credibility_ring.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 
 class ScoutPlayerCard extends StatelessWidget {
   const ScoutPlayerCard({
@@ -34,18 +36,10 @@ class ScoutPlayerCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              CircleAvatar(
+              KickproAvatar(
                 radius: 24,
-                backgroundColor: AppColors.primary,
-                backgroundImage: player.profilePhotoUrl != null
-                    ? NetworkImage(player.profilePhotoUrl!)
-                    : null,
-                child: player.profilePhotoUrl == null
-                    ? Text(
-                        player.fullName.isNotEmpty ? player.fullName[0].toUpperCase() : '?',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                      )
-                    : null,
+                photoUrl: player.profilePhotoUrl,
+                name: player.fullName,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -61,7 +55,7 @@ class ScoutPlayerCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${player.position.label} · ${player.city} · ${player.age} yrs',
+                      '${context.tr.positionLabel(player.position)} · ${player.city} · ${context.tr.nYearsOld(player.age)}',
                       style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                     ),
                     if (player.skills != null) ...[

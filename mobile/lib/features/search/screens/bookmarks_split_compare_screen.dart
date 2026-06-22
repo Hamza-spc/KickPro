@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/shared/models/search_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_avatar.dart';
 
 class BookmarksSplitCompareScreen extends StatefulWidget {
   const BookmarksSplitCompareScreen({
@@ -48,6 +49,8 @@ class _BookmarksSplitCompareScreenState extends State<BookmarksSplitCompareScree
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.tr;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -63,7 +66,7 @@ class _BookmarksSplitCompareScreenState extends State<BookmarksSplitCompareScree
                   ),
                   Expanded(
                     child: Text(
-                      context.tr.comparePlayers,
+                      tr.comparePlayers,
                       style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
@@ -76,29 +79,108 @@ class _BookmarksSplitCompareScreenState extends State<BookmarksSplitCompareScree
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: Row(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
                 children: [
-                  Expanded(
-                    child: _CompareHalf(
-                      sideColor: const Color(0xFF1E3A5F),
-                      player: widget.left,
-                      stage1: _stage1,
-                      stage2: _stage2,
-                      stage3: _stage3,
-                      stage4: _stage4,
-                      stage5: _stage5,
+                  _AnimatedRow(
+                    animation: _stage1,
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: _PlayerHeader(
+                              player: widget.left,
+                              tint: const Color(0xFF1E3A5F),
+                            ),
+                          ),
+                          _VerticalDivider(),
+                          Expanded(
+                            child: _PlayerHeader(
+                              player: widget.right,
+                              tint: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  Container(width: 1, color: AppColors.border.withValues(alpha: 0.6)),
-                  Expanded(
-                    child: _CompareHalf(
-                      sideColor: AppColors.primary.withValues(alpha: 0.35),
-                      player: widget.right,
-                      stage1: _stage1,
-                      stage2: _stage2,
-                      stage3: _stage3,
-                      stage4: _stage4,
-                      stage5: _stage5,
+                  const SizedBox(height: 12),
+                  _AnimatedRow(
+                    animation: _stage2,
+                    child: _SyncedStatRow(
+                      left: _StatCell.text(
+                        tr.positionLabel(widget.left.position),
+                        fontWeight: FontWeight.w700,
+                      ),
+                      right: _StatCell.text(
+                        tr.positionLabel(widget.right.position),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AnimatedRow(
+                    animation: _stage2,
+                    child: _SyncedStatRow(
+                      left: _StatCell.text(
+                        '${widget.left.city} · ${tr.nYearsOld(widget.left.age)}',
+                        color: AppColors.textSecondary,
+                      ),
+                      right: _StatCell.text(
+                        '${widget.right.city} · ${tr.nYearsOld(widget.right.age)}',
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AnimatedRow(
+                    animation: _stage3,
+                    child: _SyncedStatRow(
+                      left: _StatCell.metric(
+                        icon: Icons.sports_soccer_outlined,
+                        label: tr.matches,
+                        value: '${widget.left.approvedMatchCount}',
+                      ),
+                      right: _StatCell.metric(
+                        icon: Icons.sports_soccer_outlined,
+                        label: tr.matches,
+                        value: '${widget.right.approvedMatchCount}',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AnimatedRow(
+                    animation: _stage4,
+                    child: _SyncedStatRow(
+                      left: _StatCell.metric(
+                        icon: Icons.verified_outlined,
+                        label: tr.certs,
+                        value: '${widget.left.certificationCount}',
+                      ),
+                      right: _StatCell.metric(
+                        icon: Icons.verified_outlined,
+                        label: tr.certs,
+                        value: '${widget.right.certificationCount}',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AnimatedRow(
+                    animation: _stage5,
+                    child: _SyncedStatRow(
+                      left: _StatCell.metric(
+                        icon: Icons.bolt,
+                        label: tr.score,
+                        value: '${widget.left.credibilityScore.round()}/100',
+                        valueColor: AppColors.accent,
+                      ),
+                      right: _StatCell.metric(
+                        icon: Icons.bolt,
+                        label: tr.score,
+                        value: '${widget.right.credibilityScore.round()}/100',
+                        valueColor: AppColors.accent,
+                      ),
                     ),
                   ),
                 ],
@@ -111,164 +193,182 @@ class _BookmarksSplitCompareScreenState extends State<BookmarksSplitCompareScree
   }
 }
 
-class _CompareHalf extends StatelessWidget {
-  const _CompareHalf({
-    required this.player,
-    required this.sideColor,
-    required this.stage1,
-    required this.stage2,
-    required this.stage3,
-    required this.stage4,
-    required this.stage5,
-  });
+class _AnimatedRow extends StatelessWidget {
+  const _AnimatedRow({required this.animation, required this.child});
 
-  final PlayerSearchResult player;
-  final Color sideColor;
-  final Animation<double> stage1;
-  final Animation<double> stage2;
-  final Animation<double> stage3;
-  final Animation<double> stage4;
-  final Animation<double> stage5;
+  final Animation<double> animation;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final tr = context.tr;
-    final avatar = player.profilePhotoUrl;
+    return FadeTransition(
+      opacity: animation,
+      child: SlideTransition(
+        position: animation.drive(Tween(begin: const Offset(0, 0.06), end: Offset.zero)),
+        child: child,
+      ),
+    );
+  }
+}
 
-    Widget line(Animation<double> a, Widget child) {
-      return FadeTransition(
-        opacity: a,
-        child: SlideTransition(
-          position: a.drive(Tween(begin: const Offset(0, 0.06), end: Offset.zero)),
-          child: child,
-        ),
-      );
-    }
-
+class _VerticalDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      color: sideColor.withValues(alpha: 0.12),
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      width: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      color: AppColors.border.withValues(alpha: 0.6),
+    );
+  }
+}
+
+class _PlayerHeader extends StatelessWidget {
+  const _PlayerHeader({required this.player, required this.tint});
+
+  final PlayerSearchResult player;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 72),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border, width: 0.5),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          line(
-            stage1,
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: AppColors.surface,
-                  backgroundImage: (avatar != null && avatar.isNotEmpty) ? NetworkImage(avatar) : null,
-                  child: (avatar == null || avatar.isEmpty)
-                      ? Text(
-                          player.fullName.isNotEmpty ? player.fullName[0].toUpperCase() : '?',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    player.fullName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
+          KickproAvatar(
+            radius: 24,
+            photoUrl: player.profilePhotoUrl,
+            name: player.fullName,
+            backgroundColor: AppColors.surface,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              player.fullName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+                height: 1.2,
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          line(
-            stage2,
-            _StatPill(
-              label: tr.positionLabel(player.position),
-              value: '${player.city} · ${tr.nYearsOld(player.age)}',
-            ),
-          ),
-          const SizedBox(height: 10),
-          line(
-            stage3,
-            _StatPill(
-              icon: Icons.sports_soccer_outlined,
-              label: tr.matches,
-              value: '${player.approvedMatchCount}',
-            ),
-          ),
-          const SizedBox(height: 10),
-          line(
-            stage4,
-            _StatPill(
-              icon: Icons.verified_outlined,
-              label: tr.certs,
-              value: '${player.certificationCount}',
-            ),
-          ),
-          const SizedBox(height: 10),
-          line(
-            stage5,
-            _StatPill(
-              icon: Icons.bolt,
-              label: tr.score,
-              value: '${player.credibilityScore.round()}/100',
-              valueColor: AppColors.accent,
-            ),
-          ),
-          const Spacer(),
         ],
       ),
     );
   }
 }
 
-class _StatPill extends StatelessWidget {
-  const _StatPill({
-    this.icon,
-    required this.label,
-    required this.value,
-    this.valueColor,
+class _SyncedStatRow extends StatelessWidget {
+  const _SyncedStatRow({required this.left, required this.right});
+
+  final _StatCell left;
+  final _StatCell right;
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: left),
+          _VerticalDivider(),
+          Expanded(child: right),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCell extends StatelessWidget {
+  const _StatCell._({
+    required this.child,
   });
 
-  final IconData? icon;
-  final String label;
-  final String value;
-  final Color? valueColor;
+  factory _StatCell.text(
+    String text, {
+    Color color = AppColors.textPrimary,
+    FontWeight fontWeight = FontWeight.w600,
+  }) {
+    return _StatCell._(
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: color, fontWeight: fontWeight, fontSize: 14, height: 1.25),
+        ),
+      ),
+    );
+  }
+
+  factory _StatCell.metric({
+    required IconData icon,
+    required String label,
+    required String value,
+    Color? valueColor,
+  }) {
+    return _StatCell._(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: AppColors.textHint),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: valueColor ?? AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border, width: 0.5),
       ),
-      child: Row(
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16, color: AppColors.textHint),
-            const SizedBox(width: 8),
-          ],
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              color: valueColor ?? AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
+      child: child,
     );
   }
 }
-
