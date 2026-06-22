@@ -5,7 +5,7 @@ import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/drills/data/drill_repository.dart';
 import 'package:kickpro/shared/models/drill_models.dart';
-import 'package:kickpro/shared/models/video_models.dart';
+import 'package:kickpro/shared/widgets/kickpro_empty_state.dart';
 import 'package:kickpro/shared/widgets/kickpro_logo.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
@@ -121,7 +121,7 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
                                 border: Border.all(color: selected ? AppColors.primary : AppColors.border),
                               ),
                               child: Text(
-                                level.label,
+                                ref.tr.drillLevelLabel(level),
                                 style: TextStyle(
                                   color: selected ? Colors.white : AppColors.textSecondary,
                                   fontWeight: FontWeight.w600,
@@ -174,14 +174,24 @@ class _DrillProgressionScreenState extends ConsumerState<DrillProgressionScreen>
                     child: Text(e.toString(), style: const TextStyle(color: AppColors.error)),
                   ),
                 ),
-                data: (items) => SliverList.separated(
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (_, index) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _DrillTile(item: items[index]),
-                  ),
-                ),
+                data: (items) {
+                  if (items.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: KickproEmptyState(
+                        icon: Icons.fitness_center_outlined,
+                        message: ref.tr.noDrillsInLevel,
+                      ),
+                    );
+                  }
+                  return SliverList.separated(
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (_, index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _DrillTile(item: items[index]),
+                    ),
+                  );
+                },
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
@@ -236,7 +246,7 @@ class _DrillTile extends StatelessWidget {
           const SizedBox(height: 8),
           Text(item.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
           const SizedBox(height: 8),
-          Text(context.tr.target(item.targetSkill.label), style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
+          Text(context.tr.target(context.tr.targetSkillLabel(item.targetSkill)), style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
           if (canSubmit) ...[
             const SizedBox(height: 12),
             SizedBox(

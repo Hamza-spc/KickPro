@@ -9,6 +9,7 @@ import 'package:kickpro/features/challenges/data/challenge_repository.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/kickpro_text_field.dart';
 import 'package:kickpro/shared/widgets/kickpro_toast.dart';
+import 'package:kickpro/shared/widgets/kickpro_empty_state.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
 
 class ChallengesScreen extends ConsumerStatefulWidget {
@@ -97,7 +98,10 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                     error: (e, _) => Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.error)),
                     data: (challenge) {
                       if (challenge == null) {
-                        return Text(ref.tr.noActiveChallenge, style: const TextStyle(color: AppColors.textSecondary));
+                        return KickproEmptyState(
+                          icon: Icons.emoji_events_outlined,
+                          message: ref.tr.noActiveChallenge,
+                        );
                       }
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,9 +180,9 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                 data: (submissions) {
                   if (submissions.isEmpty) {
                     return SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(ref.tr.none, style: const TextStyle(color: AppColors.textHint)),
+                      child: KickproEmptyState(
+                        icon: Icons.videocam_outlined,
+                        message: ref.tr.noChallengeSubmissions,
                       ),
                     );
                   }
