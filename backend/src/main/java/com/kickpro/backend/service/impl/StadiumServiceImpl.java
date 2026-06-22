@@ -86,7 +86,11 @@ public class StadiumServiceImpl implements StadiumService {
                     .available(available)
                     .build());
 
-            slotTime = slotTime.plusHours(1);
+            LocalTime nextSlot = slotTime.plusHours(1);
+            if (!nextSlot.isAfter(slotTime)) {
+                break;
+            }
+            slotTime = nextSlot;
         }
 
         return StadiumAvailabilityResponse.builder()
@@ -112,14 +116,14 @@ public class StadiumServiceImpl implements StadiumService {
                 .description(stadium.getDescription())
                 .pricePerHour(stadium.getPricePerHour())
                 .pitchCount(stadium.getPitchCount())
-                .pitchTypes(stadium.getPitchTypes())
-                .allowedFormats(stadium.getAllowedFormats())
+                .pitchTypes(List.copyOf(stadium.getPitchTypes()))
+                .allowedFormats(List.copyOf(stadium.getAllowedFormats()))
                 .openTime(stadium.getOpenTime())
                 .closeTime(stadium.getCloseTime())
                 .grassType(stadium.getGrassType())
                 .latitude(stadium.getLatitude())
                 .longitude(stadium.getLongitude())
-                .photos(stadium.getPhotos())
+                .photos(List.copyOf(stadium.getPhotos()))
                 .build();
     }
 }

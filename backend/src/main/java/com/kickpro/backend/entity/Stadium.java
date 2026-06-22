@@ -61,14 +61,14 @@ public class Stadium {
     @Column(nullable = false)
     private Integer pitchCount = 1;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "stadium_pitch_types", joinColumns = @JoinColumn(name = "stadium_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "pitch_type")
     @Builder.Default
     private List<PitchType> pitchTypes = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "stadium_allowed_formats", joinColumns = @JoinColumn(name = "stadium_id"))
     @Column(name = "format_label")
     @Builder.Default
@@ -90,7 +90,7 @@ public class Stadium {
     @Column
     private Double longitude;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "stadium_photos", joinColumns = @JoinColumn(name = "stadium_id"))
     @Column(name = "photo_url")
     @Builder.Default

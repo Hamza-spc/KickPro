@@ -408,9 +408,7 @@ public class MatchServiceImpl implements MatchService {
                 .stadiumId(match.getStadium().getId())
                 .stadiumName(match.getStadium().getName())
                 .stadiumLocation(match.getStadium().getLocation())
-                .stadiumCoverPhotoUrl(match.getStadium().getPhotos() != null && !match.getStadium().getPhotos().isEmpty()
-                        ? match.getStadium().getPhotos().getFirst()
-                        : null)
+                .stadiumCoverPhotoUrl(resolveStadiumCoverPhoto(match.getStadium()))
                 .organizerId(match.getOrganizer().getId())
                 .organizerName(resolveOrganizerName(match))
                 .dateTime(match.getDateTime())
@@ -424,6 +422,11 @@ public class MatchServiceImpl implements MatchService {
                 .chatRoomId(chatRoomId)
                 .participants(participantSummaries)
                 .build();
+    }
+
+    private String resolveStadiumCoverPhoto(Stadium stadium) {
+        List<String> photos = stadium.getPhotos();
+        return photos.isEmpty() ? null : photos.getFirst();
     }
 
     private String resolveOrganizerName(Match match) {
