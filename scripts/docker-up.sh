@@ -44,6 +44,9 @@ if docker compose ps postgres 2>/dev/null | grep -q "Up"; then
   echo "Applying DB migrations (squad join requests)..."
   docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
     < backend/scripts/migrate-squad-join-requests.sql >/dev/null 2>&1 || true
+  echo "Applying DB migrations (notification types)..."
+  docker exec -i kickpro-postgres psql -U kickpro -d kickpro \
+    < backend/scripts/migrate-notification-types.sql >/dev/null 2>&1 || true
 fi
 
 echo "Starting Kafka..."
