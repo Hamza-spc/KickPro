@@ -58,6 +58,7 @@ class _PlayerHomeScreenState extends ConsumerState<PlayerHomeScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _navIndex,
         onDestinationSelected: _onNavSelected,
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         backgroundColor: AppColors.surface,
         indicatorColor: AppColors.primary.withValues(alpha: 0.3),
         destinations: [
@@ -82,8 +83,8 @@ class _PlayerHomeScreenState extends ConsumerState<PlayerHomeScreen> {
             label: ref.tr.navMatches,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.mail_outline),
-            selectedIcon: const Icon(Icons.mail),
+            icon: const Icon(Icons.inbox_outlined),
+            selectedIcon: const Icon(Icons.inbox),
             label: ref.tr.navMessages,
           ),
           NavigationDestination(

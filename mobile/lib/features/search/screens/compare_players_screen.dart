@@ -7,7 +7,6 @@ import 'package:kickpro/core/theme/app_colors.dart';
 import 'package:kickpro/features/search/data/bookmark_repository.dart';
 import 'package:kickpro/features/search/data/compare_repository.dart';
 import 'package:kickpro/features/search/widgets/scout_player_card.dart';
-import 'package:kickpro/shared/models/profile_models.dart';
 import 'package:kickpro/shared/models/search_models.dart';
 import 'package:kickpro/shared/widgets/kickpro_button.dart';
 import 'package:kickpro/shared/widgets/shimmer_box.dart';
@@ -228,14 +227,14 @@ class _CompareColumn extends ConsumerWidget {
         children: [
           Text(title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          Text('${player.city} · ${player.position.label}',
+          Text('${ref.tr.positionLabel(player.position)} · ${player.city}',
               style: const TextStyle(color: AppColors.textSecondary)),
           Text(ref.tr.credibilityN(player.credibilityScore.round()),
               style: const TextStyle(color: AppColors.accent)),
-          Text('${player.approvedDrillCount} drills · ${player.certificationCount} certs',
+          Text(ref.tr.nDrillsAndCerts(player.approvedDrillCount, player.certificationCount),
               style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
           if (player.averageDrillScore != null)
-            Text('Avg drill: ${player.averageDrillScore!.toStringAsFixed(1)}',
+            Text(ref.tr.avgDrillScore(player.averageDrillScore!.toStringAsFixed(1)),
                 style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
         ],
       ),

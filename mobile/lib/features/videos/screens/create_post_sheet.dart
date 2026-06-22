@@ -138,7 +138,7 @@ class _CreatePostSheetState extends ConsumerState<_CreatePostSheet> {
               children: TargetSkill.values.map((skill) {
                 final selected = _skillTag == skill;
                 return ChoiceChip(
-                  label: Text(skill.label),
+                  label: Text(ref.tr.targetSkillLabel(skill)),
                   selected: selected,
                   onSelected: (_) => setState(() => _skillTag = selected ? null : skill),
                   selectedColor: AppColors.primary,

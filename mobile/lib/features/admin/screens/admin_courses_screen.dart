@@ -26,25 +26,38 @@ class AdminCoursesScreen extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: Text(ref.tr.courses, style: const TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/admin/create-course'),
-                  child: Text(ref.tr.createCourseManually),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/admin/generate-course'),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const KickproChatbotLogo(size: 18),
-                      const SizedBox(width: 6),
-                      Text(ref.tr.aiPlusCreate),
-                    ],
+                Text(
+                  ref.tr.courses,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
                   ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => context.push('/admin/create-course'),
+                      child: Text(ref.tr.createCourseManually),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => context.push('/admin/generate-course'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const KickproChatbotLogo(size: 18),
+                          const SizedBox(width: 6),
+                          Text(ref.tr.aiPlusCreate),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -140,7 +153,7 @@ class _CourseCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(course.title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-          Text('${course.level.label} · ${course.lessons.length} lessons', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          Text('${course.level.label} · ${ref.tr.nLessons(course.lessons.length)}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           const SizedBox(height: 8),
           ...course.lessons.map(
             (lesson) => ListTile(

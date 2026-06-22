@@ -98,15 +98,20 @@ class ChallengeRepository {
   }
 
   Future<List<ChallengeSubmission>> getSubmissions() async {
-    final response = await _dio.get(ApiEndpoints.challengesSubmissions);
-    final parsed = ApiResponse.fromJson(
-      response.data as Map<String, dynamic>,
-      (data) => (data as List<dynamic>)
-          .map((item) => ChallengeSubmission.fromJson(item as Map<String, dynamic>))
-          .toList(),
-    );
-    if (!parsed.success || parsed.data == null) throw Exception(parsed.message);
-    return parsed.data!;
+    try {
+      final response = await _dio.get(ApiEndpoints.challengesSubmissions);
+      final parsed = ApiResponse.fromJson(
+        response.data as Map<String, dynamic>,
+        (data) => (data as List<dynamic>)
+            .map((item) => ChallengeSubmission.fromJson(item as Map<String, dynamic>))
+            .toList(),
+      );
+      if (!parsed.success || parsed.data == null) throw Exception(parsed.message);
+      return parsed.data!;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return [];
+      rethrow;
+    }
   }
 
   Future<ChallengeSubmission> submit(String videoUrl) async {

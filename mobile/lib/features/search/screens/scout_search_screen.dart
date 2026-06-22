@@ -173,7 +173,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                     (position) => Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: _FilterChip(
-                        label: position.label,
+                        label: ref.tr.positionLabel(position),
                         selected: _position == position,
                         onTap: () {
                           setState(() => _position = _position == position ? null : position);
