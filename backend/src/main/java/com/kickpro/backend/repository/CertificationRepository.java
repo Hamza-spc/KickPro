@@ -15,4 +15,6 @@ public interface CertificationRepository extends JpaRepository<Certification, Lo
     boolean existsByPlayerIdAndCourseId(Long playerId, Long courseId);
 
     Optional<Certification> findByPlayerIdAndCourseId(Long playerId, Long courseId);
+
+    void deleteByPlayerId(Long playerId);
 }

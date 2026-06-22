@@ -11,4 +11,6 @@ public interface ChallengeSubmissionRepository extends JpaRepository<ChallengeSu
     List<ChallengeSubmission> findByChallengeIdOrderByVotesDescSubmittedAtAsc(Long challengeId);
 
     Optional<ChallengeSubmission> findByChallengeIdAndPlayerId(Long challengeId, Long playerId);
+
+    void deleteByPlayerId(Long playerId);
 }

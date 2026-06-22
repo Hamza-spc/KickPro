@@ -12,4 +12,6 @@ public interface SkillsRepository extends JpaRepository<Skills, Long> {
     Optional<Skills> findByPlayerProfileId(Long playerProfileId);
 
     List<Skills> findByPlayerProfileIdIn(Collection<Long> playerProfileIds);
+
+    void deleteByPlayerProfileId(Long playerProfileId);
 }

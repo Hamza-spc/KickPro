@@ -179,6 +179,13 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(adminService.verifyAgent(id), "Agent verified"));
     }
 
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
+        UserPrincipal admin = SecurityUtils.getCurrentUser();
+        adminService.deleteUser(admin.getUserId(), id);
+        return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully"));
+    }
+
     @GetMapping("/posts")
     public ResponseEntity<ApiResponse<List<AdminPostResponse>>> listPosts(
             @RequestParam(defaultValue = "false") boolean flaggedOnly

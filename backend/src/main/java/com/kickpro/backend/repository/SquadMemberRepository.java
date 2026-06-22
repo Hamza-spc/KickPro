@@ -13,4 +13,8 @@ public interface SquadMemberRepository extends JpaRepository<SquadMember, Long> 
     boolean existsBySquadIdAndPlayerId(Long squadId, Long playerId);
 
     Optional<SquadMember> findBySquadIdAndPlayerId(Long squadId, Long playerId);
+
+    void deleteByPlayerId(Long playerId);
+
+    void deleteBySquadId(Long squadId);
 }

@@ -34,6 +34,7 @@ import com.kickpro.backend.repository.StadiumRepository;
 import com.kickpro.backend.repository.UserRepository;
 import com.kickpro.backend.repository.VideoRepository;
 import com.kickpro.backend.service.AdminService;
+import com.kickpro.backend.service.AdminUserDeletionService;
 import com.kickpro.backend.service.CourseService;
 import com.kickpro.backend.service.DrillService;
 import com.kickpro.backend.util.CloudinaryService;
@@ -62,6 +63,7 @@ public class AdminServiceImpl implements AdminService {
     private final MatchRepository matchRepository;
     private final DrillSubmissionRepository drillSubmissionRepository;
     private final CloudinaryService cloudinaryService;
+    private final AdminUserDeletionService adminUserDeletionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -299,6 +301,12 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
+    public void deleteUser(Long adminUserId, Long targetUserId) {
+        adminUserDeletionService.deleteUser(adminUserId, targetUserId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<AdminPostResponse> listPosts(boolean flaggedOnly) {
         List<Video> posts = flaggedOnly
@@ -368,14 +376,14 @@ public class AdminServiceImpl implements AdminService {
                 .description(stadium.getDescription())
                 .pricePerHour(stadium.getPricePerHour())
                 .pitchCount(stadium.getPitchCount())
-                .pitchTypes(stadium.getPitchTypes())
-                .allowedFormats(stadium.getAllowedFormats())
+                .pitchTypes(List.copyOf(stadium.getPitchTypes()))
+                .allowedFormats(List.copyOf(stadium.getAllowedFormats()))
                 .openTime(stadium.getOpenTime())
                 .closeTime(stadium.getCloseTime())
                 .grassType(stadium.getGrassType())
                 .latitude(stadium.getLatitude())
                 .longitude(stadium.getLongitude())
-                .photos(stadium.getPhotos())
+                .photos(List.copyOf(stadium.getPhotos()))
                 .build();
     }
 

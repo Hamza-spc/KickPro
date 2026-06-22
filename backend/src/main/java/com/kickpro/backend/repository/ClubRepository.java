@@ -10,4 +10,6 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
     List<Club> findAllByOrderByNameAsc();
 
     List<Club> findByCityIgnoreCaseOrderByNameAsc(String city);
+
+    List<Club> findByOwner_Id(Long ownerId);
 }

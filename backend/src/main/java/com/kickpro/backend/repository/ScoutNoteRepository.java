@@ -14,5 +14,9 @@ public interface ScoutNoteRepository extends JpaRepository<ScoutNote, Long> {
 
     void deleteByScout_IdAndPlayerProfile_Id(Long scoutId, Long playerProfileId);
 
+    void deleteByScout_Id(Long scoutId);
+
+    void deleteByPlayerProfile_Id(Long playerProfileId);
+
     boolean existsByScout_IdAndPlayerProfile_Id(Long scoutId, Long playerProfileId);
 }

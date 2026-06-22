@@ -11,4 +11,6 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
     List<Badge> findByPlayerIdOrderByEarnedAtDesc(Long playerId);
 
     Optional<Badge> findByPlayerIdAndDrillId(Long playerId, Long drillId);
+
+    void deleteByPlayerId(Long playerId);
 }

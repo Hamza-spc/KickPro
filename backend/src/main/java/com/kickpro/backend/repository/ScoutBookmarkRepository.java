@@ -18,6 +18,10 @@ public interface ScoutBookmarkRepository extends JpaRepository<ScoutBookmark, Lo
 
     void deleteByScout_IdAndPlayerProfile_Id(Long scoutId, Long playerProfileId);
 
+    void deleteByScout_Id(Long scoutId);
+
+    void deleteByPlayerProfile_Id(Long playerProfileId);
+
     @Query("SELECT b.playerProfile.id FROM ScoutBookmark b WHERE b.scout.id = :scoutId")
     List<Long> findPlayerProfileIdByScoutId(@Param("scoutId") Long scoutId);
 }

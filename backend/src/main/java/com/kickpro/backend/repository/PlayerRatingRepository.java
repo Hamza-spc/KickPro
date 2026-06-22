@@ -17,4 +17,10 @@ public interface PlayerRatingRepository extends JpaRepository<PlayerRating, Long
     );
 
     List<PlayerRating> findByRatedPlayerId(Long ratedPlayerId);
+
+    void deleteByRatedPlayerId(Long ratedPlayerId);
+
+    void deleteByRaterId(Long raterId);
+
+    void deleteByMatchId(Long matchId);
 }

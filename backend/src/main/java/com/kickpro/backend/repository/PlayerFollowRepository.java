@@ -16,4 +16,8 @@ public interface PlayerFollowRepository extends JpaRepository<PlayerFollow, Long
     long countByFollowerId(Long followerId);
 
     void deleteByFollowerIdAndFollowingId(Long followerId, Long followingId);
+
+    void deleteByFollowerId(Long followerId);
+
+    void deleteByFollowingId(Long followingId);
 }

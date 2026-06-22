@@ -12,4 +12,8 @@ public interface ReferralRepository extends JpaRepository<Referral, Long> {
     long countByReferrerId(Long referrerUserId);
 
     Optional<Referral> findByReferredId(Long referredUserId);
+
+    void deleteByReferrerId(Long referrerUserId);
+
+    void deleteByReferredId(Long referredUserId);
 }

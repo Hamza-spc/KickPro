@@ -10,4 +10,6 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
     List<Announcement> findAllByOrderByCreatedAtDesc();
 
     List<Announcement> findByCityIgnoreCaseOrderByCreatedAtDesc(String city);
+
+    void deleteByAuthor_Id(Long authorId);
 }

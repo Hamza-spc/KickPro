@@ -20,4 +20,6 @@ public interface PostReactionRepository extends JpaRepository<PostReaction, Long
     void deleteByPostIdAndReactorId(Long postId, Long reactorId);
 
     void deleteByPostId(Long postId);
+
+    void deleteByReactorId(Long reactorId);
 }

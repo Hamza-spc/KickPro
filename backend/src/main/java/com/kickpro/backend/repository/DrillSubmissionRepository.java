@@ -11,6 +11,8 @@ public interface DrillSubmissionRepository extends JpaRepository<DrillSubmission
 
     List<DrillSubmission> findByPlayerId(Long playerId);
 
+    void deleteByPlayerId(Long playerId);
+
     List<DrillSubmission> findByStatusOrderBySubmittedAtAsc(SubmissionStatus status);
 
     Optional<DrillSubmission> findTopByPlayerIdAndDrillIdOrderBySubmittedAtDesc(Long playerId, Long drillId);

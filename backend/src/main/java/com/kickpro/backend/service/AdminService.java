@@ -58,6 +58,8 @@ public interface AdminService {
 
     AdminUserResponse verifyAgent(Long userId);
 
+    void deleteUser(Long adminUserId, Long targetUserId);
+
     List<AdminPostResponse> listPosts(boolean flaggedOnly);
 
     AdminPostResponse flagPost(Long postId, boolean flagged);

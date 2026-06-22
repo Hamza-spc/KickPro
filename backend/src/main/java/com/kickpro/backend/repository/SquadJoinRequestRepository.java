@@ -25,4 +25,8 @@ public interface SquadJoinRequestRepository extends JpaRepository<SquadJoinReque
             @Param("userId") Long userId,
             @Param("status") SquadJoinRequestStatus status
     );
+
+    void deleteByPlayerId(Long playerId);
+
+    void deleteBySquadId(Long squadId);
 }
