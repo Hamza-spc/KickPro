@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kickpro/core/l10n/app_translations.dart';
 import 'package:kickpro/core/l10n/locale_provider.dart';
 import 'package:kickpro/core/router/app_router.dart';
 import 'package:kickpro/core/theme/app_theme.dart';
@@ -19,8 +20,10 @@ class KickproApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     final session = ref.watch(sessionBootstrapProvider);
     final locale = ref.watch(localeProvider);
+    final tr = ref.watch(trProvider);
 
     return MaterialApp.router(
+      key: ValueKey(locale.languageCode),
       title: 'KickPro',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
@@ -28,23 +31,26 @@ class KickproApp extends ConsumerWidget {
       supportedLocales: const [Locale('en'), Locale('fr')],
       routerConfig: router,
       builder: (context, child) {
-        return session.when(
-          loading: () => const Scaffold(
-            backgroundColor: Color(0xFF0D1117),
-            body: Center(child: KickproLogo(height: 56)),
-          ),
-          error: (_, _) => child ?? const LoginScreen(),
-          data: (hasToken) {
-            if (hasToken) {
-              final location = router.state.matchedLocation;
-              if (location == '/login' || location == '/profile') {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  navigateAfterAuth(ref);
-                });
+        return TrScope(
+          tr: tr,
+          child: session.when(
+            loading: () => const Scaffold(
+              backgroundColor: Color(0xFF0D1117),
+              body: Center(child: KickproLogo(height: 56)),
+            ),
+            error: (_, _) => child ?? const LoginScreen(),
+            data: (hasToken) {
+              if (hasToken) {
+                final location = router.state.matchedLocation;
+                if (location == '/login' || location == '/profile') {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    navigateAfterAuth(ref);
+                  });
+                }
               }
-            }
-            return child ?? const SizedBox.shrink();
-          },
+              return child ?? const SizedBox.shrink();
+            },
+          ),
         );
       },
     );

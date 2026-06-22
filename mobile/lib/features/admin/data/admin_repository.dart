@@ -125,6 +125,10 @@ class AdminRepository {
     await _dio.put(ApiEndpoints.adminVerifyAgent(id));
   }
 
+  Future<void> deleteUser(int id) async {
+    await _dio.delete(ApiEndpoints.adminDeleteUser(id));
+  }
+
   Future<List<AdminPost>> listPosts({bool flaggedOnly = false}) async {
     final response = await _dio.get(
       ApiEndpoints.adminPosts,

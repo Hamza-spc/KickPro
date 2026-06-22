@@ -143,6 +143,7 @@ abstract final class ApiEndpoints {
   static String adminBanUser(int id) => '/api/v1/admin/users/$id/ban';
   static String adminUnbanUser(int id) => '/api/v1/admin/users/$id/unban';
   static String adminVerifyAgent(int id) => '/api/v1/admin/users/$id/verify-agent';
+  static String adminDeleteUser(int id) => '/api/v1/admin/users/$id';
   static const adminPosts = '/api/v1/admin/posts';
   static String adminPost(int id) => '/api/v1/admin/posts/$id';
   static String adminFlagPost(int id) => '/api/v1/admin/posts/$id/flag';

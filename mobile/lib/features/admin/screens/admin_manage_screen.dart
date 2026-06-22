@@ -111,7 +111,7 @@ class _UserTile extends ConsumerWidget {
             Text(ref.tr.agentPendingVerification, style: const TextStyle(color: AppColors.gold, fontSize: 11)),
           Row(
             children: [
-              if (user.role != UserRole.admin)
+              if (user.role != UserRole.admin) ...[
                 TextButton(
                   onPressed: () async {
                     try {
@@ -127,6 +127,35 @@ class _UserTile extends ConsumerWidget {
                   },
                   child: Text(user.enabled ? ref.tr.ban : ref.tr.unban, style: TextStyle(color: user.enabled ? AppColors.error : AppColors.success)),
                 ),
+                TextButton(
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: AppColors.surface,
+                        title: Text(ref.tr.deleteUser, style: const TextStyle(color: AppColors.textPrimary)),
+                        content: Text(ref.tr.confirmDeleteUser, style: const TextStyle(color: AppColors.textSecondary)),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(ref.tr.cancel)),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(ref.tr.deleteUser, style: const TextStyle(color: AppColors.error)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed != true || !context.mounted) return;
+                    try {
+                      await ref.read(adminRepositoryProvider).deleteUser(user.id);
+                      ref.invalidate(adminUsersProvider);
+                      if (context.mounted) showKickproToast(context, ref.tr.userDeleted);
+                    } catch (e) {
+                      if (context.mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
+                    }
+                  },
+                  child: Text(ref.tr.deleteUser, style: const TextStyle(color: AppColors.error)),
+                ),
+              ],
               if (user.role == UserRole.agent && !user.agentVerified)
                 TextButton(
                   onPressed: () async {
