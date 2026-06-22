@@ -33,7 +33,7 @@ class BookMatchFlowScreen extends ConsumerStatefulWidget {
     this.initialCity,
   });
 
-  final VoidCallback onBooked;
+  final ValueChanged<String> onBooked;
   final String? initialCity;
 
   @override
@@ -54,6 +54,7 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
 
   StadiumAvailability? _availability;
   bool _loadingSlots = false;
+  bool _slotsLoadFailed = false;
 
   @override
   void initState() {
@@ -87,6 +88,7 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
       _selectedTime = null;
       _loadingSlots = true;
       _availability = null;
+      _slotsLoadFailed = false;
     });
     try {
       final availability = await ref.read(matchRepositoryProvider).getStadiumAvailability(
@@ -95,7 +97,10 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
           );
       if (mounted) setState(() => _availability = availability);
     } catch (e) {
-      if (mounted) showKickproToast(context, apiErrorMessage(e), isError: true);
+      if (mounted) {
+        setState(() => _slotsLoadFailed = true);
+        showKickproToast(context, apiErrorMessage(e), isError: true);
+      }
     } finally {
       if (mounted) setState(() => _loadingSlots = false);
     }
@@ -130,7 +135,7 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
 
     setState(() => _submitting = true);
     try {
-      await ref.read(matchRepositoryProvider).createMatch(
+      final match = await ref.read(matchRepositoryProvider).createMatch(
             stadiumId: _stadium!.id,
             dateTime: dateTime,
             maxPlayers: maxPlayersForFormat(_selectedFormat!),
@@ -140,7 +145,7 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
           );
       if (mounted) {
         showKickproToast(context, ref.tr.matchBooked);
-        widget.onBooked();
+        widget.onBooked(match.city);
         Navigator.pop(context);
       }
     } catch (e) {
@@ -272,6 +277,7 @@ class _BookMatchFlowScreenState extends ConsumerState<BookMatchFlowScreen> {
           selectedTime: _selectedTime,
           availability: _availability,
           loading: _loadingSlots,
+          loadFailed: _slotsLoadFailed,
           onPickDate: _pickDate,
           onTimeSelected: (time) => setState(() => _selectedTime = time),
         ),
@@ -799,6 +805,7 @@ class _SlotStep extends StatelessWidget {
     required this.selectedTime,
     required this.availability,
     required this.loading,
+    required this.loadFailed,
     required this.onPickDate,
     required this.onTimeSelected,
   });
@@ -808,6 +815,7 @@ class _SlotStep extends StatelessWidget {
   final String? selectedTime;
   final StadiumAvailability? availability;
   final bool loading;
+  final bool loadFailed;
   final VoidCallback onPickDate;
   final ValueChanged<String> onTimeSelected;
 
@@ -849,6 +857,8 @@ class _SlotStep extends StatelessWidget {
           Text(context.tr.pickDateToSeeSlots, style: const TextStyle(color: AppColors.textHint))
         else if (loading)
           const ShimmerBox(height: 80, width: double.infinity)
+        else if (loadFailed)
+          Text(context.tr.slotsLoadFailed, style: const TextStyle(color: AppColors.error))
         else if (availability == null || availability!.slots.isEmpty)
           Text(context.tr.noSlotsForDate, style: const TextStyle(color: AppColors.textHint))
         else
@@ -975,7 +985,7 @@ class _FormatStep extends StatelessWidget {
           spacing: 8,
           children: MatchGender.values.map((g) {
             return FilterChip(
-              label: Text(g.label),
+              label: Text(context.tr.matchGenderLabel(g)),
               selected: gender == g,
               onSelected: (_) => onGenderSelected(g),
             );

@@ -17,7 +17,11 @@ String apiErrorMessage(Object error) {
     if (error.type == DioExceptionType.receiveTimeout ||
         error.type == DioExceptionType.sendTimeout ||
         error.type == DioExceptionType.connectionTimeout) {
-      return 'AI request timed out. Gemini may be rate-limited — wait a minute and retry.';
+      final path = error.requestOptions.path;
+      if (path.contains('/api/v1/ai/')) {
+        return 'AI request timed out. Gemini may be rate-limited — wait a minute and retry.';
+      }
+      return 'Request timed out. Check your connection and try again.';
     }
     if (error.type == DioExceptionType.connectionError) {
       return 'Cannot reach server. Check Docker is running and the API URL is correct.';

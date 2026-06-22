@@ -241,6 +241,7 @@ abstract class Tr {
   String get availableSlots;
   String get pickDateToSeeSlots;
   String get noSlotsForDate;
+  String get slotsLoadFailed;
   String get matchFormat;
   String get ageRange;
   String get gender;
@@ -480,6 +481,9 @@ abstract class Tr {
   String get ban;
   String get unban;
   String get verifyAgent;
+  String get deleteUser;
+  String get confirmDeleteUser;
+  String get userDeleted;
   String get agentVerified;
   String get flaggedOnly;
   String get flag;
@@ -820,6 +824,7 @@ class _TrEn extends Tr {
   @override String get availableSlots => 'Available slots';
   @override String get pickDateToSeeSlots => 'Pick a date to see time slots';
   @override String get noSlotsForDate => 'No slots for this date';
+  @override String get slotsLoadFailed => 'Could not load time slots. Tap the date to try again.';
   @override String get matchFormat => 'Match format';
   @override String get ageRange => 'Age range';
   @override String get gender => 'Gender';
@@ -1041,6 +1046,9 @@ class _TrEn extends Tr {
   @override String get ban => 'Ban';
   @override String get unban => 'Unban';
   @override String get verifyAgent => 'Verify agent';
+  @override String get deleteUser => 'Delete user';
+  @override String get confirmDeleteUser => 'Delete this user permanently? This cannot be undone.';
+  @override String get userDeleted => 'User deleted';
   @override String get agentVerified => 'Agent verified';
   @override String get flaggedOnly => 'Flagged only';
   @override String get flag => 'Flag';
@@ -1126,7 +1134,7 @@ class _TrEn extends Tr {
   @override String get agent => 'Agent';
   @override String get agentHome => 'Agent Home';
   @override String get navTrials => 'Trials';
-  @override String get navMessages => 'Messages';
+  @override String get navMessages => 'Inbox';
   @override String get agentAccountCreated => 'Agent account created. Awaiting admin verification.';
   @override String get noConversationsYet => 'No conversations yet';
   @override String get typeMessage => 'Type a message...';
@@ -1377,6 +1385,7 @@ class _TrFr extends Tr {
   @override String get availableSlots => 'Créneaux disponibles';
   @override String get pickDateToSeeSlots => 'Choisissez une date pour voir les créneaux';
   @override String get noSlotsForDate => 'Aucun créneau pour cette date';
+  @override String get slotsLoadFailed => 'Impossible de charger les créneaux. Touchez la date pour réessayer.';
   @override String get matchFormat => 'Format du match';
   @override String get ageRange => 'Tranche d\'âge';
   @override String get gender => 'Genre';
@@ -1598,6 +1607,9 @@ class _TrFr extends Tr {
   @override String get ban => 'Bannir';
   @override String get unban => 'Débannir';
   @override String get verifyAgent => 'Vérifier l\'agent';
+  @override String get deleteUser => 'Supprimer l\'utilisateur';
+  @override String get confirmDeleteUser => 'Supprimer définitivement cet utilisateur ? Cette action est irréversible.';
+  @override String get userDeleted => 'Utilisateur supprimé';
   @override String get agentVerified => 'Agent vérifié';
   @override String get flaggedOnly => 'Signalés uniquement';
   @override String get flag => 'Signaler';
@@ -1683,7 +1695,7 @@ class _TrFr extends Tr {
   @override String get agent => 'Agent';
   @override String get agentHome => 'Accueil agent';
   @override String get navTrials => 'Essais';
-  @override String get navMessages => 'Messages';
+  @override String get navMessages => 'Boîte';
   @override String get agentAccountCreated => 'Compte agent créé. En attente de vérification admin.';
   @override String get noConversationsYet => 'Aucune conversation pour le moment';
   @override String get typeMessage => 'Écrire un message...';

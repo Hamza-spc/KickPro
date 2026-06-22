@@ -40,20 +40,22 @@ class MatchBookingScreen extends ConsumerStatefulWidget {
 
 class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
   int _tabIndex = 0;
-  String? _selectedCity = kMatchCities.first;
+  /// `null` = all cities (no filter).
+  String? _selectedCity;
+  String? _bookFlowInitialCity;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _applyProfileCity());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadBookFlowInitialCity());
   }
 
-  Future<void> _applyProfileCity() async {
+  Future<void> _loadBookFlowInitialCity() async {
     try {
       final profile = await ref.read(profileRepositoryProvider).getMyProfile();
       if (!mounted) return;
       if (kMatchCities.contains(profile.city)) {
-        setState(() => _selectedCity = profile.city);
+        setState(() => _bookFlowInitialCity = profile.city);
       }
     } catch (_) {}
   }
@@ -63,13 +65,21 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
     ref.invalidate(myMatchesProvider);
   }
 
+  void _onMatchBooked(String city) {
+    setState(() {
+      _tabIndex = 0;
+      _selectedCity = kMatchCities.contains(city) ? city : null;
+    });
+    _refresh();
+  }
+
   Future<void> _openBookSheet() async {
     await Navigator.push<void>(
       context,
       MaterialPageRoute(
         builder: (_) => BookMatchFlowScreen(
-          initialCity: _selectedCity,
-          onBooked: _refresh,
+          initialCity: _bookFlowInitialCity,
+          onBooked: _onMatchBooked,
         ),
       ),
     );
@@ -155,17 +165,27 @@ class _MatchBookingScreenState extends ConsumerState<MatchBookingScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: Row(
-                      children: kMatchCities.map((city) {
-                        final selected = _selectedCity == city;
-                        return Padding(
+                      children: [
+                        Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: _TabChip(
-                            label: city,
-                            selected: selected,
-                            onTap: () => setState(() => _selectedCity = city),
+                            label: ref.tr.allCities,
+                            selected: _selectedCity == null,
+                            onTap: () => setState(() => _selectedCity = null),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                        ...kMatchCities.map((city) {
+                          final selected = _selectedCity == city;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _TabChip(
+                              label: city,
+                              selected: selected,
+                              onTap: () => setState(() => _selectedCity = city),
+                            ),
+                          );
+                        }),
+                      ],
                     ),
                   ),
                 ),
@@ -384,6 +404,13 @@ class _MatchCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                     ),
+                    if (match.city.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        match.city,
+                        style: const TextStyle(color: AppColors.textHint, fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ],
                     const SizedBox(height: 6),
                     Text(
                       '${context.tr.agesRange(match.minAge, match.maxAge)} · ${context.tr.matchGenderLabel(match.gender)}',
