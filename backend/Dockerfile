@@ -18,4 +18,5 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Tuned for ~4 GB Docker Desktop on an 8 GB Mac (see docker-compose.yml mem limits).
+ENTRYPOINT ["java", "-Xms512m", "-Xmx1024m", "-XX:+UseG1GC", "-XX:MaxMetaspaceSize=256m", "-XX:+UseStringDeduplication", "-jar", "app.jar"]
