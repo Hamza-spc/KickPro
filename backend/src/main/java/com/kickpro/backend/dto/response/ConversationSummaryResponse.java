@@ -12,6 +12,7 @@ public class ConversationSummaryResponse {
     private Long otherUserId;
     private String otherUserName;
     private String otherUserEmail;
+    private String otherUserPhotoUrl;
     private String lastMessage;
     private LocalDateTime lastMessageAt;
     private Boolean lastMessageOwn;

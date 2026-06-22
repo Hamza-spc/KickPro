@@ -52,6 +52,7 @@ public class MessageServiceImpl implements MessageService {
                     .otherUserId(other.getId())
                     .otherUserName(displayName(other))
                     .otherUserEmail(other.getEmail())
+                    .otherUserPhotoUrl(profilePhotoUrl(other))
                     .lastMessage(message.getContent())
                     .lastMessageAt(message.getCreatedAt())
                     .lastMessageOwn(message.getSender().getId().equals(userId))
@@ -110,6 +111,13 @@ public class MessageServiceImpl implements MessageService {
                 .map(PlayerProfile::getFullName)
                 .filter(name -> name != null && !name.isBlank())
                 .orElse(user.getEmail());
+    }
+
+    private String profilePhotoUrl(User user) {
+        return playerProfileRepository.findByUserId(user.getId())
+                .map(PlayerProfile::getProfilePhotoUrl)
+                .filter(url -> url != null && !url.isBlank())
+                .orElse(null);
     }
 
     private String senderDisplayName(User sender) {
