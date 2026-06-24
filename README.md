@@ -18,6 +18,14 @@ As part of the significant efforts undertaken by the Fédération Royale Marocai
 
 It is within this context that KickPro emerges—a mobile digital platform designed to bridge this gap by directly connecting players with scouts, recruiters, and agents, through a skill verification system based on concrete, evidence-backed performance.
 
+##Key highlights:
+
+Multi-role platform (Player, Scout, Agent, Admin)
+AI-powered scouting (natural-language search with Gemini)
+Event-driven backend (Kafka) with real-time features
+Drill verification system with credibility scoring
+Match booking with concurrency handling and conflict detection
+
 ## Screenshots
 
 <p align="center">
@@ -42,6 +50,23 @@ It is within this context that KickPro emerges—a mobile digital platform desig
 | **Scout** | Advanced search, bookmarks, side-by-side compare, **Scout AI Assistant** (natural-language player discovery) |
 | **Agent** | Trials & announcements, messaging, detailed player profiles |
 | **Admin** | Users, posts, drills, courses, stadiums, moderation |
+
+## Architecture
+
+Three-tier design:
+
+1. **Presentation** — Flutter mobile (multi-role UI)
+2. **Application** — Spring Boot REST API (JWT, RBAC, WebSocket chat)
+3. **Data & services** — PostgreSQL, Redis, Kafka, Cloudinary, Gemini
+<img width="1536" height="1024" alt="ChatGPT Image Jun 24, 2026, 03_34_40 PM" src="https://github.com/user-attachments/assets/ba955372-85a6-4fdb-9112-b389c110310a" />
+
+
+## System Highlights
+
+- Event-driven architecture using Kafka for real-time workflows  
+- Concurrency-safe booking system (pessimistic locking)  
+- Real-time chat with WebSocket/STOMP  
+- AI-powered search & recommendations (Gemini + Spring AI)  
 
 ## Tech stack
 
@@ -112,14 +137,6 @@ flutter build apk --dart-define=API_BASE_URL=http://YOUR_LAN_IP:8080
 # Or directly
 cd backend && ./mvnw test -Dtest=KickProValidationSuite,StadiumServiceImplTest,CredibilityServiceImplTest
 ```
-
-## Architecture
-
-Three-tier design:
-
-1. **Presentation** — Flutter mobile (multi-role UI)
-2. **Application** — Spring Boot REST API (JWT, RBAC, WebSocket chat)
-3. **Data & services** — PostgreSQL, Redis, Kafka, Cloudinary, Gemini
 
 ## License
 
