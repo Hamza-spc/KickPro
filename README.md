@@ -18,7 +18,7 @@ As part of the significant efforts undertaken by the Fédération Royale Marocai
 
 It is within this context that KickPro emerges—a mobile digital platform designed to bridge this gap by directly connecting players with scouts, recruiters, and agents, through a skill verification system based on concrete, evidence-backed performance.
 
-##Key highlights:
+## Key highlights:
 
 Multi-role platform (Player, Scout, Agent, Admin)
 AI-powered scouting (natural-language search with Gemini)
