@@ -14,7 +14,7 @@
 
 ---
 
-As part of the significant efforts undertaken by the Fédération Royale Marocaine de Football to modernize national sports infrastructure—through the expansion of certified pitches, the development of academies, and preparations for hosting the 2030 FIFA World Cup—a major issue still remains: many talented Moroccan football players go unnoticed due to a lack of visibility and structured pathways to showcase their abilities.
+As part of the significant efforts undertaken by the Fédération Royale Marocaine de Football 🇲🇦 to modernize national sports infrastructure—through the expansion of certified pitches, the development of academies, and preparations for hosting the 2030 FIFA World Cup—a major issue still remains: many talented Moroccan football players go unnoticed due to a lack of visibility and structured pathways to showcase their abilities.
 
 It is within this context that KickPro emerges—a mobile digital platform designed to bridge this gap by directly connecting players with scouts, recruiters, and agents, through a skill verification system based on concrete, evidence-backed performance.
 
