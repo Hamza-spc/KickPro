@@ -1,0 +1,28 @@
+ :host {
+  display: block;
+}
+
+.phone-float {
+  animation: phoneFloat 3s ease-in-out infinite;
+}
+
+.phone-tilt {
+  transform: rotate(5deg);
+  transform-origin: 50% 60%;
+}
+
+.phone-ground-shadow {
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+  filter: blur(6px);
+  opacity: 0.9;
+}
+
+@keyframes phoneFloat {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}

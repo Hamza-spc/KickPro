@@ -1,0 +1,46 @@
+<header
+  [class]="
+    'fixed inset-x-0 top-0 z-50 border-b border-transparent transition ' +
+    (isScrolled() ? 'border-kp-border backdrop-blur bg-kp-bg/70' : '')
+  "
+>
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-2">
+    <button class="flex shrink-0 items-center" (click)="goTo('about')" aria-label="KickPro Home">
+      <img
+        src="assets/fullwordmark_logo.png"
+        alt="KickPro"
+        class="block h-9 w-auto max-w-[10.5rem] object-contain sm:h-10 sm:max-w-[11.5rem] md:max-w-[12rem]"
+      />
+    </button>
+
+    <nav class="hidden items-center gap-8 md:flex">
+      <button class="text-sm font-medium text-kp-text-secondary transition hover:text-kp-text-primary" (click)="goTo('about')">
+        About
+      </button>
+      <button class="text-sm font-medium text-kp-text-secondary transition hover:text-kp-text-primary" (click)="goTo('how-it-works')">
+        How it works
+      </button>
+      <button class="text-sm font-medium text-kp-text-secondary transition hover:text-kp-text-primary" (click)="goTo('features')">
+        Features
+      </button>
+      <button class="text-sm font-medium text-kp-text-secondary transition hover:text-kp-text-primary" (click)="goTo('pricing')">
+        Pricing
+      </button>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <button
+        class="hidden rounded-btn border border-kp-border bg-kp-surface/50 px-3.5 py-1.5 text-sm font-semibold text-kp-text-primary backdrop-blur transition hover:border-kp-accent/60 hover:shadow-glow-accent md:inline-flex"
+        (click)="goTo('pricing')"
+      >
+        See Pricing
+      </button>
+      <a
+        href="#"
+        class="inline-flex items-center justify-center rounded-btn bg-kp-primary px-3.5 py-1.5 text-sm font-semibold text-white transition hover:brightness-110"
+      >
+        Download App
+      </a>
+    </div>
+  </div>
+</header>

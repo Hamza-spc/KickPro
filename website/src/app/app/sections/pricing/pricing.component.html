@@ -1,0 +1,130 @@
+<div
+  class="bg-kp-bg"
+  appScrollReveal
+  #sr="scrollReveal"
+  [@reveal]="sr.visible() ? 'visible' : 'hidden'"
+>
+  <div class="mx-auto max-w-6xl px-4 py-20">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-kp-text-primary sm:text-4xl">Simple, Transparent Pricing</h2>
+      <p class="mt-3 text-base text-kp-text-secondary sm:text-lg">
+        KickPro is free to download. We only earn when you do.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-6 lg:grid-cols-3">
+      <!-- Players -->
+      <div class="rounded-card border border-kp-border bg-kp-surface/70 p-8 backdrop-blur">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-kp-primary/15 text-xl">⚽</div>
+            <div>
+              <div class="inline-flex rounded-full border border-kp-border bg-kp-bg/40 px-3 py-1 text-xs font-semibold text-kp-text-secondary">
+                For Players
+              </div>
+              <div class="mt-2 text-lg font-semibold text-kp-text-primary">Free</div>
+            </div>
+          </div>
+        </div>
+
+        <ul class="mt-6 space-y-3 text-sm text-kp-text-secondary">
+          @for (b of playerFree; track b) {
+            <li class="flex gap-3">
+              <span class="mt-[2px] text-kp-success">✅</span>
+              <span>{{ b }}</span>
+            </li>
+          }
+        </ul>
+
+        <div class="mt-8 rounded-card border border-kp-gold/40 bg-kp-bg/30 p-6">
+          <div class="flex items-center justify-between">
+            <div class="inline-flex items-center gap-2 rounded-full border border-kp-gold/40 bg-kp-gold/10 px-3 py-1 text-xs font-semibold text-kp-gold">
+              ⭐ Player Pro
+            </div>
+            <div class="text-sm font-semibold text-kp-text-primary">9.99 MAD / month</div>
+          </div>
+          <ul class="mt-4 space-y-3 text-sm text-kp-text-secondary">
+            @for (b of playerPro; track b) {
+              <li class="flex gap-3">
+                <span class="mt-[2px] text-kp-gold">✨</span>
+                <span>{{ b }}</span>
+              </li>
+            }
+          </ul>
+          <a
+            href="#"
+            class="mt-6 inline-flex w-full items-center justify-center rounded-btn bg-kp-gold px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
+          >
+            Go Pro
+          </a>
+        </div>
+      </div>
+
+      <!-- Venues -->
+      <div class="rounded-card border border-kp-border bg-kp-surface/70 p-8 backdrop-blur">
+        <div class="flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-kp-primary/15 text-xl">🏟️</div>
+          <div>
+            <div class="inline-flex rounded-full border border-kp-border bg-kp-bg/40 px-3 py-1 text-xs font-semibold text-kp-text-secondary">
+              For Venues
+            </div>
+            <div class="mt-2 text-lg font-semibold text-kp-text-primary">Commission-based</div>
+          </div>
+        </div>
+
+        <p class="mt-4 text-sm leading-relaxed text-kp-text-secondary">
+          List your venue on KickPro for free. We take a 5% commission on each booking made through the platform.
+        </p>
+
+        <ul class="mt-6 space-y-3 text-sm text-kp-text-secondary">
+          @for (b of venuesBenefits; track b) {
+            <li class="flex gap-3">
+              <span class="mt-[2px] text-kp-success">✅</span>
+              <span>{{ b }}</span>
+            </li>
+          }
+        </ul>
+
+        <a
+          href="#"
+          class="mt-8 inline-flex w-full items-center justify-center rounded-btn bg-kp-primary px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+        >
+          List Your Venue
+        </a>
+      </div>
+
+      <!-- Agents -->
+      <div class="rounded-card border border-kp-border bg-kp-surface/70 p-8 backdrop-blur">
+        <div class="flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-kp-primary/15 text-xl">🤝</div>
+          <div>
+            <div class="inline-flex rounded-full border border-kp-border bg-kp-bg/40 px-3 py-1 text-xs font-semibold text-kp-text-secondary">
+              For Agents
+            </div>
+            <div class="mt-2 text-lg font-semibold text-kp-text-primary">Success-based</div>
+          </div>
+        </div>
+
+        <p class="mt-4 text-sm leading-relaxed text-kp-text-secondary">
+          Use KickPro to discover and sign talent. We take a small percentage of the signing bonus when a player is signed through the platform.
+        </p>
+
+        <ul class="mt-6 space-y-3 text-sm text-kp-text-secondary">
+          @for (b of agentsBenefits; track b) {
+            <li class="flex gap-3">
+              <span class="mt-[2px] text-kp-success">✅</span>
+              <span>{{ b }}</span>
+            </li>
+          }
+        </ul>
+
+        <a
+          href="#"
+          class="mt-8 inline-flex w-full items-center justify-center rounded-btn bg-kp-primary px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+        >
+          Become a Partner
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

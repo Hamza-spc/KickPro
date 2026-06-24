@@ -1,0 +1,30 @@
+<div
+  class="bg-kp-bg"
+  appScrollReveal
+  #sr="scrollReveal"
+  [@reveal]="sr.visible() ? 'visible' : 'hidden'"
+>
+  <div class="mx-auto max-w-6xl px-4 py-20">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-kp-text-primary sm:text-4xl">Everything You Need to Go Pro</h2>
+    </div>
+
+    <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (f of features; track f.title) {
+        <div
+          class="group rounded-card border border-kp-border bg-kp-surface/70 p-7 backdrop-blur transition hover:-translate-y-1 hover:border-kp-accent/60 hover:shadow-glow-primary"
+        >
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-kp-primary/15 text-xl">
+              {{ f.icon }}
+            </div>
+            <h3 class="text-lg font-semibold text-kp-text-primary">{{ f.title }}</h3>
+          </div>
+          <p class="mt-4 text-sm leading-relaxed text-kp-text-secondary">
+            {{ f.desc }}
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
