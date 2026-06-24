@@ -19,13 +19,13 @@ KickPro helps young football players build a **verifiable sports profile** (skil
 ## Screenshots
 
 <p align="center">
-  <img src="rapport/kickpro-interface/feed-kickpro.jpeg" alt="Feed" width="220" />
+  <img src="assets/screenshots/feed-kickpro.jpeg" alt="Feed" width="220" />
   &nbsp;&nbsp;
-  <img src="rapport/kickpro-interface/screenshot-kickpro.png" alt="Scout AI Assistant" width="220" />
+  <img src="assets/screenshots/screenshot-kickpro.png" alt="Scout AI Assistant" width="220" />
   &nbsp;&nbsp;
-  <img src="rapport/kickpro-interface/AICoach-kickpro.jpeg" alt="AI Coach" width="220" />
+  <img src="assets/screenshots/AICoach-kickpro.jpeg" alt="AI Coach" width="220" />
   &nbsp;&nbsp;
-  <img src="rapport/kickpro-interface/comparePlayers-kickpro.jpeg" alt="Compare Players" width="220" />
+  <img src="assets/screenshots/comparePlayers-kickpro.jpeg" alt="Compare Players" width="220" />
 </p>
 
 <p align="center">
@@ -61,7 +61,8 @@ KickPro/
 ├── mobile/           # Flutter app (Android)
 ├── backend/          # Spring Boot REST API
 ├── ai-service/       # Python FastAPI + Gemini
-├── assets/           # Brand assets (logo)
+├── assets/           # Brand assets (logo, README screenshots)
+│   └── screenshots/
 ├── scripts/          # docker-up.sh, run-junit-tests.sh
 └── docker-compose.yml
 ```
