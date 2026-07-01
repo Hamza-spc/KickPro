@@ -1,0 +1,32 @@
+# AWS / RDS production overlay (Path A — free-tier t3.micro).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.aws.yml up ...
+#
+# Postgres runs on RDS — not in this stack. Local Postgres uses profile "local-db".
+
+services:
+  postgres:
+    profiles: ["local-db"]
+
+  zookeeper:
+    mem_limit: 256m
+
+  kafka:
+    mem_limit: 384m
+    environment:
+      KAFKA_HEAP_OPTS: "-Xmx256m -Xms256m"
+
+  redis:
+    mem_limit: 64m
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+
+  backend:
+    mem_limit: 640m
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx448m -XX:+UseG1GC -XX:MaxMetaspaceSize=160m"
+
+  ai-service:
+    mem_limit: 192m
+    profiles: ["ai"]

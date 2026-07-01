@@ -73,8 +73,6 @@ services:
     mem_limit: 1536m
     mem_reservation: 512m
     depends_on:
-      postgres:
-        condition: service_healthy
       kafka:
         condition: service_healthy
       redis:
