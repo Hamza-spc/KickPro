@@ -21,11 +21,12 @@
 | Metric | Count |
 |--------|------:|
 | REST API endpoints | 127 |
-| Backend JUnit tests | 30 |
+| Backend JUnit tests | 32 |
 | JPA entities / repositories | 35 |
 | Flutter screens | 46 |
 | Docker services (local stack) | 6 |
 | Live API (AWS) | `http://15.188.100.148:8080` |
+| Health check | `http://15.188.100.148:8080/actuator/health` |
 | Marketing site | [kick-pro.vercel.app](https://kick-pro.vercel.app/) |
 
 ---
@@ -114,7 +115,7 @@ On the server (after `.env` points at RDS):
 ```
 
 Uses `docker-compose.aws.yml` (no local Postgres; adds swap for free-tier `t3.micro`).  
-API: `http://YOUR_ELASTIC_IP:8080` — mobile: `--dart-define=API_BASE_URL=http://YOUR_ELASTIC_IP:8080`
+API: `http://YOUR_ELASTIC_IP:8080` — health: `/actuator/health` — mobile: `--dart-define=API_BASE_URL=http://YOUR_ELASTIC_IP:8080`
 
 #### CI/CD (GitHub Actions)
 
@@ -154,7 +155,7 @@ flutter build apk --dart-define=API_BASE_URL=http://YOUR_LAN_IP:8080
 open backend/target/site/jacoco/index.html
 ```
 
-**30 tests** covering match booking, Kafka consumer, stadium availability, credibility scoring, JWT, DTO validation, and quiz payloads.
+**32 tests** covering match booking, Kafka consumer, stadium availability, credibility scoring, JWT, DTO validation, Actuator endpoints, and quiz payloads.
 
 #### SonarCloud (optional)
 

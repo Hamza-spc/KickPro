@@ -99,17 +99,15 @@ jobs:
           API_BASE_URL: http://${{ secrets.EC2_HOST }}:8080
         run: |
           set -euo pipefail
-          echo "Checking ${API_BASE_URL}/api/v1/auth/login"
+          echo "Checking ${API_BASE_URL}/actuator/health"
           for i in $(seq 1 36); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" \
-              -X POST "${API_BASE_URL}/api/v1/auth/login" \
-              -H "Content-Type: application/json" \
-              -d '{}' || true)
-            echo "attempt ${i}: HTTP ${code}"
-            case "$code" in
-              400|401|403|405|415) echo "Smoke test passed"; exit 0 ;;
-            esac
+            body=$(curl -sf "${API_BASE_URL}/actuator/health" || true)
+            echo "attempt ${i}: ${body}"
+            if echo "$body" | grep -q '"status":"UP"'; then
+              echo "Smoke test passed (actuator health UP)"
+              exit 0
+            fi
             sleep 10
           done
-          echo "Smoke test failed — API did not return a healthy auth response"
+          echo "Smoke test failed — /actuator/health did not report UP"
           exit 1

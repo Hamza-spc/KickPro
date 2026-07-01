@@ -66,34 +66,35 @@ echo "==> Starting backend (RDS)..."
 "${COMPOSE[@]}" up -d --no-deps backend
 
 echo "==> Waiting for API (up to 5 min — Spring Boot startup)..."
-CODE="000"
+HEALTH_OK=false
 for _ in $(seq 1 60); do
-  CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/v1/auth/login 2>/dev/null || true)
-  CODE=${CODE:-000}
-  case "$CODE" in
-    400|401|403|405|415|500) break ;;
-  esac
+  if curl -sf http://127.0.0.1:8080/actuator/health 2>/dev/null | grep -q '"status":"UP"'; then
+    HEALTH_OK=true
+    break
+  fi
   sleep 5
 done
 
 echo ""
 "${COMPOSE[@]}" ps
 echo ""
-echo "Local API check HTTP status: $CODE (401/400/405 = OK)"
+if [ "$HEALTH_OK" = true ]; then
+  echo "Health check: UP (/actuator/health)"
+else
+  echo "Health check: FAILED (/actuator/health)"
+fi
 free -h
 
-case "$CODE" in
-  400|401|403|405|415|500) ;;
-  *)
+if [ "$HEALTH_OK" != true ]; then
   echo ""
   echo "Backend not responding. Logs:"
   "${COMPOSE[@]}" logs --tail=60 backend
   exit 1
-  ;;
-esac
+fi
 
 echo ""
 echo "Deploy OK. Test from your Mac:"
 PUBLIC_IP=$(curl -s --max-time 2 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || true)
 PUBLIC_IP=${PUBLIC_IP:-15.188.100.148}
-echo "  curl -s -o /dev/null -w '%{http_code}\n' http://${PUBLIC_IP}:8080/api/v1/auth/login"
+echo "  curl -s http://${PUBLIC_IP}:8080/actuator/health"
+echo "  curl -s -o /dev/null -w '%{http_code}\n' -X POST http://${PUBLIC_IP}:8080/api/v1/auth/login -H 'Content-Type: application/json' -d '{}'"
