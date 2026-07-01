@@ -53,15 +53,20 @@ jobs:
           retention-days: 14
 
       - name: SonarCloud scan
-        if: ${{ secrets.SONAR_TOKEN != '' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         run: |
+          if [ -z "${SONAR_TOKEN:-}" ]; then
+            echo "SONAR_TOKEN not set — skipping SonarCloud scan"
+            exit 0
+          fi
           ./backend/mvnw -f backend/pom.xml -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -DskipTests \
-            -Dsonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" \
-            -Dsonar.organization="${{ secrets.SONAR_ORGANIZATION }}"
+            -Dsonar.projectKey="${SONAR_PROJECT_KEY}" \
+            -Dsonar.organization="${SONAR_ORGANIZATION}"
 
       - name: Build Docker image
         working-directory: backend
@@ -69,7 +74,7 @@ jobs:
 
   deploy-aws:
     needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
 
     steps:
