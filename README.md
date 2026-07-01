@@ -21,7 +21,7 @@
 | Metric | Count |
 |--------|------:|
 | REST API endpoints | 127 |
-| Backend JUnit tests | 28 |
+| Backend JUnit tests | 30 |
 | JPA entities / repositories | 35 |
 | Flutter screens | 46 |
 | Docker services (local stack) | 6 |
@@ -154,7 +154,7 @@ flutter build apk --dart-define=API_BASE_URL=http://YOUR_LAN_IP:8080
 open backend/target/site/jacoco/index.html
 ```
 
-**28 tests** covering match booking, stadium availability, credibility scoring, JWT, DTO validation, and quiz payloads.
+**30 tests** covering match booking, Kafka consumer, stadium availability, credibility scoring, JWT, DTO validation, and quiz payloads.
 
 #### SonarCloud (optional)
 
