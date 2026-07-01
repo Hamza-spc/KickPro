@@ -9,8 +9,24 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Hamza-spc/KickPro/actions/workflows/backend-ci.yml"><img src="https://github.com/Hamza-spc/KickPro/actions/workflows/backend-ci.yml/badge.svg" alt="Backend CI/CD" /></a>
+</p>
+
+<p align="center">
   Flutter mobile app · Spring Boot REST API · PostgreSQL · Gemini AI · Docker
 </p>
+
+## Project at a glance
+
+| Metric | Count |
+|--------|------:|
+| REST API endpoints | 127 |
+| Backend JUnit tests | 28 |
+| JPA entities / repositories | 35 |
+| Flutter screens | 46 |
+| Docker services (local stack) | 6 |
+| Live API (AWS) | `http://15.188.100.148:8080` |
+| Marketing site | [kick-pro.vercel.app](https://kick-pro.vercel.app/) |
 
 ---
 
@@ -128,17 +144,25 @@ For a release APK:
 flutter build apk --dart-define=API_BASE_URL=http://YOUR_LAN_IP:8080
 ```
 
-### Tests
+### Tests & quality
 
 ```bash
-# Backend unit tests
+# All backend tests + JaCoCo HTML report
 ./scripts/run-junit-tests.sh
 
-# Or directly
-cd backend && ./mvnw test -Dtest=KickProValidationSuite,StadiumServiceImplTest,CredibilityServiceImplTest
+# Open coverage report (macOS)
+open backend/target/site/jacoco/index.html
 ```
 
-## Architecture
+**28 tests** covering match booking, stadium availability, credibility scoring, JWT, DTO validation, and quiz payloads.
+
+#### SonarCloud (optional)
+
+1. Import the repo at [sonarcloud.io](https://sonarcloud.io) (free for public repos).
+2. Add GitHub secrets: `SONAR_TOKEN`, `SONAR_ORGANIZATION`, `SONAR_PROJECT_KEY`.
+3. CI runs SonarCloud automatically when `SONAR_TOKEN` is set.
+
+---
 
 Three-tier design:
 
