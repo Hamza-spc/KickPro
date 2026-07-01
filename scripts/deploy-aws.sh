@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Deploy KickPro on AWS EC2 (RDS + Docker). Path A / free-tier friendly.
+# Triggered automatically by GitHub Actions on push to main.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

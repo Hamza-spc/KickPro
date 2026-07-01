@@ -17,6 +17,8 @@ on:
       - "docker-compose.aws.yml"
       - "scripts/deploy-aws.sh"
 
+  workflow_dispatch:
+
 concurrency:
   group: backend-${{ github.ref }}
   cancel-in-progress: true
