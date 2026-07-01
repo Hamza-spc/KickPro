@@ -164,6 +164,8 @@ open backend/target/site/jacoco/index.html
 
 ---
 
+## Architecture
+
 Three-tier design:
 
 1. **Presentation** — Flutter mobile (multi-role UI)
