@@ -173,6 +173,14 @@ Three-tier design:
 2. **Application** — Spring Boot REST API (JWT, RBAC, WebSocket chat)
 3. **Data & services** — PostgreSQL, Redis, Kafka, Cloudinary, Gemini
 
+## Documentation
+
+| Doc | Purpose |
+|-----|---------|
+| [Interview guide](docs/INTERVIEW.md) | Pitch script, Q&A, LinkedIn blurb, demo flow |
+| [ADRs](docs/adr/README.md) | Architecture decisions (JWT, Kafka, booking locks) |
+| [Diagrams](docs/diagrams/) | PlantUML / PNG (use case, sequence, class, architecture) |
+
 ## License
 
 Private / academic project — see repository owner for usage terms.
