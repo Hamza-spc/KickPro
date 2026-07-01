@@ -80,7 +80,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-kickpro}
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/${DB_NAME:-kickpro}}
       DB_USERNAME: ${DB_USERNAME:-kickpro}
       DB_PASSWORD: ${DB_PASSWORD:-kickpro}
       REDIS_HOST: redis

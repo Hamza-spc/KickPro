@@ -16,6 +16,14 @@ if ! grep -q '^DB_URL=jdbc:postgresql://' .env; then
   exit 1
 fi
 
+if grep -qE '^DB_URL=.*//postgres:' .env || grep -qE '^DB_HOST=postgres$' .env; then
+  echo "ERROR: .env still uses Docker hostname 'postgres'."
+  echo "  RDS → Databases → kickpro-db → copy Endpoint, then set:"
+  echo "  DB_URL=jdbc:postgresql://YOUR-RDS-ENDPOINT:5432/kickpro"
+  echo "  DB_HOST=YOUR-RDS-ENDPOINT"
+  exit 1
+fi
+
 echo "==> Ensuring 2G swap (t3.micro OOM guard)..."
 if ! swapon --show | grep -q /swapfile; then
   if [[ ! -f /swapfile ]]; then
@@ -56,13 +64,14 @@ fi
 echo "==> Starting backend (RDS)..."
 "${COMPOSE[@]}" up -d --no-deps backend
 
-echo "==> Waiting for API (up to 3 min)..."
+echo "==> Waiting for API (up to 5 min — Spring Boot startup)..."
 CODE="000"
-for _ in $(seq 1 36); do
-  CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/v1/auth/login || echo "000")
-  if [[ "$CODE" != "000" ]]; then
-    break
-  fi
+for _ in $(seq 1 60); do
+  CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/v1/auth/login 2>/dev/null || true)
+  CODE=${CODE:-000}
+  case "$CODE" in
+    401|400|403|405|415) break ;;
+  esac
   sleep 5
 done
 
@@ -72,13 +81,18 @@ echo ""
 echo "Local API check HTTP status: $CODE (401/400/405 = OK)"
 free -h
 
-if [[ "$CODE" == "000" ]]; then
+case "$CODE" in
+  401|400|403|405|415) ;;
+  *)
   echo ""
   echo "Backend not responding. Logs:"
   "${COMPOSE[@]}" logs --tail=60 backend
   exit 1
-fi
+  ;;
+esac
 
 echo ""
 echo "Deploy OK. Test from your Mac:"
-echo "  curl -s -o /dev/null -w '%{http_code}\n' http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo 'YOUR_ELASTIC_IP'):8080/api/v1/auth/login"
+PUBLIC_IP=$(curl -s --max-time 2 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || true)
+PUBLIC_IP=${PUBLIC_IP:-15.188.100.148}
+echo "  curl -s -o /dev/null -w '%{http_code}\n' http://${PUBLIC_IP}:8080/api/v1/auth/login"
