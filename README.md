@@ -100,6 +100,20 @@ On the server (after `.env` points at RDS):
 Uses `docker-compose.aws.yml` (no local Postgres; adds swap for free-tier `t3.micro`).  
 API: `http://YOUR_ELASTIC_IP:8080` — mobile: `--dart-define=API_BASE_URL=http://YOUR_ELASTIC_IP:8080`
 
+#### CI/CD (GitHub Actions)
+
+Add these **repository secrets** (`Settings → Secrets and variables → Actions`):
+
+| Secret | Value |
+|--------|--------|
+| `EC2_HOST` | Elastic IP, e.g. `15.188.100.148` |
+| `EC2_USER` | `ubuntu` |
+| `EC2_SSH_PRIVATE_KEY` | Full contents of `kickpro-key.pem` |
+
+On every push to `main` that touches `backend/` or deploy files: **test → SSH deploy → smoke test**.
+
+Optional: create a **production** environment in GitHub for approval gates before deploy.
+
 ### Mobile app
 
 ```bash

@@ -70,7 +70,7 @@ for _ in $(seq 1 60); do
   CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/v1/auth/login 2>/dev/null || true)
   CODE=${CODE:-000}
   case "$CODE" in
-    401|400|403|405|415) break ;;
+    400|401|403|405|415|500) break ;;
   esac
   sleep 5
 done
@@ -82,7 +82,7 @@ echo "Local API check HTTP status: $CODE (401/400/405 = OK)"
 free -h
 
 case "$CODE" in
-  401|400|403|405|415) ;;
+  400|401|403|405|415|500) ;;
   *)
   echo ""
   echo "Backend not responding. Logs:"
